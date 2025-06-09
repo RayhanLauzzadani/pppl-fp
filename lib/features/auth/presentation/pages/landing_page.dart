@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'sign_up_page.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
@@ -14,7 +15,7 @@ class LandingPage extends StatelessWidget {
             children: [
               // Gambar/logo
               Image.asset(
-                'assets/logo_laundry.png', // ganti dengan path asset gambar kamu
+                'assets/images/logo_laundryin.png',
                 width: 280,
                 height: 280,
               ),
@@ -22,8 +23,8 @@ class LandingPage extends StatelessWidget {
               // Tombol Get Started
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: const Color(0xFF265C48), // warna text
-                  backgroundColor: const Color(0xFFFDE3B4), // warna tombol
+                  foregroundColor: const Color(0xFF265C48),
+                  backgroundColor: const Color(0xFFFDE3B4),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -36,8 +37,12 @@ class LandingPage extends StatelessWidget {
                   shadowColor: Colors.black38,
                 ),
                 onPressed: () {
-                  // TODO: Arahkan ke Sign In Page
-                  // Navigator.pushNamed(context, '/sign-in');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SignUpPage(),
+                    ),
+                  );
                 },
                 child: const Text('Get Started'),
               ),
