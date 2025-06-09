@@ -15,8 +15,17 @@ class LandingPage extends StatelessWidget {
               // Gambar/logo
               Image.asset(
                 'assets/logo_laundry.png', // ganti dengan path asset gambar kamu
-                width: 280,
-                height: 280,
+                width: 200,
+                height: 200,
+              ),
+              const SizedBox(height: 32),
+              // Nama aplikasi
+              const Text(
+                'LondryIn',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 56),
               // Tombol Get Started
