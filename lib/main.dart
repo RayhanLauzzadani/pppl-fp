@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-// Import halaman sign in
-import 'features/auth/presentation/pages/sign_in_page.dart'; // pastikan path-nya sesuai struktur project kamu
+import 'features/auth/presentation/pages/landing_page.dart'; // pastikan path-nya benar
 
 void main() {
   runApp(const MyApp());
@@ -12,14 +11,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Laundry In',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      // Set halaman pertama ke SignInPage
-      home: const SignInPage(),
+      title: 'LondryIn',
       debugShowCheckedModeBanner: false,
+      home: const LandingPage(),
+      // Nanti bisa tambahkan routes di sini kalau sudah banyak page
     );
   }
 }

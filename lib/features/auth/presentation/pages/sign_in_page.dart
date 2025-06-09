@@ -55,7 +55,7 @@ class SignInPage extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.all(14.0),
                           child: Image.asset(
-                            'assets/images/logo laundryin.png',
+                            'assets/images/logo.png',
                             fit: BoxFit.contain,
                           ),
                         ),

@@ -20,9 +20,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/logo laundryin.png
     - assets/images/Google.png
     - assets/images/logo_laundryin.png
+    - assets/images/logo.png
 
   fonts:
     - family: Poppins
