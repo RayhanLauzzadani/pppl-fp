@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
-import 'features/auth/presentation/pages/landing_page.dart'; // pastikan path-nya benar
+import 'features/auth/presentation/pages/landing_page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  // WAJIB: Pastikan widget binding & Firebase init selesai sebelum runApp
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
