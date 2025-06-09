@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'sign_up_page.dart';
+import 'sign_in_page.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
@@ -40,7 +40,7 @@ class LandingPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const SignUpPage(),
+                      builder: (context) => const SignInPage(),
                     ),
                   );
                 },
