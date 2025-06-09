@@ -38,33 +38,32 @@ class SignUpPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   children: [
-                    const SizedBox(height: 70), // Jarak logo ke atas layar
-                    // Logo di tengah atas
+                    const SizedBox(height: 70),
                     Center(
                       child: CircleAvatar(
                         radius: 90,
                         backgroundColor: Colors.white,
                         child: Image.asset(
                           'assets/images/logo.png',
-                          width: 160, // LOGO-nya
+                          width: 160,
                           height: 160,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 25), // Jarak dari logo ke tulisan
+                    const SizedBox(height: 25),
                     Text(
                       'LondryIn',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.bold,
                         fontSize: 32,
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 5), // Gap antar tulisan
+                    const SizedBox(height: 5),
                     Text(
                       'Selamat datang!',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.normal,
                         fontSize: 28,
@@ -72,12 +71,8 @@ class SignUpPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 22),
-                    // Card Form (sisanya tetap)
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 24,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                       margin: const EdgeInsets.only(bottom: 24, top: 5),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -94,6 +89,10 @@ class SignUpPage extends StatelessWidget {
                         children: [
                           // Email
                           TextField(
+                            style: const TextStyle(
+                              fontFamily: "Poppins",
+                              color: Colors.black87,
+                            ),
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: const Color(0xFFD8EDFF),
@@ -106,12 +105,20 @@ class SignUpPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
                               ),
+                              hintStyle: const TextStyle(
+                                color: Color(0xFF50505A),
+                                fontFamily: "Poppins",
+                              ),
                             ),
                           ),
                           const SizedBox(height: 14),
                           // Password
                           TextField(
                             obscureText: true,
+                            style: const TextStyle(
+                              fontFamily: "Poppins",
+                              color: Colors.black87,
+                            ),
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: const Color(0xFFD8EDFF),
@@ -124,12 +131,20 @@ class SignUpPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
                               ),
+                              hintStyle: const TextStyle(
+                                color: Color(0xFF50505A),
+                                fontFamily: "Poppins",
+                              ),
                             ),
                           ),
                           const SizedBox(height: 14),
                           // Konfirmasi Password
                           TextField(
                             obscureText: true,
+                            style: const TextStyle(
+                              fontFamily: "Poppins",
+                              color: Colors.black87,
+                            ),
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: const Color(0xFFD8EDFF),
@@ -141,6 +156,10 @@ class SignUpPage extends StatelessWidget {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
+                              ),
+                              hintStyle: const TextStyle(
+                                color: Color(0xFF50505A),
+                                fontFamily: "Poppins",
                               ),
                             ),
                           ),
@@ -157,13 +176,17 @@ class SignUpPage extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 elevation: 1,
+                                textStyle: const TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
                               onPressed: () {},
                               child: const Text(
                                 'Daftar',
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
                                 ),
                               ),
                             ),
@@ -174,7 +197,14 @@ class SignUpPage extends StatelessWidget {
                               Expanded(child: Divider()),
                               Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Text('Atau'),
+                                child: Text(
+                                  'Atau',
+                                  style: TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                               ),
                               Expanded(child: Divider()),
                             ],
@@ -187,21 +217,28 @@ class SignUpPage extends StatelessWidget {
                             child: ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFD8EDFF),
-                                foregroundColor: Colors.black,
+                                foregroundColor: Colors.black87,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 elevation: 0,
+                                textStyle: const TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
                               ),
                               icon: Image.asset(
-                                'assets/images/Google.png', // pastikan asset ada
+                                'assets/images/Google.png',
                                 width: 22,
                                 height: 22,
                               ),
                               label: const Text(
                                 'Daftar dengan Akun Google',
                                 style: TextStyle(
-                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w500,
                                   fontSize: 15,
                                 ),
                               ),
@@ -209,7 +246,6 @@ class SignUpPage extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          // Teks login
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -218,6 +254,7 @@ class SignUpPage extends StatelessWidget {
                                 style: TextStyle(
                                   color: Colors.grey,
                                   fontSize: 14,
+                                  fontFamily: "Poppins",
                                 ),
                               ),
                               GestureDetector(
@@ -232,12 +269,11 @@ class SignUpPage extends StatelessWidget {
                                 child: const Text(
                                   'Masuk',
                                   style: TextStyle(
+                                    fontFamily: "Poppins",
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
-                                    color: Colors
-                                        .black, // optional: tambahkan biar beda warna
-                                    decoration: TextDecoration
-                                        .underline, // opsional: underline biar kerasa tombol
+                                    color: Colors.black,
+                                    decoration: TextDecoration.underline,
                                   ),
                                 ),
                               ),

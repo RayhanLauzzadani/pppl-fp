@@ -1,263 +1,308 @@
 import 'package:flutter/material.dart';
+import 'sign_up_page.dart';
+import 'onboarding_page.dart'; // Pastikan sudah ada file ini!
+import 'package:laundryin/auth_service.dart';
 
-class SignInPage extends StatelessWidget {
+class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+  State<SignInPage> createState() => _SignInPageState();
+}
 
+class _SignInPageState extends State<SignInPage> {
+  bool isLoading = false;
+
+  Future<void> _handleGoogleSignIn(BuildContext context) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final auth = AuthService();
+    final userCredential = await auth.signInWithGoogle();
+
+    setState(() {
+      isLoading = false;
+    });
+
+    if (userCredential != null) {
+      // Sukses login, lanjut ke OnBoardingPage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => OnBoardingPage()),
+      );
+    } else {
+      // Gagal/batal login
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Gagal masuk dengan Google")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Gradient background - sekarang 75% tinggi layar!
-          Positioned(
-            top: 0, left: 0, right: 0,
-            child: Container(
-              height: size.height * 0.75,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF40A2E3), // BIRU ATAS
-                    Color(0xFFBBE2EC),
-                    Color(0xFFFFF6E9), // KREM BAWAH
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: [0.0, 0.65, 1.0],
-                ),
+          // ... [background dan konten seperti sebelumnya, tanpa perubahan]
+          Container(
+            width: double.infinity,
+            height: 660.0,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFFFF6E9),
+                  Color(0xFFBBE2EC),
+                  Color(0xFF40A2E3),
+                ],
+                stops: [0.18, 0.38, 0.83],
+                begin: Alignment.bottomLeft,
+                end: Alignment.topRight,
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
               ),
             ),
           ),
-          // Konten
           SafeArea(
-            child: Column(
-              children: [
-                const SizedBox(height: 36),
-                // LOGO DAN JUDUL
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 10,
-                            )
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(14.0),
-                          child: Image.asset(
-                            'assets/images/logo.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 18),
-                      Text(
-                        "LondryIn",
-                        style: TextStyle(
-                          fontFamily: "Poppins",
-                          fontWeight: FontWeight.bold,
-                          fontSize: 32,
-                          color: Colors.white,
-                          height: 1.2,
-                        ),
-                      ),
-                      const Text(
-                        "Selamat datang!",
-                        style: TextStyle(
-                          fontFamily: "Poppins",
-                          fontSize: 20,
-                          color: Colors.white,
-                          height: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 28),
-                // Card benar-benar grounded!
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 18,
-                              offset: Offset(0, 4),
-                            )
-                          ],
-                        ),
-                        child: SingleChildScrollView(
-                          physics: const BouncingScrollPhysics(),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              TextField(
-                                decoration: InputDecoration(
-                                  hintText: "Alamat email",
-                                  prefixIcon: const Icon(Icons.email_rounded, color: Color(0xFF50505A)),
-                                  filled: true,
-                                  fillColor: const Color(0xFFBBE2EC),
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  hintStyle: const TextStyle(
-                                    color: Color(0xFF50505A),
-                                    fontFamily: "Poppins",
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 14),
-                              TextField(
-                                obscureText: true,
-                                decoration: InputDecoration(
-                                  hintText: "Kata Sandi",
-                                  prefixIcon: const Icon(Icons.key_rounded, color: Color(0xFF50505A)),
-                                  filled: true,
-                                  fillColor: const Color(0xFFBBE2EC),
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  hintStyle: const TextStyle(
-                                    color: Color(0xFF50505A),
-                                    fontFamily: "Poppins",
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 18),
-                              SizedBox(
-                                width: double.infinity,
-                                height: 45,
-                                child: ElevatedButton(
-                                  onPressed: () {},
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFFFE0B2),
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    textStyle: const TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    "Masuk",
-                                    style: TextStyle(color: Color(0xFF50505A)),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: const [
-                                  Expanded(child: Divider(thickness: 1)),
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                    child: Text(
-                                      "Atau",
-                                      style: TextStyle(
-                                        fontFamily: "Poppins",
-                                        fontSize: 14,
-                                        color: Color(0xFF50505A),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(child: Divider(thickness: 1)),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              SizedBox(
-                                width: double.infinity,
-                                height: 45,
-                                child: ElevatedButton.icon(
-                                  onPressed: () {},
-                                  icon: Image.asset(
-                                    'assets/images/Google.png',
-                                    width: 22,
-                                    height: 22,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(Icons.g_mobiledata, color: Colors.red, size: 28);
-                                    },
-                                  ),
-                                  label: const Text(
-                                    "Masuk dengan Akun Google",
-                                    style: TextStyle(
-                                      color: Color(0xFF50505A),
-                                      fontFamily: "Poppins",
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFBBE2EC),
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 10.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text(
-                                      "Belum punya akun? ",
-                                      style: TextStyle(
-                                        fontFamily: "Poppins",
-                                        fontSize: 13,
-                                        color: Color(0xFFB0B0B0),
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        // TODO: navigasi ke halaman registrasi
-                                      },
-                                      child: const Text(
-                                        "Registrasi",
-                                        style: TextStyle(
-                                          fontFamily: "Poppins",
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          decoration: TextDecoration.underline,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 70),
+                    Center(
+                      child: CircleAvatar(
+                        radius: 90,
+                        backgroundColor: Colors.white,
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          width: 160,
+                          height: 160,
                         ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 25),
+                    const Text(
+                      "LondryIn",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.bold,
+                        fontSize: 32,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    const Text(
+                      "Selamat datang!",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.normal,
+                        fontSize: 28,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+                    // Card Form
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 24,
+                      ),
+                      margin: const EdgeInsets.only(bottom: 24, top: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.07),
+                            blurRadius: 16,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          // Email
+                          TextField(
+                            style: const TextStyle(
+                              fontFamily: "Poppins",
+                              color: Colors.black87,
+                            ),
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: const Color(0xFFD8EDFF),
+                              hintText: "Alamat email",
+                              prefixIcon: Icon(
+                                Icons.email_rounded,
+                                color: Colors.grey.shade700,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              hintStyle: const TextStyle(
+                                color: Color(0xFF50505A),
+                                fontFamily: "Poppins",
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          // Password
+                          TextField(
+                            obscureText: true,
+                            style: const TextStyle(
+                              fontFamily: "Poppins",
+                              color: Colors.black87,
+                            ),
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: const Color(0xFFD8EDFF),
+                              hintText: "Kata Sandi",
+                              prefixIcon: Icon(
+                                Icons.vpn_key,
+                                color: Colors.grey.shade700,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              hintStyle: const TextStyle(
+                                color: Color(0xFF50505A),
+                                fontFamily: "Poppins",
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 44,
+                            child: ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFDE3B4),
+                                foregroundColor: Colors.black87,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 1,
+                                textStyle: const TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              child: const Text(
+                                "Masuk",
+                                style: TextStyle(color: Colors.black87),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Row(
+                            children: const [
+                              Expanded(child: Divider()),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text(
+                                  "Atau",
+                                  style: TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                              Expanded(child: Divider()),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 44,
+                            child: ElevatedButton.icon(
+                              onPressed: isLoading
+                                  ? null
+                                  : () => _handleGoogleSignIn(context),
+                              icon: isLoading
+                                  ? SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.black54,
+                                            ),
+                                      ),
+                                    )
+                                  : Image.asset(
+                                      'assets/images/Google.png',
+                                      width: 22,
+                                      height: 22,
+                                    ),
+                              label: Text(
+                                isLoading
+                                    ? "Loading..."
+                                    : "Masuk dengan Akun Google",
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFD8EDFF),
+                                foregroundColor: Colors.black87,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Belum punya akun? ",
+                                style: TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontSize: 13,
+                                  color: Color(0xFFB0B0B0),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const SignUpPage(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  "Registrasi",
+                                  style: TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ],

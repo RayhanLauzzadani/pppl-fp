@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "725555508249",
+    "project_id": "fp-pppl",
+    "storage_bucket": "fp-pppl.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:725555508249:android:9c488665b0195b1745e688",
+        "android_client_info": {
+          "package_name": "com.example.laundryin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "725555508249-o459ggk9v468ghi3htju4hrj0rt2hg64.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.laundryin",
+            "certificate_hash": "3c79632cbec2cf73874b38f3a0eef041bf680ed7"
+          }
+        },
+        {
+          "client_id": "725555508249-527b89ei2n5ctuvoifuuoiuictro11bq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8c7aQ13p6xk3ApbA2_ZMrhDtrkbgH50g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "725555508249-527b89ei2n5ctuvoifuuoiuictro11bq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "725555508249-nuupv8lnupbk2uen97o9l1t9n4854cdi.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.laundryin"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
