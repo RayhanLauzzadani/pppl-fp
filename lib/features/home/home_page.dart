@@ -1,13 +1,19 @@
+import 'right_drawer.dart';
 import 'package:flutter/material.dart';
 import '../pesanan/selesai_pesanan_page.dart';
 import '../pesanan/proses_pesanan_page.dart';
+
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
     return Scaffold(
+      key: scaffoldKey,
+      endDrawer: const RightDrawer(),
       backgroundColor: Colors.white,
       body: Column(
         children: [
@@ -79,13 +85,19 @@ class HomePage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // Hamburger
+                      // Hamburger menu
                       Container(
                         margin: const EdgeInsets.only(top: 2),
-                        child: Icon(
-                          Icons.menu_rounded,
-                          color: Colors.white,
-                          size: 32,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(100),
+                          onTap: () {
+                            Scaffold.of(context).openEndDrawer();
+                          },
+                          child: const Icon(
+                            Icons.menu_rounded,
+                            color: Colors.white,
+                            size: 32,
+                          ),
                         ),
                       ),
                     ],
@@ -130,10 +142,8 @@ class HomePage extends StatelessWidget {
               ),
             ],
           ),
-
           // Spacer
           const SizedBox(height: 38),
-
           // ===== Info Card (Pesanan Hari Ini) =====
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22),
@@ -222,7 +232,6 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
-
           // ===== Menu Grid =====
           const SizedBox(height: 38),
           Padding(
