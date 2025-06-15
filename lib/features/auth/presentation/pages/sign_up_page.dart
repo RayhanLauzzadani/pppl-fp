@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../profile/edit_profile_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'sign_in_page.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -17,6 +17,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final nameController = TextEditingController();
   final statusController = TextEditingController(text: "Ownership");
 
+  bool _isLoading = false;
+
   @override
   void dispose() {
     emailController.dispose();
@@ -26,6 +28,68 @@ class _SignUpPageState extends State<SignUpPage> {
     nameController.dispose();
     statusController.dispose();
     super.dispose();
+  }
+
+  Future<void> _signUp() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
+
+    if (email.isEmpty || password.isEmpty || nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nama, email, dan password harus diisi.')),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Konfirmasi password tidak cocok')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Setelah sukses, arahkan ke halaman login/sign in
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Akun berhasil dibuat! Silakan login.')),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const SignInPage(),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      String msg = "Gagal mendaftar";
+      if (e.code == 'email-already-in-use') {
+        msg = "Email sudah terdaftar.";
+      } else if (e.code == 'invalid-email') {
+        msg = "Format email tidak valid.";
+      } else if (e.code == 'weak-password') {
+        msg = "Password terlalu lemah (minimal 6 karakter).";
+      } else if (e.message != null) {
+        msg = e.message!;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -63,21 +127,25 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: Image.asset('assets/images/logo.png', width: 160, height: 160),
                     ),
                     const SizedBox(height: 25),
-                    const Text('LondryIn',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 32,
-                          color: Colors.white,
-                        )),
+                    const Text(
+                      'LondryIn',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 32,
+                        color: Colors.white,
+                      ),
+                    ),
                     const SizedBox(height: 5),
-                    const Text('Selamat datang!',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.normal,
-                          fontSize: 28,
-                          color: Colors.white,
-                        )),
+                    const Text(
+                      'Selamat datang!',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.normal,
+                        fontSize: 28,
+                        color: Colors.white,
+                      ),
+                    ),
                     const SizedBox(height: 22),
 
                     // Form Container
@@ -128,34 +196,20 @@ class _SignUpPageState extends State<SignUpPage> {
                             width: double.infinity,
                             height: 44,
                             child: ElevatedButton(
-                              onPressed: () {
-                                if (passwordController.text != confirmPasswordController.text) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Konfirmasi password tidak cocok')),
-                                  );
-                                  return;
-                                }
-
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => EditProfilPage(
-                                      name: nameController.text,
-                                      email: emailController.text,
-                                      phone: phoneController.text,
-                                      password: passwordController.text,
-                                      status: statusController.text,
-                                    ),
-                                  ),
-                                );
-                              },
+                              onPressed: _isLoading ? null : _signUp,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFFDE3B4),
                                 foregroundColor: Colors.black87,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 elevation: 1,
                               ),
-                              child: const Text('Daftar'),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  : const Text('Daftar'),
                             ),
                           ),
 
@@ -186,7 +240,10 @@ class _SignUpPageState extends State<SignUpPage> {
                               const Text('Sudah punya akun? ', style: TextStyle(color: Colors.grey)),
                               GestureDetector(
                                 onTap: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => const SignInPage()));
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const SignInPage()),
+                                  );
                                 },
                                 child: const Text(
                                   'Masuk',

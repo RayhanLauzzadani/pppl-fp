@@ -14,7 +14,6 @@ void main() async {
   );
   runApp(const MyApp());
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -23,8 +22,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'LondryIn',
       debugShowCheckedModeBanner: false,
-      // home: const LandingPage(),
-      home: SignUpPage(), // atau LandingPage jika kamu punya sistem login
+      home: const LandingPage(),
+      // home: SignUpPage(), // atau LandingPage jika kamu punya sistem login
       // Nanti bisa tambahkan routes di sini kalau sudah banyak page
     );
   }
