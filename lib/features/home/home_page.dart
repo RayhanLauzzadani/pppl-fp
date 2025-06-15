@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'right_drawer.dart';
 import '../pesanan/selesai_pesanan_page.dart';
 import '../pesanan/proses_pesanan_page.dart';
+import '../pesanan/buat_pesanan_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -248,7 +249,12 @@ class _HomePageState extends State<HomePage> {
                   asset: "assets/images/note.png",
                   label: "Buat Pesanan",
                   onTap: () {
-                    // TODO: Navigasi ke Buat Pesanan kalau ada
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const BuatPesananPage(),
+                      ),
+                    );
                   },
                 ),
                 _menuItem(
