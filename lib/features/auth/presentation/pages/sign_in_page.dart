@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'sign_up_page.dart';
-import 'onboarding_page.dart'; // Pastikan sudah ada file ini!
+import 'onboarding_page.dart';
 import 'package:laundryin/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -11,34 +12,82 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
-  bool isLoading = false;
+  // Dua state loading terpisah
+  bool isLoadingEmail = false;
+  bool isLoadingGoogle = false;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     setState(() {
-      isLoading = true;
+      isLoadingGoogle = true;
     });
 
     final auth = AuthService();
     final userCredential = await auth.signInWithGoogle();
 
     setState(() {
-      isLoading = false;
+      isLoadingGoogle = false;
     });
 
     if (userCredential != null) {
-      // Sukses login, lanjut ke OnBoardingPage
       Navigator.pushReplacement(
-        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (context) => OnBoardingPage()),
       );
     } else {
-      // Gagal/batal login
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Gagal masuk dengan Google")),
       );
     }
+  }
+
+  Future<void> _handleEmailPasswordSignIn() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Email dan password harus diisi!")),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoadingEmail = true;
+    });
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => OnBoardingPage()),
+      );
+    } on FirebaseAuthException catch (e) {
+      String msg = "Gagal login!";
+      if (e.code == 'user-not-found') {
+        msg = "Email tidak terdaftar.";
+      } else if (e.code == 'wrong-password') {
+        msg = "Password salah.";
+      } else if (e.code == 'invalid-email') {
+        msg = "Format email tidak valid.";
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Terjadi kesalahan. Coba lagi.")),
+      );
+    }
+
+    setState(() {
+      isLoadingEmail = false;
+    });
   }
 
   @override
@@ -46,7 +95,6 @@ class _SignInPageState extends State<SignInPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // ... [background dan konten seperti sebelumnya, tanpa perubahan]
           Container(
             width: double.infinity,
             height: 660.0,
@@ -118,7 +166,6 @@ class _SignInPageState extends State<SignInPage> {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            // ignore: deprecated_member_use
                             color: Colors.black.withOpacity(0.07),
                             blurRadius: 16,
                             offset: const Offset(0, 8),
@@ -129,6 +176,7 @@ class _SignInPageState extends State<SignInPage> {
                         children: [
                           // Email
                           TextField(
+                            controller: _emailController,
                             style: const TextStyle(
                               fontFamily: "Poppins",
                               color: Colors.black87,
@@ -154,6 +202,7 @@ class _SignInPageState extends State<SignInPage> {
                           const SizedBox(height: 14),
                           // Password
                           TextField(
+                            controller: _passwordController,
                             obscureText: true,
                             style: const TextStyle(
                               fontFamily: "Poppins",
@@ -182,7 +231,7 @@ class _SignInPageState extends State<SignInPage> {
                             width: double.infinity,
                             height: 44,
                             child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: isLoadingEmail ? null : _handleEmailPasswordSignIn,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFFDE3B4),
                                 foregroundColor: Colors.black87,
@@ -196,10 +245,21 @@ class _SignInPageState extends State<SignInPage> {
                                   fontSize: 16,
                                 ),
                               ),
-                              child: const Text(
-                                "Masuk",
-                                style: TextStyle(color: Colors.black87),
-                              ),
+                              child: isLoadingEmail
+                                  ? const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.black54,
+                                        ),
+                                      ),
+                                    )
+                                  : const Text(
+                                      "Masuk",
+                                      style: TextStyle(color: Colors.black87),
+                                    ),
                             ),
                           ),
                           const SizedBox(height: 14),
@@ -225,19 +285,18 @@ class _SignInPageState extends State<SignInPage> {
                             width: double.infinity,
                             height: 44,
                             child: ElevatedButton.icon(
-                              onPressed: isLoading
+                              onPressed: isLoadingGoogle
                                   ? null
                                   : () => _handleGoogleSignIn(context),
-                              icon: isLoading
-                                  ? SizedBox(
+                              icon: isLoadingGoogle
+                                  ? const SizedBox(
                                       width: 22,
                                       height: 22,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              Colors.black54,
-                                            ),
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.black54,
+                                        ),
                                       ),
                                     )
                                   : Image.asset(
@@ -246,7 +305,7 @@ class _SignInPageState extends State<SignInPage> {
                                       height: 22,
                                     ),
                               label: Text(
-                                isLoading
+                                isLoadingGoogle
                                     ? "Loading..."
                                     : "Masuk dengan Akun Google",
                                 style: const TextStyle(
