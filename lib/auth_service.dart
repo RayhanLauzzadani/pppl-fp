@@ -27,6 +27,7 @@ class AuthService {
       // 4. Sign in ke Firebase pakai credential Google
       return await _auth.signInWithCredential(credential);
     } catch (e) {
+      // ignore: avoid_print
       print('Error sign in with Google: $e');
       // Tampilkan error ke UI jika ingin
       // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));

@@ -129,6 +129,7 @@ class _OnBoardingPageState extends State<OnBoardingPage>
                     style: TextStyle(
                       fontFamily: "Poppins",
                       fontSize: 14,
+                      // ignore: deprecated_member_use
                       color: Colors.white.withOpacity(0.95),
                       fontWeight: FontWeight.w500,
                     ),
@@ -155,6 +156,7 @@ class _OnBoardingPageState extends State<OnBoardingPage>
                         height: 16,
                         width: 221,
                         decoration: BoxDecoration(
+                          // ignore: deprecated_member_use
                           color: Colors.white.withOpacity(0.32),
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -191,6 +193,7 @@ class _OnBoardingPageState extends State<OnBoardingPage>
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
+                            // ignore: deprecated_member_use
                             color: Colors.black.withOpacity(0.07),
                             blurRadius: 4,
                             offset: const Offset(0, 1),
