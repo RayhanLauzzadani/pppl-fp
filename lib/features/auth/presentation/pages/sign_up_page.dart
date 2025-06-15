@@ -72,13 +72,17 @@ class SignUpPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 22),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 24,
+                      ),
                       margin: const EdgeInsets.only(bottom: 24, top: 5),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
+                            // ignore: deprecated_member_use
                             color: Colors.black.withOpacity(0.07),
                             blurRadius: 16,
                             offset: const Offset(0, 8),
@@ -185,9 +189,7 @@ class SignUpPage extends StatelessWidget {
                               onPressed: () {},
                               child: const Text(
                                 'Daftar',
-                                style: TextStyle(
-                                  color: Colors.black87,
-                                ),
+                                style: TextStyle(color: Colors.black87),
                               ),
                             ),
                           ),

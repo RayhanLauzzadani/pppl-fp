@@ -104,6 +104,7 @@ class HomePage extends StatelessWidget {
                       "Hai, Selamat datang",
                       style: TextStyle(
                         fontFamily: "Poppins",
+                        // ignore: deprecated_member_use
                         color: Colors.white.withOpacity(0.93),
                         fontWeight: FontWeight.w400,
                         fontSize: 16,
@@ -146,6 +147,7 @@ class HomePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
+                    // ignore: deprecated_member_use
                     color: Colors.black.withOpacity(
                       0.13,
                     ), // lebih gelap dari sebelumnya
@@ -167,6 +169,7 @@ class HomePage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
+                          // ignore: deprecated_member_use
                           color: Colors.black.withOpacity(0.13),
                           blurRadius: 16,
                           spreadRadius: 1,
@@ -316,6 +319,7 @@ class HomePage extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
+                  // ignore: deprecated_member_use
                   color: Colors.black.withOpacity(0.12),
                   blurRadius: 12,
                   spreadRadius: 2,

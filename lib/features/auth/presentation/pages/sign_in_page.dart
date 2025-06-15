@@ -28,11 +28,13 @@ class _SignInPageState extends State<SignInPage> {
     if (userCredential != null) {
       // Sukses login, lanjut ke OnBoardingPage
       Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (context) => OnBoardingPage()),
       );
     } else {
       // Gagal/batal login
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Gagal masuk dengan Google")),
       );
@@ -116,6 +118,7 @@ class _SignInPageState extends State<SignInPage> {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
+                            // ignore: deprecated_member_use
                             color: Colors.black.withOpacity(0.07),
                             blurRadius: 16,
                             offset: const Offset(0, 8),
