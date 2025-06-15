@@ -1,19 +1,28 @@
-import 'right_drawer.dart';
 import 'package:flutter/material.dart';
+import 'right_drawer.dart';
 import '../pesanan/selesai_pesanan_page.dart';
 import '../pesanan/proses_pesanan_page.dart';
 
-
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  State<HomePage> createState() => _HomePageState();
+}
 
+class _HomePageState extends State<HomePage> {
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      endDrawer: const RightDrawer(),
+      endDrawer: RightDrawerWidget(
+        onLogout: () {
+          // Atur logika logout kamu di sini.
+          Navigator.pop(context);
+        },
+      ),
       backgroundColor: Colors.white,
       body: Column(
         children: [
@@ -28,11 +37,7 @@ class HomePage extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.bottomLeft,
                     end: Alignment.topRight,
-                    stops: [
-                      0.01,
-                      0.12,
-                      0.83,
-                    ],
+                    stops: [0.01, 0.12, 0.83],
                     colors: [
                       Color(0xFFFFF6E9), // krem putih
                       Color(0xFFBBE2EC), // biru muda
@@ -91,7 +96,7 @@ class HomePage extends StatelessWidget {
                         child: InkWell(
                           borderRadius: BorderRadius.circular(100),
                           onTap: () {
-                            Scaffold.of(context).openEndDrawer();
+                            scaffoldKey.currentState?.openEndDrawer();
                           },
                           child: const Icon(
                             Icons.menu_rounded,

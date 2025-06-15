@@ -66,24 +66,24 @@ class RightDrawerWidget extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            // MENU
-            _drawerMenuTile(
+            const SizedBox(height: 18),
+            // MENU BUTTONS (OutlinedButton custom)
+            _drawerMenuButton(
               icon: Icons.person_outline,
               label: "Profil Akun",
               onTap: () {},
             ),
-            _drawerMenuTile(
+            _drawerMenuButton(
               icon: Icons.notifications_outlined,
               label: "Layanan",
               onTap: () {},
             ),
-            _drawerMenuTile(
+            _drawerMenuButton(
               icon: Icons.history,
               label: "Riwayat",
               onTap: () {},
             ),
-            _drawerMenuTile(
+            _drawerMenuButton(
               icon: Icons.info_outline,
               label: "Tentang Kami",
               onTap: () {},
@@ -122,26 +122,55 @@ class RightDrawerWidget extends StatelessWidget {
     );
   }
 
-  Widget _drawerMenuTile({required IconData icon, required String label, VoidCallback? onTap}) {
+  /// MENU BUTTON: lebar penuh, border bulat, tinggi tetap, icon bulat kiri
+  Widget _drawerMenuButton({
+    required IconData icon,
+    required String label,
+    VoidCallback? onTap,
+  }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 4),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 7, vertical: 0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(11),
-          side: const BorderSide(color: Color(0xFF212C2D), width: 1.0),
-        ),
-        leading: Icon(icon, color: Color(0xFF186379)),
-        title: Text(
-          label,
-          style: const TextStyle(
-            fontFamily: "Poppins",
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-            color: Color(0xFF186379),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: SizedBox(
+        height: 52,
+        width: double.infinity,
+        child: OutlinedButton(
+          onPressed: onTap,
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Color(0xFF212C2D), width: 1.2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(13),
+            ),
+            backgroundColor: Colors.white,
+            padding: EdgeInsets.zero, // biar custom Row fill
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.transparent,
+                  border: Border.all(color: Color(0xFF186379), width: 1.4),
+                ),
+                child: Icon(icon, color: Color(0xFF186379), size: 20),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontFamily: "Poppins",
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15.7,
+                    color: Color(0xFF186379),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        onTap: onTap,
       ),
     );
   }
