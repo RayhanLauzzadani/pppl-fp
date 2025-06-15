@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
+import 'right_drawer.dart';
 import '../pesanan/selesai_pesanan_page.dart';
 import '../pesanan/proses_pesanan_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
+      endDrawer: RightDrawerWidget(
+        onLogout: () {
+          // Atur logika logout kamu di sini.
+          Navigator.pop(context);
+        },
+      ),
       backgroundColor: Colors.white,
       body: Column(
         children: [
@@ -22,11 +37,7 @@ class HomePage extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.bottomLeft,
                     end: Alignment.topRight,
-                    stops: [
-                      0.01,
-                      0.12,
-                      0.83,
-                    ],
+                    stops: [0.01, 0.12, 0.83],
                     colors: [
                       Color(0xFFFFF6E9), // krem putih
                       Color(0xFFBBE2EC), // biru muda
@@ -79,13 +90,19 @@ class HomePage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // Hamburger
+                      // Hamburger menu
                       Container(
                         margin: const EdgeInsets.only(top: 2),
-                        child: Icon(
-                          Icons.menu_rounded,
-                          color: Colors.white,
-                          size: 32,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(100),
+                          onTap: () {
+                            scaffoldKey.currentState?.openEndDrawer();
+                          },
+                          child: const Icon(
+                            Icons.menu_rounded,
+                            color: Colors.white,
+                            size: 32,
+                          ),
                         ),
                       ),
                     ],
@@ -130,10 +147,8 @@ class HomePage extends StatelessWidget {
               ),
             ],
           ),
-
           // Spacer
           const SizedBox(height: 38),
-
           // ===== Info Card (Pesanan Hari Ini) =====
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22),
@@ -222,7 +237,6 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
-
           // ===== Menu Grid =====
           const SizedBox(height: 38),
           Padding(
