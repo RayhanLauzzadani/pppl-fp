@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import '../pesanan/selesai_pesanan_page.dart';
+import '../pesanan/proses_pesanan_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // final size = MediaQuery.of(context).size;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -27,7 +26,7 @@ class HomePage extends StatelessWidget {
                       0.01,
                       0.12,
                       0.83,
-                    ], // pakai persen Figma, diubah ke [0-1]
+                    ],
                     colors: [
                       Color(0xFFFFF6E9), // krem putih
                       Color(0xFFBBE2EC), // biru muda
@@ -146,12 +145,10 @@ class HomePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(
-                      0.13,
-                    ), // lebih gelap dari sebelumnya
-                    blurRadius: 16, // diperbesar
-                    spreadRadius: 1, // spread biar soft
-                    offset: Offset(0, 8), // lebih tinggi
+                    color: Colors.black.withOpacity(0.13),
+                    blurRadius: 16,
+                    spreadRadius: 1,
+                    offset: Offset(0, 8),
                   ),
                 ],
               ),
@@ -176,7 +173,7 @@ class HomePage extends StatelessWidget {
                     ),
                     child: Center(
                       child: Image.asset(
-                        "assets/images/checklist.png", // Ganti asset icon sesuai Figma
+                        "assets/images/checklist.png",
                         width: 26,
                         height: 26,
                       ),
@@ -208,7 +205,6 @@ class HomePage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 13),
-                        // Angka-angka
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
@@ -245,7 +241,12 @@ class HomePage extends StatelessWidget {
                   asset: "assets/images/mesin_cuci.png",
                   label: "Proses",
                   onTap: () {
-                    // TODO: Navigasi ke Proses Pesanan kalau ada
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ProsesPesananPage(),
+                      ),
+                    );
                   },
                 ),
                 _menuItem(
