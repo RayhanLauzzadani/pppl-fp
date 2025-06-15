@@ -22,8 +22,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'LondryIn',
       debugShowCheckedModeBanner: false,
-      home: const LandingPage(),
-      // home: SignUpPage(), // atau LandingPage jika kamu punya sistem login
+      // home: const LandingPage(),
+       home: EditProfilPage(
+        name: "Dummy Laundry",
+        email: "dummy@email.com",
+        phone: "+62 812-3456-7890",
+        password: "passworddummy",
+        status: "Owner",
+      ), // atau LandingPage jika kamu punya sistem login
       // Nanti bisa tambahkan routes di sini kalau sudah banyak page
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+// Import dari file kelola_akun_page.dart yang benar
+import 'package:laundryin/features/profile/kelola_akun_page.dart';
 
-class EditProfilPage extends StatelessWidget {
+class EditProfilPage extends StatefulWidget {
   final String name;
   final String email;
   final String phone;
@@ -17,14 +19,45 @@ class EditProfilPage extends StatelessWidget {
   });
 
   @override
+  State<EditProfilPage> createState() => _EditProfilPageState();
+}
+
+class _EditProfilPageState extends State<EditProfilPage> {
+  late TextEditingController nameController;
+  late TextEditingController emailController;
+  late TextEditingController phoneController;
+  late TextEditingController passwordController;
+  late TextEditingController statusController;
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController(text: widget.name);
+    emailController = TextEditingController(text: widget.email);
+    phoneController = TextEditingController(text: widget.phone);
+    passwordController = TextEditingController(text: widget.password);
+    statusController = TextEditingController(text: widget.status);
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    passwordController.dispose();
+    statusController.dispose();
+    super.dispose();
+  }
+
+  void _handleUpdateProfile() {
+    // Simpan perubahan ke Firestore kalau mau, atau cukup show snackbar:
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Profil berhasil diupdate!")),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final nameController = TextEditingController(text: name);
-    final emailController = TextEditingController(text: email);
-    final phoneController = TextEditingController(text: phone);
-    final passwordController = TextEditingController(text: password);
-    final statusController = TextEditingController(text: status);
-
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -56,9 +89,10 @@ class EditProfilPage extends StatelessWidget {
             // Foto profil
             Column(
               children: [
-                CircleAvatar(
+                const CircleAvatar(
                   radius: 55,
-                  backgroundImage: AssetImage('assets/images/profile_sample.jpg'),
+                  backgroundColor: Color(0xFFF6F7FB),
+                  child: Icon(Icons.person, size: 55, color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
                 const Text(
@@ -71,22 +105,23 @@ class EditProfilPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-
-            // Form Fields
             _formField("Nama Perusahaan", nameController),
             _formField("Email Perusahaan", emailController),
             _formField("Status Akun", statusController),
             _formField("Nomor Whatsapp", phoneController),
             _formField("Password", passwordController, obscureText: true),
-
             const SizedBox(height: 20),
-
             // Tombol "Kelola Akun Karyawan"
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: Navigate to Kelola Akun Karyawan Page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const KelolaAkunPage(), // PASTIKAN ini import dari file terpisah!
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE76161),
@@ -98,16 +133,12 @@ class EditProfilPage extends StatelessWidget {
                 child: const Text("Kelola Akun Karyawan", style: TextStyle(color: Colors.white)),
               ),
             ),
-
             const SizedBox(height: 12),
-
             // Tombol "Update"
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Handle Update
-                },
+                onPressed: _handleUpdateProfile,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF40A2E3),
                   padding: const EdgeInsets.symmetric(vertical: 14),
