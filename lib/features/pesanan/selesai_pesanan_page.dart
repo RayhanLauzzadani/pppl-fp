@@ -1,4 +1,6 @@
+import 'detail_pesanan_selesai_page.dart';
 import 'package:flutter/material.dart';
+
 // Import model pesanan, samakan dengan proses
 // import 'package:laundryin/features/pesanan/pesanan_model.dart';
 
@@ -253,128 +255,140 @@ class _SelesaiPesananPageState extends State<SelesaiPesananPage> {
                 final p = filteredList[index];
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 15),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 19,
-                      vertical: 18,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(
-                        color: Colors.black.withOpacity(0.13),
-                        width: 1.15,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.13),
-                          blurRadius: 14,
-                          offset: const Offset(0, 6),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DetailPesananSelesaiPage(pesanan: p),
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                p.nama,
-                                style: const TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 17.8,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    p.tipe,
-                                    style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 15,
-                                      color: Colors.black.withOpacity(0.66),
-                                    ),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 15),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 19,
+                        vertical: 18,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(
+                          color: Colors.black.withOpacity(0.13),
+                          width: 1.15,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.13),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  p.nama,
+                                  style: const TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 17.8,
+                                    color: Colors.black,
                                   ),
-                                  if (p.ekspres)
-                                    Container(
-                                      margin: const EdgeInsets.only(left: 8),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 3,
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      p.tipe,
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 15,
+                                        color: Colors.black.withOpacity(0.66),
                                       ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.orange[200],
-                                        borderRadius: BorderRadius.circular(7),
-                                      ),
-                                      child: const Text(
-                                        "Ekspres",
-                                        style: TextStyle(
-                                          fontSize: 12.5,
-                                          color: Colors.deepOrange,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: "Poppins",
+                                    ),
+                                    if (p.ekspres)
+                                      Container(
+                                        margin: const EdgeInsets.only(left: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.orange[200],
+                                          borderRadius: BorderRadius.circular(
+                                            7,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          "Ekspres",
+                                          style: TextStyle(
+                                            fontSize: 12.5,
+                                            color: Colors.deepOrange,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: "Poppins",
+                                          ),
                                         ),
                                       ),
+                                  ],
+                                ),
+                                const SizedBox(height: 3),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "${p.kg} kgs",
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 13,
+                                        fontStyle: FontStyle.italic,
+                                        color: Colors.black.withOpacity(0.54),
+                                        fontWeight: FontWeight.w400,
+                                      ),
                                     ),
-                                ],
-                              ),
-                              const SizedBox(height: 3),
-                              Row(
-                                children: [
-                                  Text(
-                                    "${p.kg} kgs",
-                                    style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontSize: 13,
-                                      fontStyle: FontStyle.italic,
-                                      color: Colors.black.withOpacity(0.54),
-                                      fontWeight: FontWeight.w400,
+                                    const SizedBox(width: 7),
+                                    Text(
+                                      "•",
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[400],
+                                        fontSize: 13.7,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 7),
-                                  Text(
-                                    "•",
-                                    style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[400],
-                                      fontSize: 13.7,
+                                    const SizedBox(width: 7),
+                                    Text(
+                                      "${p.pcs} pcs",
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 13,
+                                        fontStyle: FontStyle.italic,
+                                        color: Colors.black.withOpacity(0.54),
+                                        fontWeight: FontWeight.w400,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 7),
-                                  Text(
-                                    "${p.pcs} pcs",
-                                    style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontSize: 13,
-                                      fontStyle: FontStyle.italic,
-                                      color: Colors.black.withOpacity(0.54),
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              _statusIcon(p.status),
+                              const SizedBox(width: 12),
+                              const Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                color: Colors.black87,
+                                size: 29,
                               ),
                             ],
                           ),
-                        ),
-                        Row(
-                          children: [
-                            _statusIcon(p.status),
-                            const SizedBox(width: 12),
-                            const Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              color: Colors.black87,
-                              size: 29,
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );
