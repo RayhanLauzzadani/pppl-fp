@@ -201,6 +201,7 @@ class SelesaiPesananPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(22),
                     boxShadow: [
                       BoxShadow(
+                        // ignore: deprecated_member_use
                         color: Colors.black.withOpacity(0.07),
                         blurRadius: 11,
                         offset: Offset(0, 4),
@@ -228,6 +229,7 @@ class SelesaiPesananPage extends StatelessWidget {
                                 fontFamily: "Poppins",
                                 fontWeight: FontWeight.w500,
                                 fontSize: 15,
+                                // ignore: deprecated_member_use
                                 color: Colors.black.withOpacity(0.66),
                               ),
                             ),
@@ -238,6 +240,7 @@ class SelesaiPesananPage extends StatelessWidget {
                                 fontFamily: "Poppins",
                                 fontSize: 13,
                                 fontStyle: FontStyle.italic,
+                                // ignore: deprecated_member_use
                                 color: Colors.black.withOpacity(0.50),
                                 fontWeight: FontWeight.w400,
                               ),
@@ -290,6 +293,7 @@ class SelesaiPesananPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
+              // ignore: deprecated_member_use
               color: Colors.black12.withOpacity(0.10),
               blurRadius: 11,
               offset: Offset(0, 3),
@@ -321,6 +325,7 @@ class SelesaiPesananPage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: "Poppins",
+                // ignore: deprecated_member_use
                 color: Colors.black.withOpacity(0.54),
                 fontWeight: FontWeight.w500,
                 fontSize: 13.5,
