@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../general/edit_layanan_page.dart'; // Tambahkan import ini
 
 class RightDrawerWidget extends StatelessWidget {
   final VoidCallback onLogout;
@@ -27,7 +28,7 @@ class RightDrawerWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // PROFILE
+            // ... PROFILE (biarkan saja)
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 12),
               child: Row(
@@ -67,7 +68,6 @@ class RightDrawerWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
-            // MENU BUTTONS (OutlinedButton custom)
             _drawerMenuButton(
               icon: Icons.person_outline,
               label: "Profil Akun",
@@ -76,7 +76,15 @@ class RightDrawerWidget extends StatelessWidget {
             _drawerMenuButton(
               icon: Icons.notifications_outlined,
               label: "Layanan",
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); // tutup drawer dulu
+                Future.delayed(const Duration(milliseconds: 210), () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EditLayananPage()),
+                  );
+                });
+              },
             ),
             _drawerMenuButton(
               icon: Icons.history,
@@ -89,7 +97,7 @@ class RightDrawerWidget extends StatelessWidget {
               onTap: () {},
             ),
             const Spacer(),
-            // LOGOUT BUTTON
+            // ... LOGOUT BUTTON (biarkan saja)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: ElevatedButton.icon(
@@ -122,7 +130,6 @@ class RightDrawerWidget extends StatelessWidget {
     );
   }
 
-  /// MENU BUTTON: lebar penuh, border bulat, tinggi tetap, icon bulat kiri
   Widget _drawerMenuButton({
     required IconData icon,
     required String label,
@@ -141,7 +148,7 @@ class RightDrawerWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(13),
             ),
             backgroundColor: Colors.white,
-            padding: EdgeInsets.zero, // biar custom Row fill
+            padding: EdgeInsets.zero,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
