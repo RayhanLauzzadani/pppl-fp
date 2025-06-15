@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'pesanan_model.dart';
@@ -43,11 +45,7 @@ class _DetailPesananPageState extends State<DetailPesananPage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF40A2E3),
-                Color(0xFFBBE2EC),
-                Color(0xFFFFF6E9),
-              ],
+              colors: [Color(0xFF40A2E3), Color(0xFFBBE2EC), Color(0xFFFFF6E9)],
             ),
             borderRadius: BorderRadius.vertical(top: Radius.circular(27)),
           ),
@@ -104,7 +102,10 @@ class _DetailPesananPageState extends State<DetailPesananPage> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(13),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 17),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 13,
+                          horizontal: 17,
+                        ),
                       ),
                     ),
                   ),
@@ -144,7 +145,12 @@ class _DetailPesananPageState extends State<DetailPesananPage> {
                 bottomRight: Radius.circular(32),
               ),
             ),
-            padding: const EdgeInsets.only(top: 42, left: 0, right: 0, bottom: 18),
+            padding: const EdgeInsets.only(
+              top: 42,
+              left: 0,
+              right: 0,
+              bottom: 18,
+            ),
             child: SafeArea(
               bottom: false,
               child: Column(
@@ -152,7 +158,11 @@ class _DetailPesananPageState extends State<DetailPesananPage> {
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87, size: 22),
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.black87,
+                          size: 22,
+                        ),
                         onPressed: () => Navigator.pop(context),
                       ),
                       const Expanded(
@@ -188,8 +198,16 @@ class _DetailPesananPageState extends State<DetailPesananPage> {
               padding: EdgeInsets.zero,
               children: [
                 Container(
-                  margin: const EdgeInsets.only(left: 15, right: 15, top: 15, bottom: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 19, vertical: 18),
+                  margin: const EdgeInsets.only(
+                    left: 15,
+                    right: 15,
+                    top: 15,
+                    bottom: 8,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 19,
+                    vertical: 18,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(22),
@@ -246,7 +264,8 @@ class _DetailPesananPageState extends State<DetailPesananPage> {
                                   ),
                                   const SizedBox(width: 12),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         pesanan.nama,
@@ -277,7 +296,10 @@ class _DetailPesananPageState extends State<DetailPesananPage> {
                             right: 0,
                             top: 0,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 13,
+                                vertical: 7,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(13),
@@ -295,13 +317,13 @@ class _DetailPesananPageState extends State<DetailPesananPage> {
                                     _status == 'belum_mulai'
                                         ? Icons.close_rounded
                                         : _status == 'proses'
-                                            ? Icons.radio_button_checked_rounded
-                                            : Icons.done_all_rounded,
+                                        ? Icons.radio_button_checked_rounded
+                                        : Icons.done_all_rounded,
                                     color: _status == 'belum_mulai'
                                         ? const Color(0xFFFF6A6A)
                                         : _status == 'proses'
-                                            ? const Color(0xFF52E18C)
-                                            : const Color(0xFF40A2E3),
+                                        ? const Color(0xFF52E18C)
+                                        : const Color(0xFF40A2E3),
                                     size: 22,
                                   ),
                                   const SizedBox(width: 5),
@@ -309,8 +331,8 @@ class _DetailPesananPageState extends State<DetailPesananPage> {
                                     _status == 'belum_mulai'
                                         ? "Belum Mulai"
                                         : _status == 'proses'
-                                            ? "Proses"
-                                            : "Selesai",
+                                        ? "Proses"
+                                        : "Selesai",
                                     style: TextStyle(
                                       fontFamily: "Poppins",
                                       fontWeight: FontWeight.w500,
@@ -325,14 +347,34 @@ class _DetailPesananPageState extends State<DetailPesananPage> {
                         ],
                       ),
                       const SizedBox(height: 10),
-                      Divider(color: Colors.grey[400], thickness: 0.8, height: 23),
+                      Divider(
+                        color: Colors.grey[400],
+                        thickness: 0.8,
+                        height: 23,
+                      ),
                       _infoRow("Status", "Dalam Antrian", boldValue: true),
-                      _infoRow("Tanggal Terima", "22/10/2024 – 15:37", boldValue: true),
-                      _infoRow("Tanggal Selesai", "26/10/2024 – 08:00", boldValue: true),
+                      _infoRow(
+                        "Tanggal Terima",
+                        "22/10/2024 – 15:37",
+                        boldValue: true,
+                      ),
+                      _infoRow(
+                        "Tanggal Selesai",
+                        "26/10/2024 – 08:00",
+                        boldValue: true,
+                      ),
                       _infoRow("Jenis Parfum", "Junjung Buih", boldValue: true),
-                      _infoRow("Layanan Antar Jemput", "≤ 2 Km", boldValue: true),
+                      _infoRow(
+                        "Layanan Antar Jemput",
+                        "≤ 2 Km",
+                        boldValue: true,
+                      ),
                       _infoRow("Catatan", "-", boldValue: false),
-                      Divider(color: Colors.grey[400], thickness: 0.8, height: 24),
+                      Divider(
+                        color: Colors.grey[400],
+                        thickness: 0.8,
+                        height: 24,
+                      ),
                       Row(
                         children: const [
                           Expanded(
@@ -371,47 +413,51 @@ class _DetailPesananPageState extends State<DetailPesananPage> {
                         ],
                       ),
                       const SizedBox(height: 7),
-                      ...listItem.map((item) => Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 2),
-                              child: Text(
-                                item["nama"],
-                                style: const TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontSize: 14.2,
+                      ...listItem.map(
+                        (item) => Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 2,
+                                ),
+                                child: Text(
+                                  item["nama"],
+                                  style: const TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontSize: 14.2,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              "${item["jumlah"]}",
-                              style: const TextStyle(
-                                fontFamily: "Poppins",
-                                fontSize: 14,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          Expanded(
-                            child: Center(
-                              child: Checkbox(
-                                value: item["konfirmasi"],
-                                onChanged: (_status == 'proses')
-                                    ? (val) {
-                                        setState(() {
-                                          item["konfirmasi"] = val ?? false;
-                                        });
-                                      }
-                                    : null,
+                            Expanded(
+                              child: Text(
+                                "${item["jumlah"]}",
+                                style: const TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ),
-                          ),
-                        ],
-                      )),
+                            Expanded(
+                              child: Center(
+                                child: Checkbox(
+                                  value: item["konfirmasi"],
+                                  onChanged: (_status == 'proses')
+                                      ? (val) {
+                                          setState(() {
+                                            item["konfirmasi"] = val ?? false;
+                                          });
+                                        }
+                                      : null,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

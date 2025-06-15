@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'sign_up_page.dart';
 import 'onboarding_page.dart';
@@ -76,9 +78,7 @@ class _SignInPageState extends State<SignInPage> {
       } else if (e.code == 'invalid-email') {
         msg = "Format email tidak valid.";
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Terjadi kesalahan. Coba lagi.")),
@@ -231,7 +231,9 @@ class _SignInPageState extends State<SignInPage> {
                             width: double.infinity,
                             height: 44,
                             child: ElevatedButton(
-                              onPressed: isLoadingEmail ? null : _handleEmailPasswordSignIn,
+                              onPressed: isLoadingEmail
+                                  ? null
+                                  : _handleEmailPasswordSignIn,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFFDE3B4),
                                 foregroundColor: Colors.black87,
@@ -251,9 +253,10 @@ class _SignInPageState extends State<SignInPage> {
                                       height: 22,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.black54,
-                                        ),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.black54,
+                                            ),
                                       ),
                                     )
                                   : const Text(
@@ -294,9 +297,10 @@ class _SignInPageState extends State<SignInPage> {
                                       height: 22,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.black54,
-                                        ),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.black54,
+                                            ),
                                       ),
                                     )
                                   : Image.asset(

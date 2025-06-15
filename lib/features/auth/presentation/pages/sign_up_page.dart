@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'sign_in_page.dart';
 // Import Firebase Auth
@@ -13,14 +15,15 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool isLoading = false;
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _handleSignUp() async {
@@ -135,7 +138,10 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 22),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 24,
+                      ),
                       margin: const EdgeInsets.only(bottom: 24, top: 5),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -255,16 +261,15 @@ class _SignUpPageState extends State<SignUpPage> {
                                       height: 22,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.black54,
-                                        ),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.black54,
+                                            ),
                                       ),
                                     )
                                   : const Text(
                                       'Daftar',
-                                      style: TextStyle(
-                                        color: Colors.black87,
-                                      ),
+                                      style: TextStyle(color: Colors.black87),
                                     ),
                             ),
                           ),

@@ -1,13 +1,17 @@
+// ignore_for_file: unused_import, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:laundryin/features/pesanan/pesanan_model.dart';
 import 'package:laundryin/features/pesanan/detail_pesanan_page.dart';
+
 class ProsesPesananPage extends StatefulWidget {
   const ProsesPesananPage({super.key});
 
   @override
   State<ProsesPesananPage> createState() => _ProsesPesananPageState();
 }
+
 class _ProsesPesananPageState extends State<ProsesPesananPage> {
   String search = "";
 
@@ -65,23 +69,27 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
 
   @override
   Widget build(BuildContext context) {
-    final countBelumMulai = pesananList.where((e) => e.status == 'belum_mulai').length;
+    final countBelumMulai = pesananList
+        .where((e) => e.status == 'belum_mulai')
+        .length;
     final countProses = pesananList.where((e) => e.status == 'proses').length;
     final countSelesai = pesananList.where((e) => e.status == 'selesai').length;
 
-    final filteredList = pesananList
-        .where((p) => p.nama.toLowerCase().contains(search.toLowerCase()))
-        .toList()
-      ..sort((a, b) {
-        int getOrder(String status) {
-          if (status == 'belum_mulai') return 0;
-          if (status == 'proses') return 1;
-          return 2;
-        }
-        int cmp = getOrder(a.status).compareTo(getOrder(b.status));
-        if (cmp != 0) return cmp;
-        return a.tanggal.compareTo(b.tanggal);
-      });
+    final filteredList =
+        pesananList
+            .where((p) => p.nama.toLowerCase().contains(search.toLowerCase()))
+            .toList()
+          ..sort((a, b) {
+            int getOrder(String status) {
+              if (status == 'belum_mulai') return 0;
+              if (status == 'proses') return 1;
+              return 2;
+            }
+
+            int cmp = getOrder(a.status).compareTo(getOrder(b.status));
+            if (cmp != 0) return cmp;
+            return a.tanggal.compareTo(b.tanggal);
+          });
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -106,7 +114,12 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                 bottomRight: Radius.circular(32),
               ),
             ),
-            padding: const EdgeInsets.only(top: 42, left: 0, right: 0, bottom: 26),
+            padding: const EdgeInsets.only(
+              top: 42,
+              left: 0,
+              right: 0,
+              bottom: 26,
+            ),
             child: SafeArea(
               bottom: false,
               child: Column(
@@ -140,7 +153,10 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                   const SizedBox(height: 8),
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 9),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 11,
+                      horizontal: 9,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.70),
                       borderRadius: BorderRadius.circular(20),
@@ -225,7 +241,12 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
           const SizedBox(height: 7),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.only(left: 0, right: 0, top: 7, bottom: 15),
+              padding: const EdgeInsets.only(
+                left: 0,
+                right: 0,
+                top: 7,
+                bottom: 15,
+              ),
               itemCount: filteredList.length,
               itemBuilder: (context, index) {
                 final p = filteredList[index];
@@ -242,7 +263,10 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                     },
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 15),
-                      padding: const EdgeInsets.symmetric(horizontal: 19, vertical: 18),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 19,
+                        vertical: 18,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(22),
@@ -404,11 +428,23 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
 
   Widget _statusIcon(String status) {
     if (status == 'belum_mulai') {
-      return const Icon(Icons.close_rounded, color: Color(0xFFFF6A6A), size: 29);
+      return const Icon(
+        Icons.close_rounded,
+        color: Color(0xFFFF6A6A),
+        size: 29,
+      );
     } else if (status == 'proses') {
-      return const Icon(Icons.radio_button_checked_rounded, color: Color(0xFF52E18C), size: 29);
+      return const Icon(
+        Icons.radio_button_checked_rounded,
+        color: Color(0xFF52E18C),
+        size: 29,
+      );
     } else {
-      return const Icon(Icons.done_all_rounded, color: Color(0xFF40A2E3), size: 29);
+      return const Icon(
+        Icons.done_all_rounded,
+        color: Color(0xFF40A2E3),
+        size: 29,
+      );
     }
   }
 }

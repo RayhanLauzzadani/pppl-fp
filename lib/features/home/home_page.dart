@@ -1,5 +1,8 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'right_drawer.dart';
+import '../pesanan/buat_pesanan_page.dart';
 import '../pesanan/selesai_pesanan_page.dart';
 import '../pesanan/proses_pesanan_page.dart';
 
@@ -19,7 +22,6 @@ class _HomePageState extends State<HomePage> {
       key: scaffoldKey,
       endDrawer: RightDrawerWidget(
         onLogout: () {
-          // Atur logika logout kamu di sini.
           Navigator.pop(context);
         },
       ),
@@ -237,43 +239,55 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          // ===== Menu Grid =====
-          const SizedBox(height: 38),
+          // ===== Menu Grid Responsive =====
+          const SizedBox(height: 35),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _menuItem(
-                  asset: "assets/images/note.png",
-                  label: "Buat Pesanan",
-                  onTap: () {
-                    // TODO: Navigasi ke Buat Pesanan kalau ada
-                  },
+                Expanded(
+                  child: _menuItem(
+                    asset: "assets/images/note.png",
+                    label: "Buat Pesanan",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const BuatPesananPage(),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-                _menuItem(
-                  asset: "assets/images/mesin_cuci.png",
-                  label: "Proses",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ProsesPesananPage(),
-                      ),
-                    );
-                  },
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _menuItem(
+                    asset: "assets/images/mesin_cuci.png",
+                    label: "Proses",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ProsesPesananPage(),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-                _menuItem(
-                  asset: "assets/images/icon_done.png",
-                  label: "Selesaikan",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const SelesaiPesananPage(),
-                      ),
-                    );
-                  },
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _menuItem(
+                    asset: "assets/images/icon_done.png",
+                    label: "Selesaikan",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SelesaiPesananPage(),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -311,39 +325,41 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ===== Menu Item Widget =====
+  // ===== Menu Item Widget Responsive =====
   Widget _menuItem({
     required String asset,
     required String label,
-    double iconWidth = 90,
-    double iconHeight = 90,
+    double iconWidth = 54,
+    double iconHeight = 54,
     VoidCallback? onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 110,
-            height: 110,
-            decoration: BoxDecoration(
-              color: const Color(0xFFBBE2EC),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.12),
-                  blurRadius: 12,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 7),
+          AspectRatio(
+            aspectRatio: 1,
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFBBE2EC),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.12),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 7),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Image.asset(
+                  asset,
+                  width: iconWidth,
+                  height: iconHeight,
+                  fit: BoxFit.contain,
                 ),
-              ],
-            ),
-            child: Center(
-              child: Image.asset(
-                asset,
-                width: iconWidth,
-                height: iconHeight,
-                fit: BoxFit.contain,
               ),
             ),
           ),
