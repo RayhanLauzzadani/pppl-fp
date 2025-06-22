@@ -28,6 +28,10 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
   late TextEditingController namaController;
   late TextEditingController waController;
 
+  //search bar laya
+  TextEditingController searchLayananController = TextEditingController();
+  String layananQuery = "";
+
   // --- Layanan List
   List<Map<String, dynamic>> layananList = [
     {"nama": "Bed Cover Double", "harga": 20000, "qty": 0},
@@ -62,6 +66,12 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
       total += (item['harga'] as int) * (item['qty'] as int);
     }
     total += (kiloan > 0) ? (kiloan * hargaPerKg).round() : 0;
+    // Terapkan diskon jika ada
+    if (diskon == "10%") {
+      total = (total * 0.9).round();
+    } else if (diskon == "20%") {
+      total = (total * 0.8).round();
+    }
     return total;
   }
 
@@ -133,8 +143,14 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
       backgroundColor: Colors.white,
       appBar: CustomGradientHeader(
         title: "Buat Pesanan",
-        showBack: _step > 0,
-        onBack: _prevStep,
+        showBack: true, // selalu tampilkan tombol back
+        onBack: () {
+          if (_step == 0) {
+            Navigator.pop(context); // balik ke homepage/halaman sebelumnya
+          } else {
+            _prevStep(); // step mundur
+          }
+        },
       ),
       body: SafeArea(
         child: StepperBody(
@@ -163,6 +179,11 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
           onKurangLayanan: (i) => setState(() {
             if (layananList[i]['qty'] > 0) layananList[i]['qty'] -= 1;
           }),
+          searchLayananController: searchLayananController,
+          layananQuery: layananQuery,
+          onLayananQueryChanged: (v) {
+            setState(() => layananQuery = v);
+          },
           onNext: _nextStep,
           onPrev: _prevStep,
           onCatatanChanged: (v) => setState(() => catatan = v),
@@ -217,18 +238,18 @@ class CustomGradientHeader extends StatelessWidget
           width: double.infinity,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+              begin: Alignment.bottomLeft,
+              end: Alignment.topRight,
               colors: [
-                Color(0xFF40A2E3), // Biru atas
-                Color(0xFFBBE2EC), // Biru muda tengah
-                Color(0xFFFFF6E9), // Putih krem bawah
+                Color(0xFFFFF6E9),
+                Color(0xFFBBE2EC),
+                Color(0xFF40A2E3), // Putih krem bawah
               ],
-              stops: [0.0, 0.75, 1.0],
+              stops: [0.01, 0.38, 0.83],
             ),
             borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(18),
-              bottomRight: Radius.circular(18),
+              bottomLeft: Radius.circular(32),
+              bottomRight: Radius.circular(32),
             ),
             boxShadow: [
               BoxShadow(
@@ -248,7 +269,7 @@ class CustomGradientHeader extends StatelessWidget
                     ? IconButton(
                         icon: const Icon(
                           Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white,
+                          color: Color.fromARGB(255, 0, 0, 0),
                           size: 22,
                         ),
                         onPressed: onBack ?? () => Navigator.pop(context),
@@ -295,6 +316,9 @@ class StepperBody extends StatelessWidget {
   final TextEditingController namaController;
   final TextEditingController waController;
   final TextEditingController catatanController;
+  final TextEditingController searchLayananController;
+  final String layananQuery;
+  final ValueChanged<String>? onLayananQueryChanged;
 
   final ValueChanged<String> onNamaChanged,
       onWhatsappChanged,
@@ -354,6 +378,9 @@ class StepperBody extends StatelessWidget {
     required this.onBayarSekarang,
     required this.onBatalkanPesanan,
     required this.onLihatProses,
+    required this.searchLayananController,
+    required this.layananQuery,
+    required this.onLayananQueryChanged,
   });
 
   Widget _itemCountInput(String label, int value, ValueChanged<int> onChanged) {
@@ -445,6 +472,13 @@ class StepperBody extends StatelessWidget {
 
     // --- Step 1: Pilih layanan ---
     if (step == 1) {
+      // Filter list layanan berdasarkan search
+      final filteredLayanan = layananList
+          .where(
+            (l) => l['nama'].toLowerCase().contains(layananQuery.toLowerCase()),
+          )
+          .toList();
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -454,12 +488,46 @@ class StepperBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Cari nama layanan",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                  // ===== SEARCH BAR =====
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 0,
+                      vertical: 0,
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFDF6ED), // krem
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: TextField(
+                        controller: searchLayananController,
+                        onChanged: (v) => onLayananQueryChanged?.call(v),
+                        style: TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 16,
+                          color: Color(0xFF20443C), // hijau tua
+                        ),
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            color: Color(0xFF20443C),
+                            size: 26,
+                          ),
+                          hintText: "Cari nama layanan",
+                          hintStyle: TextStyle(
+                            fontFamily: "Poppins",
+                            color: Color(0xFF20443C),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  // Cuci Kiloan Card
+                  const SizedBox(height: 18),
+
+                  // Cuci Kiloan Card (biarkan tetap)
                   Container(
                     margin: const EdgeInsets.only(bottom: 18),
                     padding: const EdgeInsets.symmetric(
@@ -560,14 +628,15 @@ class StepperBody extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Layanan Satuan
+
+                  // ===== LIST LAYANAN =====
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     padding: EdgeInsets.zero,
-                    itemCount: layananList.length,
+                    itemCount: filteredLayanan.length,
                     itemBuilder: (context, i) {
-                      final l = layananList[i];
+                      final l = filteredLayanan[i];
                       return Container(
                         margin: const EdgeInsets.only(bottom: 18),
                         padding: const EdgeInsets.symmetric(
@@ -595,19 +664,28 @@ class StepperBody extends StatelessWidget {
                                     l['nama'],
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 22,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  const Text(
+                                    "Satuan",
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 13,
+                                      color: Colors.black87,
                                     ),
                                   ),
                                   Text(
                                     "Rp. ${l['harga']}",
-                                    style: const TextStyle(fontSize: 17),
+                                    style: const TextStyle(fontSize: 15),
                                   ),
                                 ],
                               ),
                             ),
                             IconButton(
                               icon: const Icon(Icons.remove, size: 22),
-                              onPressed: () => onKurangLayanan(i),
+                              onPressed: () =>
+                                  onKurangLayanan(layananList.indexOf(l)),
                             ),
                             Text(
                               "${l['qty']}",
@@ -618,7 +696,8 @@ class StepperBody extends StatelessWidget {
                             ),
                             IconButton(
                               icon: const Icon(Icons.add, size: 22),
-                              onPressed: () => onTambahLayanan(i),
+                              onPressed: () =>
+                                  onTambahLayanan(layananList.indexOf(l)),
                             ),
                           ],
                         ),
@@ -689,216 +768,270 @@ class StepperBody extends StatelessWidget {
 
     // --- Step 2: Tambahan/opsi ---
     if (step == 2) {
-      return Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Dropdown Jenis Parfum
-                const Text(
-                  "Jenis Parfum",
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 6),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF2FAFF),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Color(0xFFD7E6EE)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: jenisParfum,
-                      borderRadius: BorderRadius.circular(15),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF243147),
-                      ),
-                      items: ["Junjung Buih", "Paris", "Royal"]
-                          .map(
-                            (e) => DropdownMenuItem(value: e, child: Text(e)),
-                          )
-                          .toList(),
-                      onChanged: (v) => onJenisParfumChanged(v ?? ''),
-                      isExpanded: true,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // Dropdown Antar Jemput
-                const Text(
-                  "Layanan Antar Jemput",
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 6),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF2FAFF),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Color(0xFFD7E6EE)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: antarJemput,
-                      borderRadius: BorderRadius.circular(15),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF243147),
-                      ),
-                      items: ["≤ 2 Km", "≤ 5 Km"]
-                          .map(
-                            (e) => DropdownMenuItem(value: e, child: Text(e)),
-                          )
-                          .toList(),
-                      onChanged: (v) => onAntarJemputChanged(v ?? ''),
-                      isExpanded: true,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // Dropdown Diskon
-                const Text(
-                  "Diskon",
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 6),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF2FAFF),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Color(0xFFD7E6EE)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: diskon,
-                      borderRadius: BorderRadius.circular(15),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF243147),
-                      ),
-                      items: ["-", "10%", "20%"]
-                          .map(
-                            (e) => DropdownMenuItem(value: e, child: Text(e)),
-                          )
-                          .toList(),
-                      onChanged: (v) => onDiskonChanged(v ?? ''),
-                      isExpanded: true,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-
-                // Catatan Tambahan ala sticky note
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF8F0),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 3,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.note_alt_rounded,
-                            color: Colors.orange.shade400,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 7),
-                          const Text(
-                            "Catatan Tambahan",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      TextField(
-                        controller: catatanController,
-                        maxLines: 4,
-                        minLines: 2,
-                        style: const TextStyle(fontSize: 15),
-                        decoration: const InputDecoration(
-                          hintText: "Tuliskan disini...",
-                          hintStyle: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                          border: InputBorder.none,
-                        ),
-                        onChanged: onCatatanChanged,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(
-                  height: 90,
-                ), // Padding bawah biar tombol ngambang
-              ],
-            ),
+      return Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF6EC6F2), // biru muda atas
+              Color(0xFFB3E5FC), // biru sangat muda tengah
+              Color(0xFFFDF6ED), // krem bawah
+            ],
+            stops: [0.0, 0.6, 1.0],
           ),
-          // Floating Button
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.all(18),
-              color: Colors.transparent,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  elevation: 4,
-                  backgroundColor: const Color(0xFFB6D6EF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 17),
-                ),
-                onPressed: onBuatPesanan,
-                child: const Text(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Judul
+              const Padding(
+                padding: EdgeInsets.only(bottom: 14.0),
+                child: Text(
                   "Buat Pesanan",
                   style: TextStyle(
+                    fontFamily: "Poppins",
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A3365),
-                    fontSize: 20,
+                    fontSize: 22,
+                    color: Colors.white,
                   ),
                 ),
               ),
-            ),
+              // Jenis Parfum
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: Text(
+                      "Jenis Parfum",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
+                        color: Color(0xFF243147),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    flex: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFDF6ED),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: jenisParfum,
+                          isExpanded: true,
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                          style: const TextStyle(
+                            fontFamily: "Poppins",
+                            color: Color(0xFF243147),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          items: ["Junjung Buih", "Paris", "Royal"]
+                              .map(
+                                (e) =>
+                                    DropdownMenuItem(value: e, child: Text(e)),
+                              )
+                              .toList(),
+                          onChanged: (v) => onJenisParfumChanged(v ?? ''),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Antar Jemput
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: Text(
+                      "Layanan Antar Jemput",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
+                        color: Color(0xFF243147),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    flex: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFDF6ED),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: antarJemput,
+                          isExpanded: true,
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                          style: const TextStyle(
+                            fontFamily: "Poppins",
+                            color: Color(0xFF243147),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          items: ["≤ 2 Km", "≤ 5 Km"]
+                              .map(
+                                (e) =>
+                                    DropdownMenuItem(value: e, child: Text(e)),
+                              )
+                              .toList(),
+                          onChanged: (v) => onAntarJemputChanged(v ?? ''),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Diskon
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: Text(
+                      "Diskon",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
+                        color: Color(0xFF243147),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    flex: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFDF6ED),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: diskon,
+                          isExpanded: true,
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                          style: const TextStyle(
+                            fontFamily: "Poppins",
+                            color: Color(0xFF243147),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          items: ["-", "10%", "20%"]
+                              .map(
+                                (e) =>
+                                    DropdownMenuItem(value: e, child: Text(e)),
+                              )
+                              .toList(),
+                          onChanged: (v) => onDiskonChanged(v ?? ''),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              // Catatan Tambahan (TextField)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.note_alt_rounded,
+                    color: Colors.black.withOpacity(0.8),
+                    size: 22,
+                  ),
+                  const SizedBox(width: 7),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFDF6ED),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: TextField(
+                        controller: catatanController,
+                        minLines: 1,
+                        maxLines: 2,
+                        style: const TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 15,
+                        ),
+                        decoration: const InputDecoration(
+                          hintText: "Catatan tambahan",
+                          hintStyle: TextStyle(
+                            fontFamily: "Poppins",
+                            color: Colors.black45,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 14,
+                          ),
+                        ),
+                        onChanged: onCatatanChanged,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              Divider(color: Colors.white60, thickness: 1.2, height: 16),
+              // Button "Buat Pesanan"
+              Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onBuatPesanan,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFD2EDFC),
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      shadowColor: Colors.black38,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: const Text(
+                      "Buat Pesanan",
+                      style: TextStyle(
+                        color: Color(0xFF20443C),
+                        fontWeight: FontWeight.bold,
+                        fontFamily: "Poppins",
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       );
     }
 
