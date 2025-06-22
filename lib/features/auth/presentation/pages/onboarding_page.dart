@@ -1,8 +1,11 @@
+// onboarding_page.dart
+
 import 'package:flutter/material.dart';
-import '../../../home/home_page.dart'; // <-- ini path benar!
+import '../../../home/home_page.dart';
 
 class OnBoardingPage extends StatefulWidget {
   const OnBoardingPage({super.key});
+
   @override
   State<OnBoardingPage> createState() => _OnBoardingPageState();
 }
@@ -12,8 +15,8 @@ class _OnBoardingPageState extends State<OnBoardingPage>
   late AnimationController _controller;
   late Animation<double> _animation;
 
-  final double barMin = 16; // bar awal (titik)
-  final double barMax = 221 - 16; // panjang total bar
+  final double barMin = 16;
+  final double barMax = 221 - 16;
 
   @override
   void initState() {
@@ -31,7 +34,6 @@ class _OnBoardingPageState extends State<OnBoardingPage>
 
     _animation.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        // Delay sedikit biar user lihat bar sudah full dulu, baru navigate
         Future.delayed(const Duration(milliseconds: 200), () {
           if (mounted) {
             Navigator.pushReplacement(

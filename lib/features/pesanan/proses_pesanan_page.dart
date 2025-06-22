@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:laundryin/features/pesanan/pesanan_model.dart';
-import 'package:laundryin/features/pesanan/detail_pesanan_page.dart';
-
-
+import 'package:laundryin/features/pesanan/proses_detail_pesanan_belum_mulai_page.dart';
+import 'package:laundryin/features/pesanan/proses_detail_pesanan_proses_page.dart';
+import 'package:laundryin/features/pesanan/proses_detail_pesanan_selesai_page.dart';
+// import 'package:laundryin/features/pesanan/selesai_pesanan_page.dart';
 class ProsesPesananPage extends StatefulWidget {
   const ProsesPesananPage({super.key});
 
@@ -18,6 +18,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
   final List<Pesanan> pesananList = [
     Pesanan(
       nama: 'Farhan Laksono',
+      noHp: '+6281322214567',
       tipe: 'Reguler',
       kg: 7,
       pcs: 8,
@@ -26,6 +27,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
     ),
     Pesanan(
       nama: 'Habibullah Adilah P',
+      noHp: '+6281322111999',
       tipe: 'Reguler',
       kg: 6,
       pcs: 9,
@@ -34,6 +36,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
     ),
     Pesanan(
       nama: 'Pak Fazzle Ariwica',
+      noHp: '+6281322100099',
       tipe: 'Ekspress',
       kg: 2,
       pcs: 3,
@@ -42,6 +45,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
     ),
     Pesanan(
       nama: 'Pak Kresnadana Liu',
+      noHp: '+6281322200022',
       tipe: 'Reguler',
       kg: 10,
       pcs: 11,
@@ -50,6 +54,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
     ),
     Pesanan(
       nama: 'Bu Kim Suili Cak Lo',
+      noHp: '+6281322300033',
       tipe: 'Reguler',
       kg: 9,
       pcs: 8,
@@ -58,6 +63,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
     ),
     Pesanan(
       nama: 'Budi Santoso',
+      noHp: '+6281322400044',
       tipe: 'Reguler',
       kg: 8,
       pcs: 9,
@@ -232,6 +238,17 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
               itemCount: filteredList.length,
               itemBuilder: (context, index) {
                 final p = filteredList[index];
+
+                // Tentukan page detail sesuai status pesanan
+                Widget detailPage;
+                if (p.status == 'belum_mulai') {
+                  detailPage = ProsesDetailPesananBelumMulaiPage(pesanan: p);
+                } else if (p.status == 'proses') {
+                  detailPage = ProsesDetailPesananProsesPage(pesanan: p);
+                } else {
+                  detailPage = ProsesDetailPesananSelesaiPage(pesanan: p);
+                }
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                   child: GestureDetector(
@@ -239,7 +256,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => DetailPesananPage(pesanan: p),
+                          builder: (_) => detailPage,
                         ),
                       );
                     },
