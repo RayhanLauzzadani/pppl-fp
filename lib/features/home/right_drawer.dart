@@ -1,119 +1,114 @@
 import 'package:flutter/material.dart';
+import '../auth/presentation/pages/edit_layanan_page.dart';
 
-class RightDrawerWidget extends StatelessWidget {
+class ModernDrawerWidget extends StatelessWidget {
   final VoidCallback onLogout;
-  const RightDrawerWidget({super.key, required this.onLogout});
+  final VoidCallback? onClose;
+  final String laundryId; // <--- Tambahkan ini
+
+  const ModernDrawerWidget({
+    Key? key,
+    required this.onLogout,
+    this.onClose,
+    required this.laundryId, // <--- Tambahkan ini
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.8,
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        color: Colors.white,
+    return Drawer(
+      width: MediaQuery.of(context).size.width * 0.83,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(36),
-          bottomLeft: Radius.circular(36),
+          topLeft: Radius.circular(32),
+          bottomLeft: Radius.circular(32),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x29000000),
-            blurRadius: 30,
-            offset: Offset(-5, 0),
-          ),
-        ],
       ),
       child: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // PROFILE
+            // Header with Avatar, Name, Close Button
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 12),
+              padding: const EdgeInsets.fromLTRB(24, 30, 16, 4),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircleAvatar(
                     radius: 32,
-                    backgroundImage: NetworkImage(
-                      "https://randomuser.me/api/portraits/men/31.jpg",
-                    ),
+                    backgroundImage: AssetImage('assets/images/profile.jpg'),
                   ),
                   const SizedBox(width: 14),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        "Jamal Sentosa",
-                        style: TextStyle(
-                          fontFamily: "Poppins",
-                          fontWeight: FontWeight.w700,
-                          fontSize: 17,
-                          color: Color(0xFF132931),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          "Hello,",
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 19,
+                            color: Colors.black87,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        "Outlet",
-                        style: TextStyle(
-                          fontFamily: "Poppins",
-                          fontWeight: FontWeight.w400,
-                          fontSize: 14,
-                          color: Color(0xFF69979F),
+                        SizedBox(height: 1),
+                        Text(
+                          "Adiwara Bestari",
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 15,
+                            color: Colors.black54,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  // Tambah tombol close jika perlu
+                  // if (onClose != null)
+                  //   IconButton(
+                  //     icon: Icon(Icons.close_rounded, size: 32, color: Colors.black54),
+                  //     onPressed: onClose,
+                  //   ),
                 ],
               ),
             ),
-            const SizedBox(height: 18),
-            // MENU BUTTONS (OutlinedButton custom)
-            _drawerMenuButton(
-              icon: Icons.person_outline,
-              label: "Profil Akun",
-              onTap: () {},
+            // Garis pembatas antara profil dan menu
+            const SizedBox(height: 10),
+            const Divider(
+              thickness: 1.2,
+              color: Colors.black26,
+              indent: 18,
+              endIndent: 18,
             ),
-            _drawerMenuButton(
-              icon: Icons.notifications_outlined,
-              label: "Layanan",
-              onTap: () {},
+            const SizedBox(height: 8),
+
+            // Menu list (hanya 4 icon sesuai permintaan)
+            _drawerMenuItem(Icons.person_outline, "Profil Akun", onTap: () {}),
+            _drawerMenuItem(
+              Icons.notifications_outlined,
+              "Layanan",
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => EditLayananPage(laundryId: laundryId),
+                  ),
+                );
+              },
             ),
-            _drawerMenuButton(
-              icon: Icons.history,
-              label: "Riwayat",
-              onTap: () {},
-            ),
-            _drawerMenuButton(
-              icon: Icons.info_outline,
-              label: "Tentang Kami",
-              onTap: () {},
-            ),
+            _drawerMenuItem(Icons.history, "Riwayat", onTap: () {}),
+            _drawerMenuItem(Icons.help_outline, "Tentang Kami", onTap: () {}),
+
             const Spacer(),
-            // LOGOUT BUTTON
+
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              child: ElevatedButton.icon(
-                onPressed: onLogout,
-                icon: const Icon(Icons.power_settings_new, color: Color(0xFF40A2E3)),
-                label: const Text(
-                  "Keluar Akun",
-                  style: TextStyle(
-                    fontFamily: "Poppins",
-                    color: Color(0xFF40A2E3),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE7F4FD),
-                  foregroundColor: const Color(0xFF40A2E3),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(13),
-                  ),
-                  minimumSize: const Size(double.infinity, 46),
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 28),
+              child: _drawerMenuItem(
+                Icons.logout_rounded,
+                "Logout",
+                onTap: onLogout,
+                color: const Color(0xFFE64848),
+                isLogout: true,
               ),
             ),
           ],
@@ -122,55 +117,33 @@ class RightDrawerWidget extends StatelessWidget {
     );
   }
 
-  /// MENU BUTTON: lebar penuh, border bulat, tinggi tetap, icon bulat kiri
-  Widget _drawerMenuButton({
-    required IconData icon,
-    required String label,
+  // Helper untuk menu item drawer
+  static Widget _drawerMenuItem(
+    IconData icon,
+    String label, {
     VoidCallback? onTap,
+    Color color = Colors.black87,
+    bool isLogout = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      child: SizedBox(
-        height: 52,
-        width: double.infinity,
-        child: OutlinedButton(
-          onPressed: onTap,
-          style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Color(0xFF212C2D), width: 1.2),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(13),
-            ),
-            backgroundColor: Colors.white,
-            padding: EdgeInsets.zero, // biar custom Row fill
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.transparent,
-                  border: Border.all(color: Color(0xFF186379), width: 1.4),
-                ),
-                child: Icon(icon, color: Color(0xFF186379), size: 20),
-              ),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15.7,
-                    color: Color(0xFF186379),
-                  ),
-                ),
-              ),
-            ],
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+      child: ListTile(
+        leading: Icon(icon, color: color, size: 26),
+        title: Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: isLogout ? FontWeight.bold : FontWeight.w600,
+            color: color,
+            fontSize: 16.2,
           ),
         ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 2),
+        minLeadingWidth: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        onTap: onTap,
+        hoverColor: Colors.black12.withOpacity(0.06),
+        tileColor: Colors.transparent,
       ),
     );
   }

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:laundryin/features/auth/presentation/pages/sign_up_page.dart';
 import 'features/auth/presentation/pages/landing_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'features/home/home_page.dart';
-import 'features/profile/edit_profile_page.dart';
+// import 'features/pesanan/pesanan_model.dart';
 
 void main() async {
   // WAJIB: Pastikan widget binding & Firebase init selesai sebelum runApp
