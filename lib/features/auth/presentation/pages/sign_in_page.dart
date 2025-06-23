@@ -3,19 +3,6 @@ import 'sign_up_page.dart';
 import 'onboarding_page.dart';
 import 'package:laundryin/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-// Helper untuk cari laundryId user
-Future<String?> getLaundryIdForUser(String uid) async {
-  final laundrySnap = await FirebaseFirestore.instance.collection('laundries').get();
-  for (var doc in laundrySnap.docs) {
-    final userDoc = await doc.reference.collection('users').doc(uid).get();
-    if (userDoc.exists) {
-      return doc.id;
-    }
-  }
-  return null;
-}
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -46,28 +33,10 @@ class _SignInPageState extends State<SignInPage> {
     if (!mounted) return;
 
     if (userCredential != null) {
-      final uid = userCredential.user?.uid;
-      if (uid == null) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("User tidak valid!")),
-        );
-        return;
-      }
-      final laundryId = await getLaundryIdForUser(uid);
-
-      if (!mounted) return;
-
-      if (laundryId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Akun ini belum terhubung dengan laundry manapun!")),
-        );
-        return;
-      }
-
+      // Langsung ke onboarding tanpa laundryId
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => OnBoardingPage(laundryId: laundryId)),
+        MaterialPageRoute(builder: (context) => const OnBoardingPage()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -92,39 +61,16 @@ class _SignInPageState extends State<SignInPage> {
     });
 
     try {
-      UserCredential userCred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      final uid = userCred.user?.uid;
-      if (uid == null) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("User tidak valid!")),
-        );
-        setState(() {
-          isLoadingEmail = false;
-        });
-        return;
-      }
-
-      final laundryId = await getLaundryIdForUser(uid);
 
       if (!mounted) return;
 
-      if (laundryId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Akun ini belum terhubung dengan laundry manapun!")),
-        );
-        setState(() {
-          isLoadingEmail = false;
-        });
-        return;
-      }
-
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => OnBoardingPage(laundryId: laundryId)),
+        MaterialPageRoute(builder: (context) => const OnBoardingPage()),
       );
     } on FirebaseAuthException catch (e) {
       String msg = "Gagal login!";

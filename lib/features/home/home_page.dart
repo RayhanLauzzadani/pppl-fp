@@ -8,8 +8,7 @@ import '../pesanan/proses_pesanan_page.dart';
 import '../pesanan/buat_pesanan/buat_pesanan_page.dart';
 
 class HomePage extends StatefulWidget {
-  final String laundryId; // Tambah parameter ini!
-  const HomePage({super.key, required this.laundryId});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -18,50 +17,51 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  String? namaUser;
   String? namaLaundry;
+  String? laundryId;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    _loadLaundry();
   }
 
-  Future<void> _loadProfile() async {
+  Future<void> _loadLaundry() async {
     final user = FirebaseAuth.instance.currentUser;
+    print('UID Login: ${user?.uid}');
     if (user == null) {
       setState(() {
-        namaUser = "-";
         namaLaundry = "-";
         _isLoading = false;
       });
       return;
     }
 
-    // --- Cari user di laundryId yang diberikan ---
-    final laundryId = widget.laundryId;
-    final userDoc = await FirebaseFirestore.instance
-        .collection('laundries')
-        .doc(laundryId)
-        .collection('users')
-        .doc(user.uid)
-        .get();
+    String? foundLaundryId;
+    String? foundLaundryName;
 
-    if (userDoc.exists) {
-      namaUser = userDoc.data()?['nama'] ?? "-";
-      // Ambil nama laundry
-      final laundryDoc = await FirebaseFirestore.instance
-          .collection('laundries')
-          .doc(laundryId)
+    final laundriesSnap = await FirebaseFirestore.instance
+        .collection('laundries')
+        .get();
+    for (var doc in laundriesSnap.docs) {
+      print('Cek laundry: ${doc.id}');
+      final userDoc = await doc.reference
+          .collection('users')
+          .doc(user.uid)
           .get();
-      namaLaundry = laundryDoc.data()?['nama'] ?? "-";
-    } else {
-      namaUser = "-";
-      namaLaundry = "-";
+      print('  Ada user di sini? ${userDoc.exists}');
+      if (userDoc.exists) {
+        foundLaundryId = doc.id;
+        foundLaundryName = doc.data()['namaLaundry'] ?? "-";
+        print('  FOUND! Nama laundry: $foundLaundryName');
+        break;
+      }
     }
 
     setState(() {
+      laundryId = foundLaundryId;
+      namaLaundry = foundLaundryName ?? "-";
       _isLoading = false;
     });
   }
@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
         onLogout: () {
           Navigator.pop(context);
         },
-        laundryId: widget.laundryId, // Pass ke drawer
+        laundryId: laundryId ?? '',
       ),
       backgroundColor: Colors.white,
       body: _isLoading
@@ -173,59 +173,33 @@ class _HomePageState extends State<HomePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "Hai, Selamat datang",
+                            // Tambahkan kembali text "Selamat datang"
+                            const Text(
+                              "Selamat datang",
                               style: TextStyle(
                                 fontFamily: "Poppins",
-                                color: Colors.white.withAlpha(
-                                  (0.93 * 255).round(),
-                                ),
+                                color: Colors.white,
                                 fontWeight: FontWeight.w400,
                                 fontSize: 16,
                               ),
                             ),
                             const SizedBox(height: 6),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  namaUser ?? "-",
-                                  style: const TextStyle(
-                                    fontFamily: "Poppins",
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 22,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black12,
-                                        offset: Offset(0, 1),
-                                        blurRadius: 2,
-                                      ),
-                                    ],
+                            // Nama laundry di bawahnya
+                            Text(
+                              namaLaundry ?? "-",
+                              style: const TextStyle(
+                                fontFamily: "Poppins",
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 22,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black12,
+                                    offset: Offset(0, 1),
+                                    blurRadius: 2,
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                Flexible(
-                                  child: Text(
-                                    namaLaundry ?? "-",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: "Poppins",
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 22,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.black12,
-                                          offset: Offset(0, 1),
-                                          blurRadius: 2,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),
