@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'LondryIn',
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: const LandingPage(),
       // home: ProsesPesananPage(),
       // Nanti bisa tambahkan routes di sini kalau sudah banyak page
     );

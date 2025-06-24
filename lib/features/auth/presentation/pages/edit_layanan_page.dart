@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'update_jenis_layanan_parfum_page.dart';
+import 'package:laundryin/features/layanan/durasi_layanan_page.dart';
+import 'package:laundryin/features/layanan/jenis_layanan_page.dart';
+import 'package:laundryin/features/layanan/diskon_page.dart';
+import 'package:laundryin/features/layanan/antarjemput_page.dart'; // Pastikan path sudah benar!
 
 class EditLayananPage extends StatelessWidget {
-  final String laundryId; // Tambah parameter laundryId
+  final String laundryId;
 
   const EditLayananPage({super.key, required this.laundryId});
 
@@ -10,77 +14,121 @@ class EditLayananPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFDFBF6),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF147C8A)),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          "Edit Layanan",
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.bold,
-            fontSize: 21,
-            color: Color(0xFF147C8A),
-          ),
-        ),
-        centerTitle: true,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFBBE2EC), Color(0xFF40A2E3)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-          ),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.only(top: 30, left: 16, right: 16),
+      body: Column(
         children: [
-          _LayananTile(
-            icon: 'assets/icons/clock.png',
-            title: 'Durasi layanan',
-            subtitle: 'Tambah, ubah, hapus durasi layanan',
-            onTap: () {}, // TODO
-          ),
-          const SizedBox(height: 18),
-          _LayananTile(
-            icon: 'assets/icons/layer.png',
-            title: 'Jenis layanan',
-            subtitle: 'Tambah, ubah, hapus jenis layanan',
-            onTap: () {},
-          ),
-          const SizedBox(height: 18),
-          _LayananTile(
-            icon: 'assets/icons/discount.png',
-            title: 'Diskon',
-            subtitle: 'Tambah, ubah, hapus diskon',
-            onTap: () {},
-          ),
-          const SizedBox(height: 18),
-          _LayananTile(
-            icon: 'assets/icons/delivery.png',
-            title: 'Layanan antar jemput',
-            subtitle: 'Tambah, ubah, hapus layanan',
-            onTap: () {},
-          ),
-          const SizedBox(height: 18),
-          _LayananTile(
-            icon: 'assets/icons/perfume.png',
-            title: 'Parfum',
-            subtitle: 'Tambah, ubah, hapus parfum',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => UpdateJenisLayananParfumPage(laundryId: laundryId),
+          // HEADER GRADIENT CUSTOM (seperti Edit Profil)
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF40A2E3),
+                  Color(0xFFBBE2EC),
+                ],
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
+              ),
+            ),
+            padding: const EdgeInsets.only(top: 42, left: 0, right: 0, bottom: 22),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
+                  onPressed: () => Navigator.pop(context),
                 ),
-              );
-            },
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      "Edit Layanan",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 22,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black26,
+                            blurRadius: 4,
+                            offset: Offset(1, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 44),
+              ],
+            ),
+          ),
+          // Body
+          const SizedBox(height: 19),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.only(top: 0, left: 16, right: 16),
+              children: [
+                // Navigasi ke DurasiLayananPage
+                _LayananTile(
+                  icon: 'assets/icons/clock.png',
+                  title: 'Durasi layanan',
+                  subtitle: 'Tambah, ubah, hapus durasi layanan',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const DurasiLayananPage()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 18),
+                // Navigasi ke JenisLayananPage
+                _LayananTile(
+                  icon: 'assets/icons/layer.png',
+                  title: 'Jenis layanan',
+                  subtitle: 'Tambah, ubah, hapus jenis layanan',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const JenisLayananPage()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 18),
+                _LayananTile(
+                  icon: 'assets/icons/discount.png',
+                  title: 'Diskon',
+                  subtitle: 'Tambah, ubah, hapus diskon',
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const DiskonPage()));
+                  },
+                ),
+                const SizedBox(height: 18),
+                _LayananTile(
+                  icon: 'assets/icons/delivery.png',
+                  title: 'Layanan antar jemput',
+                  subtitle: 'Tambah, ubah, hapus layanan',
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AntarJemputPage()));
+                  },
+                ),
+                const SizedBox(height: 18),
+                _LayananTile(
+                  icon: 'assets/icons/perfume.png',
+                  title: 'Parfum',
+                  subtitle: 'Tambah, ubah, hapus parfum',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => UpdateJenisLayananParfumPage(laundryId: laundryId),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),
