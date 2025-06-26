@@ -3,12 +3,17 @@ import 'update_jenis_layanan_parfum_page.dart';
 import 'package:laundryin/features/layanan/durasi_layanan_page.dart';
 import 'package:laundryin/features/layanan/jenis_layanan_page.dart';
 import 'package:laundryin/features/layanan/diskon_page.dart';
-import 'package:laundryin/features/layanan/antarjemput_page.dart'; // Pastikan path sudah benar!
+import 'package:laundryin/features/layanan/antarjemput_page.dart';
 
 class EditLayananPage extends StatelessWidget {
   final String laundryId;
+  final bool isOwner;
 
-  const EditLayananPage({super.key, required this.laundryId});
+  const EditLayananPage({
+    super.key,
+    required this.laundryId,
+    required this.isOwner,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -75,11 +80,16 @@ class EditLayananPage extends StatelessWidget {
                   icon: 'assets/icons/clock.png',
                   title: 'Durasi layanan',
                   subtitle: 'Tambah, ubah, hapus durasi layanan',
+                  enabled: isOwner,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const DurasiLayananPage()),
-                    );
+                    if (isOwner) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const DurasiLayananPage()),
+                      );
+                    } else {
+                      _showNoEditDialog(context);
+                    }
                   },
                 ),
                 const SizedBox(height: 18),
@@ -88,11 +98,16 @@ class EditLayananPage extends StatelessWidget {
                   icon: 'assets/icons/layer.png',
                   title: 'Jenis layanan',
                   subtitle: 'Tambah, ubah, hapus jenis layanan',
+                  enabled: isOwner,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const JenisLayananPage()),
-                    );
+                    if (isOwner) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const JenisLayananPage()),
+                      );
+                    } else {
+                      _showNoEditDialog(context);
+                    }
                   },
                 ),
                 const SizedBox(height: 18),
@@ -100,8 +115,13 @@ class EditLayananPage extends StatelessWidget {
                   icon: 'assets/icons/discount.png',
                   title: 'Diskon',
                   subtitle: 'Tambah, ubah, hapus diskon',
+                  enabled: isOwner,
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const DiskonPage()));
+                    if (isOwner) {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const DiskonPage()));
+                    } else {
+                      _showNoEditDialog(context);
+                    }
                   },
                 ),
                 const SizedBox(height: 18),
@@ -109,8 +129,13 @@ class EditLayananPage extends StatelessWidget {
                   icon: 'assets/icons/delivery.png',
                   title: 'Layanan antar jemput',
                   subtitle: 'Tambah, ubah, hapus layanan',
+                  enabled: isOwner,
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AntarJemputPage()));
+                    if (isOwner) {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AntarJemputPage()));
+                    } else {
+                      _showNoEditDialog(context);
+                    }
                   },
                 ),
                 const SizedBox(height: 18),
@@ -118,17 +143,38 @@ class EditLayananPage extends StatelessWidget {
                   icon: 'assets/icons/perfume.png',
                   title: 'Parfum',
                   subtitle: 'Tambah, ubah, hapus parfum',
+                  enabled: isOwner,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => UpdateJenisLayananParfumPage(laundryId: laundryId),
-                      ),
-                    );
+                    if (isOwner) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => UpdateJenisLayananParfumPage(laundryId: laundryId),
+                        ),
+                      );
+                    } else {
+                      _showNoEditDialog(context);
+                    }
                   },
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showNoEditDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Hanya dapat melihat"),
+        content: const Text("Hanya owner yang bisa mengedit layanan. Hubungi owner jika ingin menambah/mengubah."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Tutup"),
           ),
         ],
       ),
@@ -141,66 +187,71 @@ class _LayananTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final bool enabled;
 
   const _LayananTile({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(13),
-        onTap: onTap,
-        child: Row(
-          children: [
-            Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                color: const Color(0xFFBBE2EC),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Center(
-                child: Image.asset(
-                  icon,
-                  width: 32,
-                  height: 32,
-                  fit: BoxFit.contain,
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.60,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(13),
+          onTap: onTap,
+          child: Row(
+            children: [
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFBBE2EC),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Center(
+                  child: Image.asset(
+                    icon,
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 18),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.7,
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.7,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 13.5,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.black87,
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 13.5,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.black87,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

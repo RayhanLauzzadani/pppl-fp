@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'sign_up_page.dart';
-import 'onboarding_page.dart';
-import 'package:laundryin/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'onboarding_page.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -12,38 +10,10 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
-  bool isLoadingEmail = false;
-  bool isLoadingGoogle = false;
+  bool isLoading = false;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  Future<void> _handleGoogleSignIn(BuildContext context) async {
-    setState(() {
-      isLoadingGoogle = true;
-    });
-
-    final auth = AuthService();
-    final userCredential = await auth.signInWithGoogle();
-
-    setState(() {
-      isLoadingGoogle = false;
-    });
-
-    if (!mounted) return;
-
-    if (userCredential != null) {
-      // Langsung ke onboarding tanpa laundryId
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const OnBoardingPage()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Gagal masuk dengan Google")),
-      );
-    }
-  }
 
   Future<void> _handleEmailPasswordSignIn() async {
     final email = _emailController.text.trim();
@@ -57,7 +27,7 @@ class _SignInPageState extends State<SignInPage> {
     }
 
     setState(() {
-      isLoadingEmail = true;
+      isLoading = true;
     });
 
     try {
@@ -70,7 +40,7 @@ class _SignInPageState extends State<SignInPage> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const OnBoardingPage()),
+        MaterialPageRoute(builder: (_) => const OnBoardingPage()),
       );
     } on FirebaseAuthException catch (e) {
       String msg = "Gagal login!";
@@ -82,19 +52,17 @@ class _SignInPageState extends State<SignInPage> {
         msg = "Format email tidak valid.";
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Terjadi kesalahan. Coba lagi.")),
+        SnackBar(content: Text("Terjadi kesalahan: ${e.toString()}")),
       );
     }
 
     if (!mounted) return;
     setState(() {
-      isLoadingEmail = false;
+      isLoading = false;
     });
   }
 
@@ -105,7 +73,7 @@ class _SignInPageState extends State<SignInPage> {
         children: [
           Container(
             width: double.infinity,
-            height: 660.0,
+            height: 620.0,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -137,7 +105,7 @@ class _SignInPageState extends State<SignInPage> {
                         child: Image.asset(
                           'assets/images/logo.png',
                           width: 160,
-                          height: 160,
+                          height: 170,
                         ),
                       ),
                     ),
@@ -161,7 +129,7 @@ class _SignInPageState extends State<SignInPage> {
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 70),
                     // Card Form
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -182,56 +150,36 @@ class _SignInPageState extends State<SignInPage> {
                       ),
                       child: Column(
                         children: [
-                          // Email
                           TextField(
                             controller: _emailController,
-                            style: const TextStyle(
-                              fontFamily: "Poppins",
-                              color: Colors.black87,
-                            ),
+                            style: const TextStyle(fontFamily: "Poppins"),
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: const Color(0xFFD8EDFF),
                               hintText: "Alamat email",
-                              prefixIcon: Icon(
-                                Icons.email_rounded,
-                                color: Colors.grey.shade700,
-                              ),
+                              prefixIcon: const Icon(Icons.email_rounded),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
                               ),
-                              hintStyle: const TextStyle(
-                                color: Color(0xFF50505A),
-                                fontFamily: "Poppins",
-                              ),
+                              hintStyle: const TextStyle(fontFamily: "Poppins"),
                             ),
                           ),
                           const SizedBox(height: 14),
-                          // Password
                           TextField(
                             controller: _passwordController,
                             obscureText: true,
-                            style: const TextStyle(
-                              fontFamily: "Poppins",
-                              color: Colors.black87,
-                            ),
+                            style: const TextStyle(fontFamily: "Poppins"),
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: const Color(0xFFD8EDFF),
                               hintText: "Kata Sandi",
-                              prefixIcon: Icon(
-                                Icons.vpn_key,
-                                color: Colors.grey.shade700,
-                              ),
+                              prefixIcon: const Icon(Icons.vpn_key),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
                               ),
-                              hintStyle: const TextStyle(
-                                color: Color(0xFF50505A),
-                                fontFamily: "Poppins",
-                              ),
+                              hintStyle: const TextStyle(fontFamily: "Poppins"),
                             ),
                           ),
                           const SizedBox(height: 18),
@@ -239,133 +187,21 @@ class _SignInPageState extends State<SignInPage> {
                             width: double.infinity,
                             height: 44,
                             child: ElevatedButton(
-                              onPressed: isLoadingEmail ? null : _handleEmailPasswordSignIn,
+                              onPressed: isLoading ? null : _handleEmailPasswordSignIn,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFFDE3B4),
                                 foregroundColor: Colors.black87,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                elevation: 1,
-                                textStyle: const TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
                               ),
-                              child: isLoadingEmail
-                                  ? const SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.black54,
-                                        ),
-                                      ),
-                                    )
+                              child: isLoading
+                                  ? const CircularProgressIndicator(strokeWidth: 2)
                                   : const Text(
                                       "Masuk",
-                                      style: TextStyle(color: Colors.black87),
+                                      style: TextStyle(fontWeight: FontWeight.bold),
                                     ),
                             ),
-                          ),
-                          const SizedBox(height: 14),
-                          Row(
-                            children: const [
-                              Expanded(child: Divider()),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Text(
-                                  "Atau",
-                                  style: TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontSize: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
-                              Expanded(child: Divider()),
-                            ],
-                          ),
-                          const SizedBox(height: 14),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 44,
-                            child: ElevatedButton.icon(
-                              onPressed: isLoadingGoogle
-                                  ? null
-                                  : () => _handleGoogleSignIn(context),
-                              icon: isLoadingGoogle
-                                  ? const SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.black54,
-                                        ),
-                                      ),
-                                    )
-                                  : Image.asset(
-                                      'assets/images/Google.png',
-                                      width: 22,
-                                      height: 22,
-                                    ),
-                              label: Text(
-                                isLoadingGoogle
-                                    ? "Loading..."
-                                    : "Masuk dengan Akun Google",
-                                style: const TextStyle(
-                                  color: Colors.black87,
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFD8EDFF),
-                                foregroundColor: Colors.black87,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                "Belum punya akun? ",
-                                style: TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontSize: 13,
-                                  color: Color(0xFFB0B0B0),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const SignUpPage(),
-                                    ),
-                                  );
-                                },
-                                child: const Text(
-                                  "Registrasi",
-                                  style: TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.underline,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
