@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'features/auth/presentation/pages/landing_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:laundryin/features/home/home_page.dart';
+// import 'package:laundryin/features/home/home_page.dart';
 
 void main() async {
   // WAJIB: Pastikan widget binding & Firebase init selesai sebelum runApp

@@ -1,6 +1,6 @@
-// onboarding_page.dart
-
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../home/home_page.dart';
 
 class OnBoardingPage extends StatefulWidget {
@@ -23,7 +23,7 @@ class _OnBoardingPageState extends State<OnBoardingPage>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2500),
+      duration: const Duration(milliseconds: 2000),
     );
     _animation = Tween<double>(
       begin: barMin,
@@ -34,16 +34,59 @@ class _OnBoardingPageState extends State<OnBoardingPage>
 
     _animation.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        Future.delayed(const Duration(milliseconds: 200), () {
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const HomePage()),
-            );
-          }
-        });
+        Future.delayed(const Duration(milliseconds: 300), _navigateToHome);
       }
     });
+  }
+
+  // Fix: Langsung return 'laksolaundry'
+  String getLaundryId() => 'laksolaundry';
+
+  Future<void> _navigateToHome() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null || user.uid.isEmpty) {
+      _showErrorAndExit("User tidak valid atau belum login.");
+      return;
+    }
+
+    final uid = user.uid;
+    final laundryId = getLaundryId();
+
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('laundries')
+          .doc(laundryId)
+          .collection('users')
+          .doc(uid)
+          .get();
+
+      if (!userDoc.exists) {
+        _showErrorAndExit("Data pengguna tidak ditemukan di Firestore.");
+        return;
+      }
+
+      final data = userDoc.data()!;
+      final role = data['role'] ?? '';
+
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HomePage(role: role, laundryId: laundryId),
+        ),
+      );
+    } catch (e) {
+      _showErrorAndExit("Gagal memuat data pengguna: ${e.toString()}");
+    }
+  }
+
+  void _showErrorAndExit(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+    Navigator.pop(context); // kembali ke SignInPage
   }
 
   @override
@@ -60,7 +103,7 @@ class _OnBoardingPageState extends State<OnBoardingPage>
       body: Stack(
         alignment: Alignment.center,
         children: [
-          // 1. Background
+          // Background
           Positioned(
             left: 0,
             right: 0,
@@ -87,7 +130,6 @@ class _OnBoardingPageState extends State<OnBoardingPage>
               ),
             ),
           ),
-          // 2. Konten utama
           SafeArea(
             child: Column(
               children: [
@@ -140,7 +182,6 @@ class _OnBoardingPageState extends State<OnBoardingPage>
               ],
             ),
           ),
-          // 3. Loading Bar Animasi
           Positioned(
             left: (size.width - 221) / 2,
             bottom: 28,
@@ -150,7 +191,6 @@ class _OnBoardingPageState extends State<OnBoardingPage>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Rail (track)
                   Positioned.fill(
                     child: Center(
                       child: Container(
@@ -163,7 +203,6 @@ class _OnBoardingPageState extends State<OnBoardingPage>
                       ),
                     ),
                   ),
-                  // Animated bar
                   AnimatedBuilder(
                     animation: _animation,
                     builder: (context, child) {
@@ -180,7 +219,6 @@ class _OnBoardingPageState extends State<OnBoardingPage>
                       );
                     },
                   ),
-                  // Bulatan kiri
                   Positioned(
                     left: 0,
                     top: 0,
