@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'update_jenis_layanan_parfum_page.dart';
+import '../../../layanan/update_jenis_layanan_parfum_page.dart';
 import 'package:laundryin/features/layanan/durasi_layanan_page.dart';
 import 'package:laundryin/features/layanan/jenis_layanan_page.dart';
 import 'package:laundryin/features/layanan/diskon_page.dart';
