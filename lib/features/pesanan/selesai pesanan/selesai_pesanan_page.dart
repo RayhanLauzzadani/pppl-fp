@@ -1,28 +1,8 @@
-import 'detail_pesanan_selesai_page.dart';
 import 'package:flutter/material.dart';
-
-// Import model pesanan, samakan dengan proses
-// import 'package:laundryin/features/pesanan/pesanan_model.dart';
-
-class Pesanan {
-  final String nama;
-  final String tipe;
-  final int kg;
-  final int pcs;
-  final String status; // "belum_diambil", "belum_bayar", "sudah_diambil"
-  final DateTime tanggal;
-  final bool ekspres;
-
-  Pesanan({
-    required this.nama,
-    required this.tipe,
-    required this.kg,
-    required this.pcs,
-    required this.status,
-    required this.tanggal,
-    this.ekspres = false,
-  });
-}
+import 'selesai_pesanan_model.dart';
+import 'detail_pesanan_belum_diambil_page.dart';
+import 'detail_pesanan_belum_bayar_page.dart';
+import 'detail_pesanan_sudah_diambil_page.dart';
 
 class SelesaiPesananPage extends StatefulWidget {
   const SelesaiPesananPage({super.key});
@@ -34,71 +14,98 @@ class SelesaiPesananPage extends StatefulWidget {
 class _SelesaiPesananPageState extends State<SelesaiPesananPage> {
   String search = "";
 
-  final List<Pesanan> pesananList = [
+  List<Pesanan> pesananList = [
     Pesanan(
+      noNota: '1157.1909.21',
       nama: 'Farhan Laksono',
+      noHp: '+6281322214567',
       tipe: 'Reguler',
       kg: 7,
       pcs: 8,
       status: 'belum_diambil',
-      tanggal: DateTime(2024, 6, 12, 9, 0),
+      tanggalTerima: DateTime(2024, 6, 10, 15, 37),
+      tanggalSelesai: DateTime(2024, 6, 12, 9, 0),
+      totalBayar: 84000,
+      jenisParfum: 'Junjung Buih',
+      antarJemput: '≤ 2 Km',
+      listLaundry: [
+        LaundryItem(nama: 'Bed Cover Jumbo', tipe: 'Satuan', jumlah: 1, harga: 30000, hargaTotal: 30000),
+        LaundryItem(nama: 'Boneka Kecil', tipe: 'Satuan', jumlah: 3, harga: 5000, hargaTotal: 15000),
+        LaundryItem(nama: 'Cuci Setrika', tipe: 'Kiloan', jumlah: 4, harga: 6000, hargaTotal: 24000),
+        LaundryItem(nama: 'Selimut Single', tipe: 'Satuan', jumlah: 1, harga: 15000, hargaTotal: 15000),
+      ],
     ),
     Pesanan(
+      noNota: '2221.1909.22',
       nama: 'Habibullah Adilah P',
+      noHp: '+6281322299911',
       tipe: 'Reguler',
       kg: 6,
       pcs: 9,
       status: 'belum_bayar',
-      tanggal: DateTime(2024, 6, 8, 15, 0),
+      tanggalTerima: DateTime(2024, 6, 6, 15, 0),
+      tanggalSelesai: DateTime(2024, 6, 8, 9, 0),
+      totalBayar: 70000,
+      jenisParfum: 'Junjung Buih',
+      antarJemput: '≤ 2 Km',
+      listLaundry: [
+        LaundryItem(nama: 'Bed Cover Jumbo', tipe: 'Satuan', jumlah: 1, harga: 30000, hargaTotal: 30000),
+        LaundryItem(nama: 'Boneka Kecil', tipe: 'Satuan', jumlah: 2, harga: 5000, hargaTotal: 10000),
+        LaundryItem(nama: 'Cuci Setrika', tipe: 'Kiloan', jumlah: 5, harga: 6000, hargaTotal: 30000),
+      ],
     ),
     Pesanan(
+      noNota: '1333.1234.23',
       nama: 'Pak Fazzle Ariwica',
-      tipe: 'Ekspress',
+      noHp: '+6281322222233',
+      tipe: 'Ekspres',
       kg: 2,
       pcs: 3,
       status: 'sudah_diambil',
-      tanggal: DateTime(2024, 6, 7, 14, 30),
-      ekspres: true,
-    ),
-    Pesanan(
-      nama: 'Pak Kresnadana Liu',
-      tipe: 'Reguler',
-      kg: 10,
-      pcs: 11,
-      status: 'belum_diambil',
-      tanggal: DateTime(2024, 6, 9, 18, 45),
-    ),
-    Pesanan(
-      nama: 'Bu Kim Suili Cak Lo',
-      tipe: 'Reguler',
-      kg: 9,
-      pcs: 8,
-      status: 'sudah_diambil',
-      tanggal: DateTime(2024, 6, 6, 12, 0),
+      tanggalTerima: DateTime(2024, 6, 7, 14, 30),
+      tanggalSelesai: DateTime(2024, 6, 8, 9, 0),
+      totalBayar: 30000,
+      jenisParfum: 'Junjung Buih',
+      antarJemput: '≤ 2 Km',
+      listLaundry: [
+        LaundryItem(nama: 'Cuci Setrika', tipe: 'Kiloan', jumlah: 3, harga: 10000, hargaTotal: 30000),
+      ],
     ),
   ];
 
+  void updatePesananStatus(int idx, String newStatus) {
+    setState(() {
+      pesananList[idx] = pesananList[idx].copyWith(status: newStatus);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final countBelumDiambil = pesananList
-        .where((e) => e.status == 'belum_diambil')
-        .length;
-    final countBelumBayar = pesananList
-        .where((e) => e.status == 'belum_bayar')
-        .length;
-    final countSudahDiambil = pesananList
-        .where((e) => e.status == 'sudah_diambil')
-        .length;
-
     final filteredList = pesananList
         .where((p) => p.nama.toLowerCase().contains(search.toLowerCase()))
         .toList();
+
+    // Sort: belum_diambil > belum_bayar > sudah_diambil
+    filteredList.sort((a, b) {
+      int order(String s) {
+        if (s == 'belum_diambil') return 0;
+        if (s == 'belum_bayar') return 1;
+        return 2;
+      }
+      int cmp = order(a.status).compareTo(order(b.status));
+      if (cmp != 0) return cmp;
+      return pesananList.indexOf(a).compareTo(pesananList.indexOf(b));
+    });
+
+    final countBelumDiambil = pesananList.where((e) => e.status == 'belum_diambil').length;
+    final countBelumBayar = pesananList.where((e) => e.status == 'belum_bayar').length;
+    final countSudahDiambil = pesananList.where((e) => e.status == 'sudah_diambil').length;
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // HEADER & GRADIENT — mengikuti ProsesPesananPage
+          // HEADER & GRADIENT
           Container(
             width: double.infinity,
             decoration: const BoxDecoration(
@@ -244,139 +251,153 @@ class _SelesaiPesananPageState extends State<SelesaiPesananPage> {
           const SizedBox(height: 7),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.only(
-                left: 0,
-                right: 0,
-                top: 7,
-                bottom: 15,
-              ),
+              padding: const EdgeInsets.only(left: 0, right: 0, top: 7, bottom: 15),
               itemCount: filteredList.length,
               itemBuilder: (context, index) {
                 final p = filteredList[index];
+                final idxInList = pesananList.indexOf(p);
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 15),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 19,
-                      vertical: 18,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(
-                        color: Colors.black.withOpacity(0.13),
-                        width: 1.15,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(22),
+                    onTap: () async {
+                      // Pilih detail page berdasarkan status
+                      if (p.status == 'belum_diambil') {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DetailPesananBelumDiambilPage(
+                              pesanan: p,
+                              onKonfirmasiDiambil: () {
+                                updatePesananStatus(idxInList, 'sudah_diambil');
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                        );
+                      } else if (p.status == 'belum_bayar') {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DetailPesananBelumBayarPage(
+                              pesanan: p,
+                              onKonfirmasiBayar: () {
+                                updatePesananStatus(idxInList, 'belum_diambil');
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                        );
+                      } else {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DetailPesananSudahDiambilPage(
+                              pesanan: p,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 15),
+                      padding: const EdgeInsets.symmetric(horizontal: 19, vertical: 18),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(
                           color: Colors.black.withOpacity(0.13),
-                          blurRadius: 14,
-                          offset: const Offset(0, 6),
+                          width: 1.15,
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                p.nama,
-                                style: const TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 17.8,
-                                  color: Colors.black,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.13),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  p.nama,
+                                  style: const TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 17.8,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    p.tipe,
-                                    style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 15,
-                                      color: Colors.black.withOpacity(0.66),
-                                    ),
-                                  ),
-                                  if (p.ekspres)
-                                    Container(
-                                      margin: const EdgeInsets.only(left: 8),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 3,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.orange[200],
-                                        borderRadius: BorderRadius.circular(7),
-                                      ),
-                                      child: const Text(
-                                        "Ekspres",
-                                        style: TextStyle(
-                                          fontSize: 12.5,
-                                          color: Colors.deepOrange,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: "Poppins",
-                                        ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      p.tipe,
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 15,
+                                        color: Colors.black.withOpacity(0.66),
                                       ),
                                     ),
-                                ],
-                              ),
-                              const SizedBox(height: 3),
-                              Row(
-                                children: [
-                                  Text(
-                                    "${p.kg} kgs",
-                                    style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontSize: 13,
-                                      fontStyle: FontStyle.italic,
-                                      color: Colors.black.withOpacity(0.54),
-                                      fontWeight: FontWeight.w400,
+                                  ],
+                                ),
+                                const SizedBox(height: 3),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "${p.kg} kgs",
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 13,
+                                        fontStyle: FontStyle.italic,
+                                        color: Colors.black.withOpacity(0.54),
+                                        fontWeight: FontWeight.w400,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 7),
-                                  Text(
-                                    "•",
-                                    style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[400],
-                                      fontSize: 13.7,
+                                    const SizedBox(width: 7),
+                                    Text(
+                                      "•",
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[400],
+                                        fontSize: 13.7,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 7),
-                                  Text(
-                                    "${p.pcs} pcs",
-                                    style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontSize: 13,
-                                      fontStyle: FontStyle.italic,
-                                      color: Colors.black.withOpacity(0.54),
-                                      fontWeight: FontWeight.w400,
+                                    const SizedBox(width: 7),
+                                    Text(
+                                      "${p.pcs} pcs",
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 13,
+                                        fontStyle: FontStyle.italic,
+                                        color: Colors.black.withOpacity(0.54),
+                                        fontWeight: FontWeight.w400,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              _statusIcon(p.status),
+                              const SizedBox(width: 12),
+                              const Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                color: Colors.black87,
+                                size: 29,
                               ),
                             ],
                           ),
-                        ),
-                        Row(
-                          children: [
-                            _statusIcon(p.status),
-                            const SizedBox(width: 12),
-                            const Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              color: Colors.black87,
-                              size: 29,
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -447,14 +468,14 @@ class _SelesaiPesananPageState extends State<SelesaiPesananPage> {
   Widget _statusIcon(String status) {
     if (status == 'belum_diambil') {
       return const Icon(
-        Icons.close_rounded,
-        color: Color(0xFFFF6A6A),
+        Icons.help_outline_rounded,
+        color: Color(0xFF52E18C),
         size: 29,
       );
     } else if (status == 'belum_bayar') {
       return const Icon(
-        Icons.radio_button_checked_rounded,
-        color: Color(0xFF52E18C),
+        Icons.close_rounded,
+        color: Color(0xFFFF6A6A),
         size: 29,
       );
     } else {
