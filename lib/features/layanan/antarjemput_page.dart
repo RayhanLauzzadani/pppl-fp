@@ -33,18 +33,20 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
           child: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF40A2E3), Color(0xFFBBE2EC), Color(0xFFFFFAF6)],
+                colors: [Color(0xFF40A2E3), Color(0xFFBBE2EC)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
             ),
             padding: const EdgeInsets.fromLTRB(22, 30, 22, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  isEdit ? "Edit Layanan\nAntar Jemput" : "Tambah Layanan\nAntar Jemput",
+                  isEdit
+                      ? "Edit Layanan\nAntar Jemput"
+                      : "Tambah Layanan\nAntar Jemput",
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontFamily: "Poppins",
@@ -105,9 +107,9 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
                       });
                       Navigator.pop(context);
                     },
-                    child: Text(
+                    child: const Text(
                       "SIMPAN",
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16.7,
                         letterSpacing: 1.1,
@@ -161,7 +163,8 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF40A2E3),
                         textStyle: const TextStyle(fontFamily: "Poppins"),
-                        side: const BorderSide(color: Color(0xFF40A2E3), width: 1.5),
+                        side: const BorderSide(
+                            color: Color(0xFF40A2E3), width: 1.5),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
@@ -247,7 +250,8 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
                 bottomRight: Radius.circular(32),
               ),
             ),
-            padding: const EdgeInsets.only(top: 42, left: 0, right: 0, bottom: 22),
+            padding: const EdgeInsets.only(
+                top: 42, left: 0, right: 0, bottom: 22),
             child: Row(
               children: [
                 IconButton(
@@ -295,7 +299,8 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 15),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -364,7 +369,8 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
           ),
           // Tombol Tambah Antar Jemput
           Padding(
-            padding: const EdgeInsets.only(bottom: 30, top: 3, left: 30, right: 30),
+            padding:
+                const EdgeInsets.only(bottom: 30, top: 3, left: 30, right: 30),
             child: SizedBox(
               width: double.infinity,
               height: 46,
