@@ -3,7 +3,7 @@ import 'package:laundryin/features/pesanan/pesanan_model.dart';
 import 'package:laundryin/features/pesanan/proses_detail_pesanan_belum_mulai_page.dart';
 import 'package:laundryin/features/pesanan/proses_detail_pesanan_proses_page.dart';
 import 'package:laundryin/features/pesanan/proses_detail_pesanan_selesai_page.dart';
-// import 'package:laundryin/features/pesanan/selesai_pesanan_page.dart';
+
 class ProsesPesananPage extends StatefulWidget {
   const ProsesPesananPage({super.key});
 
@@ -14,8 +14,7 @@ class ProsesPesananPage extends StatefulWidget {
 class _ProsesPesananPageState extends State<ProsesPesananPage> {
   String search = "";
 
-  // List pakai model, bukan Map
-  final List<Pesanan> pesananList = [
+  List<Pesanan> pesananList = [
     Pesanan(
       nama: 'Farhan Laksono',
       noHp: '+6281322214567',
@@ -71,6 +70,18 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
       tanggal: DateTime(2024, 6, 5, 17, 40),
     ),
   ];
+
+  void updatePesananStatus(int idx, String newStatus) {
+    setState(() {
+      pesananList[idx] = pesananList[idx].copyWith(status: newStatus);
+    });
+  }
+
+  void hapusPesanan(int idx) {
+    setState(() {
+      pesananList.removeAt(idx);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -238,27 +249,56 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
               itemCount: filteredList.length,
               itemBuilder: (context, index) {
                 final p = filteredList[index];
-
-                // Tentukan page detail sesuai status pesanan
-                Widget detailPage;
-                if (p.status == 'belum_mulai') {
-                  detailPage = ProsesDetailPesananBelumMulaiPage(pesanan: p);
-                } else if (p.status == 'proses') {
-                  detailPage = ProsesDetailPesananProsesPage(pesanan: p);
-                } else {
-                  detailPage = ProsesDetailPesananSelesaiPage(pesanan: p);
-                }
+                final idxInList = pesananList.indexOf(p);
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => detailPage,
-                        ),
-                      );
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(22),
+                    onTap: () async {
+                      if (p.status == 'belum_mulai') {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ProsesDetailPesananBelumMulaiPage(
+                              pesanan: p,
+                              onMulaiProses: () {
+                                setState(() {
+                                  pesananList[idxInList] = pesananList[idxInList].copyWith(status: 'proses');
+                                });
+                              },
+                            ),
+                          ),
+                        );
+                      } else if (p.status == 'proses') {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ProsesDetailPesananProsesPage(
+                              pesanan: p,
+                              onHentikanProses: () {
+                                setState(() {
+                                  pesananList[idxInList] = pesananList[idxInList].copyWith(status: 'selesai');
+                                });
+                              },
+                            ),
+                          ),
+                        );
+                      } else if (p.status == 'selesai') {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ProsesDetailPesananSelesaiPage(
+                              pesanan: p,
+                              onSelesaikanPesanan: () {
+                                setState(() {
+                                  pesananList.removeAt(idxInList);
+                                });
+                              },
+                            ),
+                          ),
+                        );
+                      }
                     },
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 15),
@@ -294,14 +334,18 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                                     color: Colors.black,
                                   ),
                                 ),
-                                Text(
-                                  p.tipe,
-                                  style: TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 15,
-                                    color: Colors.black.withOpacity(0.66),
-                                  ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      p.tipe,
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 15,
+                                        color: Colors.black.withOpacity(0.66),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 3),
                                 Row(
