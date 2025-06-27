@@ -1,28 +1,18 @@
 import 'package:flutter/material.dart';
 
-class LayananSatuanTile extends StatelessWidget {
-  final String nama;
-  final int harga;
-  final int jumlah;
+class BarangCustomTile extends StatelessWidget {
+  final String title;
+  final int qty;
   final VoidCallback onTambah;
   final VoidCallback onKurang;
 
-  const LayananSatuanTile({
+  const BarangCustomTile({
     Key? key,
-    required this.nama,
-    required this.harga,
-    required this.jumlah,
+    required this.title,
+    required this.qty,
     required this.onTambah,
     required this.onKurang,
   }) : super(key: key);
-
-  static String _currencyFormat(int price) {
-    final s = price.toString();
-    return s.replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]}.',
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +23,7 @@ class LayananSatuanTile extends StatelessWidget {
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 2),
             title: Text(
-              nama,
+              title,
               style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w600,
@@ -41,22 +31,18 @@ class LayananSatuanTile extends StatelessWidget {
                 color: Color(0xFF232323),
               ),
             ),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                'Satuan\nRp. ${_currencyFormat(harga)}',
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 12.7,
-                  color: Color(0xFF7A7A7A),
-                  height: 1.3,
-                ),
+            subtitle: const Text(
+              'Satuan',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 12.7,
+                color: Color(0xFF7A7A7A),
               ),
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (jumlah > 0)
+                if (qty > 0)
                   InkWell(
                     onTap: onKurang,
                     borderRadius: BorderRadius.circular(10),
@@ -74,11 +60,11 @@ class LayananSatuanTile extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (jumlah > 0)
+                if (qty > 0)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: Text(
-                      '$jumlah',
+                      '$qty',
                       style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,

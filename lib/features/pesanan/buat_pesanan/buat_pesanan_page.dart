@@ -84,8 +84,7 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
     if (!_isValidName(nama)) {
       _scaffoldMessengerKey.currentState?.showSnackBar(
         const SnackBar(
-          content: Text(
-              'Nama hanya boleh huruf dan spasi, minimal 2 karakter!'),
+          content: Text('Nama hanya boleh huruf dan spasi, minimal 2 karakter!'),
           backgroundColor: Colors.orange,
           duration: Duration(seconds: 2),
         ),
@@ -95,8 +94,7 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
     if (!_isValidPhone(wa)) {
       _scaffoldMessengerKey.currentState?.showSnackBar(
         const SnackBar(
-          content: Text(
-              'Nomor Whatsapp tidak valid! Harus diawali 08 dan 10-13 digit angka.'),
+          content: Text('Nomor Whatsapp tidak valid! Harus diawali 08 dan 10-13 digit angka.'),
           backgroundColor: Colors.orange,
           duration: Duration(seconds: 2),
         ),
@@ -135,106 +133,116 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
       key: _scaffoldMessengerKey,
       child: Scaffold(
         backgroundColor: const Color(0xFFFDFBF6),
-        appBar: const GradientAppBar(title: "Buat Pesanan"),
         body: _loadingKodeLaundry
             ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            : SafeArea(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Nama
-                    const Text(
-                      "Nama",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16.5,
-                        color: Colors.black87,
-                        fontFamily: 'Poppins',
+                    GradientAppBar(
+                      title: "Buat Pesanan",
+                      onBack: () => Navigator.pop(context),
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Nama
+                            const Text(
+                              "Nama",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16.5,
+                                color: Colors.black87,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            TextField(
+                              controller: namaController,
+                              decoration: const InputDecoration(
+                                isDense: true,
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 13,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(9)),
+                                  borderSide: BorderSide(color: Color(0xFFD2D2D2)),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(9)),
+                                  borderSide: BorderSide(color: Color(0xFFD2D2D2)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(9)),
+                                  borderSide: BorderSide(color: Color(0xFF4EA6ED)),
+                                ),
+                                hintText: "Contoh: Budi Santoso",
+                              ),
+                              style: TextStyle(fontSize: 15.8, fontFamily: 'Poppins'),
+                              keyboardType: TextInputType.name,
+                            ),
+                            const SizedBox(height: 16),
+                            // Whatsapp
+                            const Text(
+                              "Nomor Whatsapp",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16.5,
+                                color: Colors.black87,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            TextField(
+                              controller: waController,
+                              decoration: const InputDecoration(
+                                hintText: "08xxxxxxxxxx",
+                                isDense: true,
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 13,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(9)),
+                                  borderSide: BorderSide(color: Color(0xFFD2D2D2)),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(9)),
+                                  borderSide: BorderSide(color: Color(0xFFD2D2D2)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(9)),
+                                  borderSide: BorderSide(color: Color(0xFF4EA6ED)),
+                                ),
+                              ),
+                              style: TextStyle(fontSize: 15.8, fontFamily: 'Poppins'),
+                              keyboardType: TextInputType.phone,
+                            ),
+                            const SizedBox(height: 28),
+                            // Pilihan Layanan
+                            LayananTile(
+                              label: "3 Hari",
+                              desc: "Reguler",
+                              onTap: () => _onLayananTap("3 Hari", "Reguler"),
+                            ),
+                            const SizedBox(height: 18),
+                            LayananTile(
+                              label: "1 Hari",
+                              desc: "Ekspress",
+                              onTap: () => _onLayananTap("1 Hari", "Ekspress"),
+                            ),
+                            const SizedBox(height: 18),
+                            LayananTile(
+                              label: "3 Jam",
+                              desc: "Kilat",
+                              onTap: () => _onLayananTap("3 Jam", "Kilat"),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: namaController,
-                      decoration: const InputDecoration(
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 13,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(9)),
-                          borderSide: BorderSide(color: Color(0xFFD2D2D2)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(9)),
-                          borderSide: BorderSide(color: Color(0xFFD2D2D2)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(9)),
-                          borderSide: BorderSide(color: Color(0xFF4EA6ED)),
-                        ),
-                        hintText: "Contoh: Budi Santoso",
-                      ),
-                      style: TextStyle(fontSize: 15.8, fontFamily: 'Poppins'),
-                      keyboardType: TextInputType.name,
-                    ),
-                    const SizedBox(height: 16),
-                    // Whatsapp
-                    const Text(
-                      "Nomor Whatsapp",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16.5,
-                        color: Colors.black87,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: waController,
-                      decoration: const InputDecoration(
-                        hintText: "08xxxxxxxxxx",
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 13,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(9)),
-                          borderSide: BorderSide(color: Color(0xFFD2D2D2)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(9)),
-                          borderSide: BorderSide(color: Color(0xFFD2D2D2)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(9)),
-                          borderSide: BorderSide(color: Color(0xFF4EA6ED)),
-                        ),
-                      ),
-                      style: TextStyle(fontSize: 15.8, fontFamily: 'Poppins'),
-                      keyboardType: TextInputType.phone,
-                    ),
-                    const SizedBox(height: 28),
-                    // Pilihan Layanan
-                    LayananTile(
-                      label: "3 Hari",
-                      desc: "Reguler",
-                      onTap: () => _onLayananTap("3 Hari", "Reguler"),
-                    ),
-                    const SizedBox(height: 18),
-                    LayananTile(
-                      label: "1 Hari",
-                      desc: "Ekspress",
-                      onTap: () => _onLayananTap("1 Hari", "Ekspress"),
-                    ),
-                    const SizedBox(height: 18),
-                    LayananTile(
-                      label: "3 Jam",
-                      desc: "Kilat",
-                      onTap: () => _onLayananTap("3 Jam", "Kilat"),
                     ),
                   ],
                 ),

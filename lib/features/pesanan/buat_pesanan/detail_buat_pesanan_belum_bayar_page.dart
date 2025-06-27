@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'detail_buat_pesanan_belum_bayar_page.dart';
-import 'detail_buat_pesanan_selesai_bayar_page.dart';
 
-class DetailBuatPesananPage extends StatelessWidget {
+class DetailBuatPesananBelumBayarPage extends StatelessWidget {
   final Map<String, dynamic> data;
-  const DetailBuatPesananPage({Key? key, required this.data}) : super(key: key);
+  const DetailBuatPesananBelumBayarPage({Key? key, required this.data}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Data dummy / bisa ganti data sesuai kebutuhan
+    // Ganti dengan data asli dari Map, di sini dummy biar gampang preview
     final String nota = "Nota–1157.1909.21";
     final String layanan = data['layanan'] ?? "Reguler";
     final String nama = data['nama'] ?? "Farhan Laksono";
@@ -20,7 +18,6 @@ class DetailBuatPesananPage extends StatelessWidget {
     final String antarJemput = data['antarJemput'] ?? "≤ 2 Km";
     final String catatan = data['catatan'] ?? "-";
 
-    // Contoh list barang
     final List<Map<String, dynamic>> listBarang = [
       {
         'nama': 'Bed Cover Jumbo',
@@ -51,7 +48,6 @@ class DetailBuatPesananPage extends StatelessWidget {
         'total': 0,
       },
     ];
-
     final int totalHarga = 84000;
 
     return Scaffold(
@@ -70,10 +66,7 @@ class DetailBuatPesananPage extends StatelessWidget {
                 // CARD utama
                 Container(
                   margin: const EdgeInsets.only(top: 16, left: 12, right: 12),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 16,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(22),
@@ -117,19 +110,9 @@ class DetailBuatPesananPage extends StatelessWidget {
                           ),
                           Column(
                             children: const [
-                              Icon(
-                                Icons.print,
-                                size: 28,
-                                color: Color(0xFF727272),
-                              ),
+                              Icon(Icons.print, size: 28, color: Color(0xFF727272)),
                               SizedBox(height: 2),
-                              Text(
-                                "Print Nota",
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12.3,
-                                ),
-                              ),
+                              Text("Print Nota", style: TextStyle(fontFamily: 'Poppins', fontSize: 12.3)),
                             ],
                           ),
                         ],
@@ -143,9 +126,7 @@ class DetailBuatPesananPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(36),
                             child: Image.network(
                               "https://randomuser.me/api/portraits/men/32.jpg",
-                              width: 46,
-                              height: 46,
-                              fit: BoxFit.cover,
+                              width: 46, height: 46, fit: BoxFit.cover,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -153,56 +134,22 @@ class DetailBuatPesananPage extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  nama,
-                                  style: const TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15.4,
-                                  ),
-                                ),
-                                Text(
-                                  noHp,
-                                  style: const TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontSize: 13.1,
-                                    color: Colors.black87,
-                                  ),
-                                ),
+                                Text(nama, style: const TextStyle(fontFamily: "Poppins", fontWeight: FontWeight.bold, fontSize: 15.4)),
+                                Text(noHp, style: const TextStyle(fontFamily: "Poppins", fontSize: 13.1, color: Colors.black87)),
                               ],
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 10),
-                      Divider(
-                        color: Colors.grey[300],
-                        thickness: 0.7,
-                        height: 21,
-                      ),
+                      Divider(color: Colors.grey[300], thickness: 0.7, height: 21),
                       _InfoRow("Status", status, boldValue: true),
-                      _InfoRow(
-                        "Tanggal Terima",
-                        tanggalTerima,
-                        boldValue: true,
-                      ),
-                      _InfoRow(
-                        "Tanggal Selesai",
-                        tanggalSelesai,
-                        boldValue: true,
-                      ),
+                      _InfoRow("Tanggal Terima", tanggalTerima, boldValue: true),
+                      _InfoRow("Tanggal Selesai", tanggalSelesai, boldValue: true),
                       _InfoRow("Jenis Parfum", jenisParfum, boldValue: true),
-                      _InfoRow(
-                        "Layanan Antar Jemput",
-                        antarJemput,
-                        boldValue: true,
-                      ),
+                      _InfoRow("Layanan Antar Jemput", antarJemput, boldValue: true),
                       _InfoRow("Catatan", catatan, boldValue: false),
-                      Divider(
-                        color: Colors.grey[300],
-                        thickness: 0.7,
-                        height: 23,
-                      ),
+                      Divider(color: Colors.grey[300], thickness: 0.7, height: 23),
 
                       // List Item Title
                       Padding(
@@ -225,10 +172,7 @@ class DetailBuatPesananPage extends StatelessWidget {
                       Container(
                         width: double.infinity,
                         margin: const EdgeInsets.only(top: 7),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 13,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 13),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF6F6F6),
                           borderRadius: BorderRadius.circular(13),
@@ -275,81 +219,64 @@ class DetailBuatPesananPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Tombol bawah
-                const SizedBox(height: 15),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 22),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    DetailBuatPesananBelumBayarPage(data: data),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            elevation: 5,
-                            backgroundColor: const Color(0xFFE2F4FF),
-                            foregroundColor: const Color(0xFF1D90C6),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 13),
-                          ),
-                          child: const Text(
-                            "Bayar Nanti",
-                            style: TextStyle(
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w500,
-                              fontSize: 17.7,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ),
+                const SizedBox(height: 30),
+              ],
+            ),
+          ),
+          // Tombol bawah
+          Container(
+            width: double.infinity,
+            color: const Color(0xFFFFF6E9),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFBDE8F8),
+                      foregroundColor: Colors.black87,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      const SizedBox(width: 13),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    DetailBuatPesananSelesaiBayarPage(
-                                      data: data,
-                                    ),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            elevation: 5,
-                            backgroundColor: const Color(0xFF40A2E3),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 13),
-                          ),
-                          child: const Text(
-                            "Bayar Sekarang",
-                            style: TextStyle(
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w500,
-                              fontSize: 17.7,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text(
+                      "Batalkan Pesanan",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 15.7,
+                        fontWeight: FontWeight.w500,
+                        fontStyle: FontStyle.italic,
                       ),
-                    ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF279AF1),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text(
+                      "Lihat Proses",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 15.7,
+                        fontWeight: FontWeight.w500,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -383,7 +310,11 @@ class _GradientAppBar extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           stops: [0.01, 0.12, 0.83],
-          colors: [Color(0xFFFFF6E9), Color(0xFFBBE2EC), Color(0xFF40A2E3)],
+          colors: [
+            Color(0xFFFFF6E9),
+            Color(0xFFBBE2EC),
+            Color(0xFF40A2E3),
+          ],
         ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(32),
@@ -404,11 +335,7 @@ class _GradientAppBar extends StatelessWidget {
             Positioned(
               left: 8,
               child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white,
-                  size: 21,
-                ),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 21),
                 onPressed: onBack,
               ),
             ),
@@ -501,7 +428,9 @@ Widget _LaundryItemTile(Map<String, dynamic> b) {
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+            border: Border(
+              bottom: BorderSide(color: Colors.grey[200]!),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,7 +464,7 @@ Widget _LaundryItemTile(Map<String, dynamic> b) {
                     ),
                   ),
                   Text(
-                    "Rp. ${_DetailBuatPesananPageState._currencyFormat(b['total'])}",
+                    "Rp. ${_DetailBuatPesananBelumBayarPageState._currencyFormat(b['total'])}",
                     style: const TextStyle(
                       fontFamily: "Poppins",
                       fontSize: 13.7,
@@ -548,7 +477,7 @@ Widget _LaundryItemTile(Map<String, dynamic> b) {
                 Padding(
                   padding: const EdgeInsets.only(top: 3, left: 1),
                   child: Text(
-                    "x Rp. ${_DetailBuatPesananPageState._currencyFormat(b['harga'])}",
+                    "x Rp. ${_DetailBuatPesananBelumBayarPageState._currencyFormat(b['harga'])}",
                     style: const TextStyle(
                       fontFamily: "Poppins",
                       fontSize: 11.7,
@@ -563,7 +492,7 @@ Widget _LaundryItemTile(Map<String, dynamic> b) {
 }
 
 // For static method in Widget
-class _DetailBuatPesananPageState {
+class _DetailBuatPesananBelumBayarPageState {
   static String _currencyFormat(int price) {
     final s = price.toString();
     return s.replaceAllMapped(
