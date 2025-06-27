@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'selesai_pesanan_model.dart';
-import 'detail_pesanan_scaffold.dart';
+import 'detail_pesanan_selesai_scaffold.dart';
 
 class DetailPesananBelumBayarPage extends StatelessWidget {
   final Pesanan pesanan;
@@ -14,12 +14,10 @@ class DetailPesananBelumBayarPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: DetailPesananScaffold(
-        pesanan: pesanan,
-        status: 'belum_bayar',
-        onKonfirmasiBayar: onKonfirmasiBayar,
-      ),
+    return DetailPesananSelesaiScaffold(
+      pesanan: pesanan,
+      status: 'belum_bayar',
+      onKonfirmasi: onKonfirmasiBayar,
     );
   }
 }

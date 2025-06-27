@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import './pesanan_model.dart';
-import 'components/detail_pesanan_scaffold.dart';
+import 'components/detail_pesanan_proses_scaffold.dart';
 import 'components/kendala_modal.dart';
-import 'proses_detail_pesanan_selesai_page.dart';
 
 class ProsesDetailPesananProsesPage extends StatefulWidget {
   final Pesanan pesanan;
-  const ProsesDetailPesananProsesPage({super.key, required this.pesanan});
+  final VoidCallback? onHentikanProses;
+  const ProsesDetailPesananProsesPage({
+    super.key,
+    required this.pesanan,
+    this.onHentikanProses,
+  });
 
   @override
   State<ProsesDetailPesananProsesPage> createState() => _ProsesDetailPesananProsesPageState();
@@ -46,14 +50,8 @@ class _ProsesDetailPesananProsesPageState extends State<ProsesDetailPesananProse
         },
         onLaporkanKendala: handleLaporkanKendala,
         onHentikanProses: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ProsesDetailPesananSelesaiPage(
-                pesanan: widget.pesanan,
-              ),
-            ),
-          );
+          if (widget.onHentikanProses != null) widget.onHentikanProses!();
+          Navigator.pop(context);
         },
       ),
     );

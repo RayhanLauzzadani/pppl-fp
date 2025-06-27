@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'selesai_pesanan_model.dart';
+import 'package:laundryin/features/pesanan/components/kendala_modal.dart';
 
-class DetailPesananScaffold extends StatelessWidget {
+class DetailPesananSelesaiScaffold extends StatelessWidget {
   final Pesanan pesanan;
   final String status; // 'belum_diambil', 'belum_bayar', 'sudah_diambil'
-  final VoidCallback? onKonfirmasiDiambil;
-  final VoidCallback? onKonfirmasiBayar;
+  final VoidCallback? onKonfirmasi;
 
-  const DetailPesananScaffold({
+  const DetailPesananSelesaiScaffold({
     super.key,
     required this.pesanan,
     required this.status,
-    this.onKonfirmasiDiambil,
-    this.onKonfirmasiBayar,
+    this.onKonfirmasi,
   });
 
   @override
@@ -288,35 +287,44 @@ class DetailPesananScaffold extends StatelessWidget {
                 ],
               ),
             ),
-            // BUTTON
-            if (status == 'belum_diambil')
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {},
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF40A2E3),
-                          side: const BorderSide(color: Color(0xFF40A2E3), width: 1.7),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          textStyle: const TextStyle(fontFamily: "Poppins"),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          backgroundColor: const Color(0xFFE2F4FF),
+            // BUTTONS
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              child: Row(
+                children: [
+                  // BUTTON LAPORKAN KENDALA (Hubungi Pelanggan)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        // Tampilkan modal laporkan kendala (pop up) dari kendala_modal.dart
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (ctx) => KendalaModal(noHp: pesanan.noHp),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF40A2E3),
+                        side: const BorderSide(color: Color(0xFF40A2E3), width: 1.7),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        icon: const Icon(Icons.phone),
-                        label: const Text("Hubungi Pelanggan"),
+                        textStyle: const TextStyle(fontFamily: "Poppins"),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: const Color(0xFFE2F4FF),
                       ),
+                      icon: const Icon(Icons.phone),
+                      label: const Text("Hubungi Pelanggan"),
                     ),
-                    const SizedBox(width: 13),
+                  ),
+                  if (onKonfirmasi != null) const SizedBox(width: 13),
+                  if (onKonfirmasi != null)
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: onKonfirmasiDiambil,
+                        onPressed: onKonfirmasi,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1877F2),
+                          backgroundColor: const Color(0xFF1976D2),
                           foregroundColor: Colors.white,
                           elevation: 2,
                           shape: RoundedRectangleBorder(
@@ -325,60 +333,15 @@ class DetailPesananScaffold extends StatelessWidget {
                           textStyle: const TextStyle(fontFamily: "Poppins"),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        child: const Text(
-                          "Konfirmasi Diambil",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        child: Text(
+                          status == 'belum_bayar' ? "Konfirmasi Bayar" : "Konfirmasi Diambil",
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                ],
               ),
-            if (status == 'belum_bayar')
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {},
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF40A2E3),
-                          side: const BorderSide(color: Color(0xFF40A2E3), width: 1.7),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          textStyle: const TextStyle(fontFamily: "Poppins"),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          backgroundColor: const Color(0xFFE2F4FF),
-                        ),
-                        icon: const Icon(Icons.phone),
-                        label: const Text("Hubungi Pelanggan"),
-                      ),
-                    ),
-                    const SizedBox(width: 13),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: onKonfirmasiBayar,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1877F2),
-                          foregroundColor: Colors.white,
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          textStyle: const TextStyle(fontFamily: "Poppins"),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: const Text(
-                          "Konfirmasi Bayar",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            ),
             const SizedBox(height: 22),
           ],
         ),
