@@ -45,18 +45,15 @@ class _DurasiLayananPageState extends State<DurasiLayananPage> {
                   colors: [
                     Color(0xFF40A2E3),
                     Color(0xFFBBE2EC),
-                    Color(0xFFFDFBF6),
                   ],
-                  stops: [0.0, 0.55, 1.0],
                 ),
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(33),
-                  topRight: Radius.circular(33),
+                  topLeft: Radius.circular(28),
+                  topRight: Radius.circular(28),
                 ),
               ),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 23),
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 23),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -124,16 +121,17 @@ class _DurasiLayananPageState extends State<DurasiLayananPage> {
                     const SizedBox(height: 14),
                     SizedBox(
                       width: double.infinity,
-                      height: 44,
+                      height: 45,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFD9F1FF),
-                          foregroundColor: Colors.black87,
-                          elevation: 3,
-                          shadowColor: Colors.black.withOpacity(0.09),
+                          backgroundColor: const Color(0xFF40A2E3),
+                          foregroundColor: Colors.white,
+                          elevation: 4,
+                          shadowColor: Colors.black12,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(11),
+                            borderRadius: BorderRadius.circular(12),
                           ),
+                          textStyle: const TextStyle(fontFamily: "Poppins"),
                         ),
                         onPressed: () {
                           String nama = namaController.text.trim();
@@ -157,10 +155,10 @@ class _DurasiLayananPageState extends State<DurasiLayananPage> {
                         child: const Text(
                           "SIMPAN",
                           style: TextStyle(
-                            fontFamily: "Poppins",
                             fontWeight: FontWeight.bold,
-                            fontSize: 16.3,
-                            letterSpacing: 1.2,
+                            fontSize: 16.7,
+                            letterSpacing: 1.1,
+                            fontFamily: "Poppins",
                           ),
                         ),
                       ),

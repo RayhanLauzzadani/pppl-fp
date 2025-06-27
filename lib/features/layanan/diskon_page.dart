@@ -298,12 +298,11 @@ class _DiskonFormSheetState extends State<DiskonFormSheet> {
       child: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF40A2E3), Color(0xFFBBE2EC), Colors.white],
+            colors: [Color(0xFF40A2E3), Color(0xFFBBE2EC)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            stops: [0.0, 0.45, 1.0],
           ),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
         child: SingleChildScrollView(
@@ -377,20 +376,24 @@ class _DiskonFormSheetState extends State<DiskonFormSheet> {
                 child: ElevatedButton(
                   onPressed: widget.onSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.55),
-                    foregroundColor: Colors.black,
-                    elevation: 3,
-                    shadowColor: const Color(0xFF40A2E3).withOpacity(0.12),
+                    backgroundColor: const Color(0xFF40A2E3),
+                    foregroundColor: Colors.white,
+                    elevation: 4,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    textStyle: const TextStyle(
-                      fontFamily: "Poppins",
+                    shadowColor: Colors.black12,
+                    textStyle: const TextStyle(fontFamily: "Poppins"),
+                  ),
+                  child: const Text(
+                    "SIMPAN",
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 17,
+                      fontSize: 16.7,
+                      letterSpacing: 1.1,
+                      fontFamily: "Poppins",
                     ),
                   ),
-                  child: const Text("SIMPAN"),
                 ),
               ),
             ],

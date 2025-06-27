@@ -72,26 +72,29 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
+                height: 45,
                 child: ElevatedButton(
                   onPressed: () {
                     // Simpan / Edit (implementasi backend/logic)
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.7),
-                    foregroundColor: Colors.black87,
-                    elevation: 3,
+                    backgroundColor: const Color(0xFF40A2E3),
+                    foregroundColor: Colors.white,
+                    elevation: 4,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(11),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    shadowColor: Colors.black12,
+                    textStyle: const TextStyle(fontFamily: "Poppins"),
                   ),
                   child: const Text(
                     "SIMPAN",
                     style: TextStyle(
-                      fontFamily: "Poppins",
                       fontWeight: FontWeight.bold,
-                      fontSize: 15.5,
-                      letterSpacing: 1,
+                      fontSize: 16.7,
+                      letterSpacing: 1.1,
+                      fontFamily: "Poppins",
                     ),
                   ),
                 ),
