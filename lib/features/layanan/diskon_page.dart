@@ -1,36 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-// -------- MODEL DISKON --------
 class DiskonModel {
+  String id;
   String jenisDiskon;
   String tipeDiskon;
   String jumlahDiskon;
-  bool isPercent; // untuk format tampilan %
+  bool isPercent;
 
   DiskonModel({
+    this.id = "",
     required this.jenisDiskon,
     required this.tipeDiskon,
     required this.jumlahDiskon,
     this.isPercent = false,
   });
+
+  factory DiskonModel.fromDoc(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return DiskonModel(
+      id: doc.id,
+      jenisDiskon: data['jenisDiskon'] ?? "",
+      tipeDiskon: data['tipeDiskon'] ?? "",
+      jumlahDiskon: data['jumlahDiskon'] ?? "",
+      isPercent: (data['tipeDiskon'] ?? "") == "Persen",
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    "jenisDiskon": jenisDiskon,
+    "tipeDiskon": tipeDiskon,
+    "jumlahDiskon": jumlahDiskon,
+  };
 }
 
-// ----------- PAGE DISKON -----------
 class DiskonPage extends StatefulWidget {
-  const DiskonPage({Key? key}) : super(key: key);
+   final String laundryId;
+  const DiskonPage({Key? key, required this.laundryId}) : super(key: key);
 
   @override
   State<DiskonPage> createState() => _DiskonPageState();
 }
 
 class _DiskonPageState extends State<DiskonPage> {
-  List<DiskonModel> listDiskon = [
-    DiskonModel(jenisDiskon: "Hari Raya", tipeDiskon: "Persen", jumlahDiskon: "5", isPercent: true),
-    DiskonModel(jenisDiskon: "Pelanggan Baru", tipeDiskon: "Nominal", jumlahDiskon: "5000"),
-    DiskonModel(jenisDiskon: "Special Day 8.8", tipeDiskon: "Nominal", jumlahDiskon: "8888"),
-  ];
+  final String laundryId = 'laksolaundry'; // atau ambil dari login nanti
+  final _collectionName = 'diskon';
 
-  void _showForm({DiskonModel? diskon, required bool isEdit}) async {
+  Future<void> _showForm({DiskonModel? diskon, required bool isEdit}) async {
     final controllerJenis = TextEditingController(text: diskon?.jenisDiskon ?? "");
     final controllerJumlah = TextEditingController(text: diskon?.jumlahDiskon ?? "");
     String tipeDiskon = diskon?.tipeDiskon ?? "Persen";
@@ -48,23 +64,26 @@ class _DiskonPageState extends State<DiskonPage> {
             jumlahDiskon: controllerJumlah,
             tipeDiskon: tipeDiskon,
             onTipeChanged: (value) => tipeDiskon = value,
-            onSubmit: () {
-              setState(() {
-                if (isEdit && diskon != null) {
-                  diskon.jenisDiskon = controllerJenis.text;
-                  diskon.jumlahDiskon = controllerJumlah.text;
-                  diskon.tipeDiskon = tipeDiskon;
-                  diskon.isPercent = tipeDiskon == "Persen";
-                } else {
-                  listDiskon.add(DiskonModel(
-                    jenisDiskon: controllerJenis.text,
-                    jumlahDiskon: controllerJumlah.text,
-                    tipeDiskon: tipeDiskon,
-                    isPercent: tipeDiskon == "Persen",
-                  ));
-                }
-              });
-              Navigator.pop(context);
+            onSubmit: () async {
+              // Validasi
+              if (controllerJenis.text.trim().isEmpty || controllerJumlah.text.trim().isEmpty) return;
+              final newDiskon = DiskonModel(
+                jenisDiskon: controllerJenis.text.trim(),
+                tipeDiskon: tipeDiskon,
+                jumlahDiskon: controllerJumlah.text.trim(),
+                isPercent: tipeDiskon == "Persen",
+              );
+              final ref = FirebaseFirestore.instance
+                  .collection('laundries')
+                  .doc(laundryId)
+                  .collection(_collectionName);
+
+              if (isEdit && diskon != null) {
+                await ref.doc(diskon.id).update(newDiskon.toJson());
+              } else {
+                await ref.add(newDiskon.toJson());
+              }
+              if (mounted) Navigator.pop(context);
             },
           ),
         );
@@ -72,17 +91,20 @@ class _DiskonPageState extends State<DiskonPage> {
     );
   }
 
-  void _showDeleteConfirm(int index) {
+  void _showDeleteConfirm(DiskonModel diskon) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => DiskonDeleteDialog(
         onCancel: () => Navigator.pop(context),
-        onDelete: () {
-          setState(() {
-            listDiskon.removeAt(index);
-          });
-          Navigator.pop(context);
+        onDelete: () async {
+          await FirebaseFirestore.instance
+              .collection('laundries')
+              .doc(laundryId)
+              .collection(_collectionName)
+              .doc(diskon.id)
+              .delete();
+          if (mounted) Navigator.pop(context);
         },
       ),
     );
@@ -138,91 +160,127 @@ class _DiskonPageState extends State<DiskonPage> {
           const SizedBox(height: 18),
           // Daftar diskon
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              itemCount: listDiskon.length,
-              itemBuilder: (context, idx) {
-                final item = listDiskon[idx];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 18),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFDF6ED),
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.14),
-                        blurRadius: 14,
-                        offset: const Offset(0, 7),
-                        spreadRadius: 0.2,
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('laundries')
+                  .doc(laundryId)
+                  .collection(_collectionName)
+                  .orderBy('jenisDiskon')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting)
+                  return const Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(38.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset("assets/icons/empty_box.png", width: 120, height: 120),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Belum ada diskon.\nSilakan tambah terlebih dahulu.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 16.7,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Deskripsi diskon
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.isPercent
-                                    ? "${item.jumlahDiskon} %"
-                                    : "Rp. ${item.jumlahDiskon}",
-                                style: const TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 18,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                "Diskon ${item.jenisDiskon}",
-                                style: const TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14.2,
-                                  fontStyle: FontStyle.italic,
-                                  color: Color(0xFF565656),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Tombol Edit
-                        Container(
-                          margin: const EdgeInsets.only(left: 8, right: 7),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFBBE2EC),
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                          child: IconButton(
-                            onPressed: () => _showForm(diskon: item, isEdit: true),
-                            icon: const Icon(Icons.edit, color: Color(0xFF2B303A)),
-                            iconSize: 23,
-                            tooltip: "Edit",
-                          ),
-                        ),
-                        // Tombol Hapus
-                        Container(
-                          margin: const EdgeInsets.only(left: 0),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFBBE2EC),
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                          child: IconButton(
-                            onPressed: () => _showDeleteConfirm(idx),
-                            icon: const Icon(Icons.delete, color: Color(0xFF2B303A)),
-                            iconSize: 23,
-                            tooltip: "Hapus",
-                          ),
-                        ),
-                      ],
                     ),
-                  ),
+                  );
+                }
+                final data = snapshot.data!.docs.map((e) => DiskonModel.fromDoc(e)).toList();
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  itemCount: data.length,
+                  itemBuilder: (context, idx) {
+                    final item = data[idx];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 18),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFDF6ED),
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.14),
+                            blurRadius: 14,
+                            offset: const Offset(0, 7),
+                            spreadRadius: 0.2,
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Deskripsi diskon
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.isPercent
+                                        ? "${item.jumlahDiskon} %"
+                                        : "Rp. ${item.jumlahDiskon}",
+                                    style: const TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 18,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    "Diskon ${item.jenisDiskon}",
+                                    style: const TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 14.2,
+                                      fontStyle: FontStyle.italic,
+                                      color: Color(0xFF565656),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Tombol Edit
+                            Container(
+                              margin: const EdgeInsets.only(left: 8, right: 7),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFBBE2EC),
+                                borderRadius: BorderRadius.circular(9),
+                              ),
+                              child: IconButton(
+                                onPressed: () => _showForm(diskon: item, isEdit: true),
+                                icon: const Icon(Icons.edit, color: Color(0xFF2B303A)),
+                                iconSize: 23,
+                                tooltip: "Edit",
+                              ),
+                            ),
+                            // Tombol Hapus
+                            Container(
+                              margin: const EdgeInsets.only(left: 0),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFBBE2EC),
+                                borderRadius: BorderRadius.circular(9),
+                              ),
+                              child: IconButton(
+                                onPressed: () => _showDeleteConfirm(item),
+                                icon: const Icon(Icons.delete, color: Color(0xFF2B303A)),
+                                iconSize: 23,
+                                tooltip: "Hapus",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -260,7 +318,8 @@ class _DiskonPageState extends State<DiskonPage> {
   }
 }
 
-// ----------- MODAL BOTTOM SHEET FORM DISKON -----------
+// ------ Modal Bottom Sheet & Delete Dialog tetap sama dari kode kamu ------
+
 class DiskonFormSheet extends StatefulWidget {
   final bool isEdit;
   final TextEditingController jenisDiskon;
@@ -428,7 +487,6 @@ class _DiskonFormSheetState extends State<DiskonFormSheet> {
       );
 }
 
-// ----------- KONFIRMASI HAPUS POPUP -----------
 class DiskonDeleteDialog extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback onDelete;

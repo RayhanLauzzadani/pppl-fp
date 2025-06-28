@@ -28,21 +28,27 @@ class EditLayananPage extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF40A2E3),
-                  Color(0xFFBBE2EC),
-                ],
+                colors: [Color(0xFF40A2E3), Color(0xFFBBE2EC)],
               ),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(32),
                 bottomRight: Radius.circular(32),
               ),
             ),
-            padding: const EdgeInsets.only(top: 42, left: 0, right: 0, bottom: 22),
+            padding: const EdgeInsets.only(
+              top: 42,
+              left: 0,
+              right: 0,
+              bottom: 22,
+            ),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
                 const Expanded(
@@ -85,7 +91,9 @@ class EditLayananPage extends StatelessWidget {
                     if (isOwner) {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const DurasiLayananPage()),
+                        MaterialPageRoute(
+                          builder: (_) => DurasiLayananPage(laundryId: laundryId),
+                        ),
                       );
                     } else {
                       _showNoEditDialog(context);
@@ -103,7 +111,9 @@ class EditLayananPage extends StatelessWidget {
                     if (isOwner) {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const JenisLayananPage()),
+                        MaterialPageRoute(
+                          builder: (_) => JenisLayananPage(laundryId: laundryId),
+                        ),
                       );
                     } else {
                       _showNoEditDialog(context);
@@ -118,7 +128,12 @@ class EditLayananPage extends StatelessWidget {
                   enabled: isOwner,
                   onTap: () {
                     if (isOwner) {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const DiskonPage()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DiskonPage(laundryId: laundryId),
+                        ),
+                      );
                     } else {
                       _showNoEditDialog(context);
                     }
@@ -132,7 +147,12 @@ class EditLayananPage extends StatelessWidget {
                   enabled: isOwner,
                   onTap: () {
                     if (isOwner) {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AntarJemputPage()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AntarJemputPage(laundryId: laundryId),
+                        ),
+                      );
                     } else {
                       _showNoEditDialog(context);
                     }
@@ -149,7 +169,9 @@ class EditLayananPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => UpdateJenisLayananParfumPage(laundryId: laundryId),
+                          builder: (_) => UpdateJenisLayananParfumPage(
+                            laundryId: laundryId,
+                          ),
                         ),
                       );
                     } else {
@@ -170,7 +192,9 @@ class EditLayananPage extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text("Hanya dapat melihat"),
-        content: const Text("Hanya owner yang bisa mengedit layanan. Hubungi owner jika ingin menambah/mengubah."),
+        content: const Text(
+          "Hanya owner yang bisa mengedit layanan. Hubungi owner jika ingin menambah/mengubah.",
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

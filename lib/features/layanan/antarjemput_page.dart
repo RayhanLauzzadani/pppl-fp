@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AntarJemputPage extends StatefulWidget {
-  const AntarJemputPage({super.key});
+  final String laundryId;
+  const AntarJemputPage({super.key, required this.laundryId});
 
   @override
   State<AntarJemputPage> createState() => _AntarJemputPageState();
 }
 
 class _AntarJemputPageState extends State<AntarJemputPage> {
-  List<Map<String, String>> antarJemputList = [
-    {"harga": "0", "jarak": "≤ 2 Km"},
-    {"harga": "3.000", "jarak": "≤ 5 Km"},
-    {"harga": "8.000", "jarak": "> 5 Km"},
-  ];
+  CollectionReference<Map<String, dynamic>> get _colRef => FirebaseFirestore
+      .instance
+      .collection('laundries')
+      .doc(widget.laundryId)
+      .collection('antar_jemput');
 
-  void _showEditSheet({int? editIdx}) {
-    bool isEdit = editIdx != null;
+  void _showEditSheet({DocumentSnapshot? doc}) {
+    bool isEdit = doc != null;
     final TextEditingController hargaController = TextEditingController(
-        text: isEdit ? antarJemputList[editIdx]['harga'] : "");
+      text: isEdit ? doc['harga'].toString() : "",
+    );
     final TextEditingController jarakController = TextEditingController(
-        text: isEdit ? antarJemputList[editIdx]['jarak'] : "");
+      text: isEdit ? doc['jarak'] : "",
+    );
 
     showModalBottomSheet(
       context: context,
@@ -28,8 +32,8 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
       builder: (_) {
         return Padding(
           padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom + 15,
-              left: 0, right: 0, top: 0),
+            bottom: MediaQuery.of(context).viewInsets.bottom + 15,
+          ),
           child: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -87,25 +91,25 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
                       shadowColor: Colors.black12,
                       textStyle: const TextStyle(fontFamily: "Poppins"),
                     ),
-                    onPressed: () {
-                      if (hargaController.text.isEmpty ||
-                          jarakController.text.isEmpty) {
-                        return;
+                    onPressed: () async {
+                      final jarak = jarakController.text.trim();
+                      final harga = hargaController.text.trim();
+                      if (harga.isEmpty || jarak.isEmpty) return;
+
+                      if (isEdit) {
+                        await _colRef.doc(doc.id).update({
+                          'harga': harga,
+                          'jarak': jarak,
+                          'updatedAt': FieldValue.serverTimestamp(),
+                        });
+                      } else {
+                        await _colRef.add({
+                          'harga': harga,
+                          'jarak': jarak,
+                          'createdAt': FieldValue.serverTimestamp(),
+                        });
                       }
-                      setState(() {
-                        if (isEdit) {
-                          antarJemputList[editIdx!] = {
-                            "harga": hargaController.text,
-                            "jarak": jarakController.text,
-                          };
-                        } else {
-                          antarJemputList.add({
-                            "harga": hargaController.text,
-                            "jarak": jarakController.text,
-                          });
-                        }
-                      });
-                      Navigator.pop(context);
+                      if (mounted) Navigator.pop(context);
                     },
                     child: const Text(
                       "SIMPAN",
@@ -126,7 +130,7 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
     );
   }
 
-  void _showDeleteDialog(int idx) {
+  void _showDeleteDialog(DocumentSnapshot doc) {
     showDialog(
       context: context,
       builder: (_) => Dialog(
@@ -164,9 +168,12 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
                         foregroundColor: const Color(0xFF40A2E3),
                         textStyle: const TextStyle(fontFamily: "Poppins"),
                         side: const BorderSide(
-                            color: Color(0xFF40A2E3), width: 1.5),
+                          color: Color(0xFF40A2E3),
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                       onPressed: () => Navigator.pop(context),
                       child: const Text("Batal"),
@@ -179,19 +186,20 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
                         backgroundColor: const Color(0xFF40A2E3),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         elevation: 0,
                         textStyle: const TextStyle(fontFamily: "Poppins"),
                       ),
-                      onPressed: () {
-                        setState(() => antarJemputList.removeAt(idx));
-                        Navigator.pop(context);
+                      onPressed: () async {
+                        await doc.reference.delete();
+                        if (mounted) Navigator.pop(context);
                       },
                       child: const Text("Hapus"),
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
@@ -200,17 +208,17 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
   }
 
   static Widget _inputLabel(String text) => Padding(
-        padding: const EdgeInsets.only(left: 2, bottom: 2),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontFamily: "Poppins",
-            fontSize: 14.2,
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.only(left: 2, bottom: 2),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontFamily: "Poppins",
+        fontSize: 14.2,
+        color: Colors.white,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  );
 
   static InputDecoration _inputDecoration({String? hint}) {
     return InputDecoration(
@@ -251,12 +259,19 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
               ),
             ),
             padding: const EdgeInsets.only(
-                top: 42, left: 0, right: 0, bottom: 22),
+              top: 42,
+              left: 0,
+              right: 0,
+              bottom: 22,
+            ),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                      color: Colors.white, size: 22),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
                 const Expanded(
@@ -277,100 +292,162 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
             ),
           ),
           const SizedBox(height: 17),
-          // LIST LAYANAN ANTAR JEMPUT
+          // LIST LAYANAN ANTAR JEMPUT (Firestore)
           Expanded(
-            child: ListView.builder(
-              itemCount: antarJemputList.length,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
-              itemBuilder: (context, idx) {
-                final item = antarJemputList[idx];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 17),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF6ED),
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.14),
-                        blurRadius: 13,
-                        offset: const Offset(0, 8),
-                        spreadRadius: 0.5,
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _colRef.orderBy('jarak').snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  // Data kosong dengan motivasi/empty box
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(38.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            "assets/icons/empty_box.png", // Ganti aset sesuai punya kamu
+                            width: 120,
+                            height: 120,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Belum ada layanan antar jemput.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 16.7,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          const Text(
+                            "Tambah daftar layanan & tarif antar jemput,\nagar pelangganmu makin mudah order dari mana saja.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 14.2,
+                              color: Colors.black45,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 15),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Harga & Jarak
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Rp. ${item['harga']}",
-                                style: const TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 18,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                item["jarak"]!,
-                                style: const TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14.2,
-                                  color: Color(0xFF565656),
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Tombol Edit
-                        Container(
-                          margin: const EdgeInsets.only(left: 8, right: 7),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFBBE2EC),
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                          child: IconButton(
-                            onPressed: () => _showEditSheet(editIdx: idx),
-                            icon: const Icon(Icons.edit, color: Color(0xFF2B303A)),
-                            iconSize: 23,
-                            tooltip: "Edit",
-                          ),
-                        ),
-                        // Tombol Hapus
-                        Container(
-                          margin: const EdgeInsets.only(left: 0),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFBBE2EC),
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                          child: IconButton(
-                            onPressed: () => _showDeleteDialog(idx),
-                            icon: const Icon(Icons.delete, color: Color(0xFF2B303A)),
-                            iconSize: 23,
-                            tooltip: "Hapus",
-                          ),
-                        ),
-                      ],
                     ),
+                  );
+                }
+                final docs = snapshot.data!.docs;
+                return ListView.builder(
+                  itemCount: docs.length,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 7,
                   ),
+                  itemBuilder: (context, idx) {
+                    final item = docs[idx];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 17),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF6ED),
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withAlpha((0.93 * 255).toInt()),
+                            blurRadius: 13,
+                            offset: const Offset(0, 8),
+                            spreadRadius: 0.5,
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 15,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Harga & Jarak
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Rp. ${item['harga']}",
+                                    style: const TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 18,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    item["jarak"],
+                                    style: const TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 14.2,
+                                      color: Color(0xFF565656),
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Tombol Edit
+                            Container(
+                              margin: const EdgeInsets.only(left: 8, right: 7),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFBBE2EC),
+                                borderRadius: BorderRadius.circular(9),
+                              ),
+                              child: IconButton(
+                                onPressed: () => _showEditSheet(doc: item),
+                                icon: const Icon(
+                                  Icons.edit,
+                                  color: Color(0xFF2B303A),
+                                ),
+                                iconSize: 23,
+                                tooltip: "Edit",
+                              ),
+                            ),
+                            // Tombol Hapus
+                            Container(
+                              margin: const EdgeInsets.only(left: 0),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFBBE2EC),
+                                borderRadius: BorderRadius.circular(9),
+                              ),
+                              child: IconButton(
+                                onPressed: () => _showDeleteDialog(item),
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Color(0xFF2B303A),
+                                ),
+                                iconSize: 23,
+                                tooltip: "Hapus",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
           ),
           // Tombol Tambah Antar Jemput
           Padding(
-            padding:
-                const EdgeInsets.only(bottom: 30, top: 3, left: 30, right: 30),
+            padding: const EdgeInsets.only(
+              bottom: 30,
+              top: 3,
+              left: 30,
+              right: 30,
+            ),
             child: SizedBox(
               width: double.infinity,
               height: 46,

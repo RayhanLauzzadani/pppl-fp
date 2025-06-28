@@ -21,6 +21,12 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
   String? kodeLaundryUser;
   bool _loadingKodeLaundry = true;
 
+  /// Data sementara hasil pop dari PilihLayananPage
+  Map<String, dynamic>? _draftPesanan;
+
+  /// Untuk track draft per jenis layanan
+  final Map<String, Map<String, dynamic>> _draftPerJenis = {};
+
   @override
   void initState() {
     super.initState();
@@ -35,10 +41,11 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
       });
       return;
     }
-    // Cari kodeLaundry di semua laundry (karena karyawan tidak tahu kode laundrynya sendiri)
-    final snapshots = await FirebaseFirestore.instance.collection('laundries').get();
+    final snapshots =
+        await FirebaseFirestore.instance.collection('laundries').get();
     for (var doc in snapshots.docs) {
-      final userDoc = await doc.reference.collection('users').doc(user.uid).get();
+      final userDoc =
+          await doc.reference.collection('users').doc(user.uid).get();
       if (userDoc.exists) {
         setState(() {
           kodeLaundryUser = doc.id;
@@ -67,7 +74,7 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
     return RegExp(r'^08[0-9]{8,11}$').hasMatch(phone);
   }
 
-  void _onLayananTap(String label, String desc) {
+  Future<void> _onLayananTap(String label, String desc) async {
     String nama = namaController.text.trim();
     String wa = waController.text.trim();
 
@@ -84,7 +91,8 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
     if (!_isValidName(nama)) {
       _scaffoldMessengerKey.currentState?.showSnackBar(
         const SnackBar(
-          content: Text('Nama hanya boleh huruf dan spasi, minimal 2 karakter!'),
+          content:
+              Text('Nama hanya boleh huruf dan spasi, minimal 2 karakter!'),
           backgroundColor: Colors.orange,
           duration: Duration(seconds: 2),
         ),
@@ -94,7 +102,8 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
     if (!_isValidPhone(wa)) {
       _scaffoldMessengerKey.currentState?.showSnackBar(
         const SnackBar(
-          content: Text('Nomor Whatsapp tidak valid! Harus diawali 08 dan 10-13 digit angka.'),
+          content: Text(
+              'Nomor Whatsapp tidak valid! Harus diawali 08 dan 10-13 digit angka.'),
           backgroundColor: Colors.orange,
           duration: Duration(seconds: 2),
         ),
@@ -113,7 +122,10 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
       return;
     }
 
-    Navigator.push(
+    // Ambil draft sesuai desc/jenis (per kategori layanan)
+    final draft = _draftPerJenis[desc];
+
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => PilihLayananPage(
@@ -122,9 +134,20 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
           layanan: label,
           desc: desc,
           kodeLaundry: kodeLaundryUser!,
+          barangCustom: draft?['barangCustom'],
+          barangQtyCustom: draft?['barangQty'],
+          beratKgSebelumnya: draft?['beratKg'],
         ),
       ),
     );
+
+    if (result != null && result is Map<String, dynamic>) {
+      setState(() {
+        // Simpan draft per kategori layanan (desc)
+        _draftPerJenis[desc] = result;
+        _draftPesanan = result; // (optional) jika mau tetap ambil draft terakhir
+      });
+    }
   }
 
   @override
@@ -144,7 +167,10 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
                     ),
                     Expanded(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -168,20 +194,27 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
                                   horizontal: 13,
                                 ),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(9)),
-                                  borderSide: BorderSide(color: Color(0xFFD2D2D2)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(9)),
+                                  borderSide:
+                                      BorderSide(color: Color(0xFFD2D2D2)),
                                 ),
                                 enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(9)),
-                                  borderSide: BorderSide(color: Color(0xFFD2D2D2)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(9)),
+                                  borderSide:
+                                      BorderSide(color: Color(0xFFD2D2D2)),
                                 ),
                                 focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(9)),
-                                  borderSide: BorderSide(color: Color(0xFF4EA6ED)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(9)),
+                                  borderSide:
+                                      BorderSide(color: Color(0xFF4EA6ED)),
                                 ),
                                 hintText: "Contoh: Budi Santoso",
                               ),
-                              style: TextStyle(fontSize: 15.8, fontFamily: 'Poppins'),
+                              style: TextStyle(
+                                  fontSize: 15.8, fontFamily: 'Poppins'),
                               keyboardType: TextInputType.name,
                             ),
                             const SizedBox(height: 16),
@@ -206,40 +239,95 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
                                   horizontal: 13,
                                 ),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(9)),
-                                  borderSide: BorderSide(color: Color(0xFFD2D2D2)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(9)),
+                                  borderSide:
+                                      BorderSide(color: Color(0xFFD2D2D2)),
                                 ),
                                 enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(9)),
-                                  borderSide: BorderSide(color: Color(0xFFD2D2D2)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(9)),
+                                  borderSide:
+                                      BorderSide(color: Color(0xFFD2D2D2)),
                                 ),
                                 focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(9)),
-                                  borderSide: BorderSide(color: Color(0xFF4EA6ED)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(9)),
+                                  borderSide:
+                                      BorderSide(color: Color(0xFF4EA6ED)),
                                 ),
                               ),
-                              style: TextStyle(fontSize: 15.8, fontFamily: 'Poppins'),
+                              style: TextStyle(
+                                  fontSize: 15.8, fontFamily: 'Poppins'),
                               keyboardType: TextInputType.phone,
                             ),
                             const SizedBox(height: 28),
-                            // Pilihan Layanan
-                            LayananTile(
-                              label: "3 Hari",
-                              desc: "Reguler",
-                              onTap: () => _onLayananTap("3 Hari", "Reguler"),
-                            ),
-                            const SizedBox(height: 18),
-                            LayananTile(
-                              label: "1 Hari",
-                              desc: "Ekspress",
-                              onTap: () => _onLayananTap("1 Hari", "Ekspress"),
-                            ),
-                            const SizedBox(height: 18),
-                            LayananTile(
-                              label: "3 Jam",
-                              desc: "Kilat",
-                              onTap: () => _onLayananTap("3 Jam", "Kilat"),
-                            ),
+                            // Pilihan Layanan Dinamis dari Firestore
+                            if (kodeLaundryUser != null)
+                              StreamBuilder<QuerySnapshot>(
+                                stream: FirebaseFirestore.instance
+                                    .collection('laundries')
+                                    .doc(kodeLaundryUser)
+                                    .collection('durasi_layanan')
+                                    .orderBy('jenis')
+                                    .snapshots(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                  if (!snapshot.hasData ||
+                                      snapshot.data!.docs.isEmpty) {
+                                    return Center(
+                                      child: Column(
+                                        children: [
+                                          const SizedBox(height: 34),
+                                          Image.asset(
+                                            "assets/icons/empty_box.png",
+                                            width: 120,
+                                            height: 120,
+                                          ),
+                                          const SizedBox(height: 17),
+                                          const Text(
+                                            "Belum ada data durasi layanan.\n"
+                                            "Silakan tambahkan durasi layanan\n"
+                                            "melalui menu Durasi Layanan.",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontFamily: "Poppins",
+                                              fontSize: 15.3,
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }
+                                  final docs = snapshot.data!.docs;
+                                  return Column(
+                                    children: docs.map((doc) {
+                                      final data =
+                                          doc.data() as Map<String, dynamic>;
+                                      final String label =
+                                          data['durasi'] ?? 'Durasi';
+                                      final String desc =
+                                          data['jenis'] ?? 'Jenis';
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                            bottom: 18.0),
+                                        child: LayananTile(
+                                          label: label,
+                                          desc: desc,
+                                          onTap: () =>
+                                              _onLayananTap(label, desc),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  );
+                                },
+                              ),
                           ],
                         ),
                       ),

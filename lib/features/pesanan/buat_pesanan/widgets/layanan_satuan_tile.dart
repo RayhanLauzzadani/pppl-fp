@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class LayananSatuanTile extends StatelessWidget {
   final String nama;
   final int harga;
+  final String tipe; // <-- TAMBAH PARAMETER
   final int jumlah;
   final VoidCallback onTambah;
   final VoidCallback onKurang;
@@ -11,6 +12,7 @@ class LayananSatuanTile extends StatelessWidget {
     Key? key,
     required this.nama,
     required this.harga,
+    required this.tipe, // <-- TAMBAH
     required this.jumlah,
     required this.onTambah,
     required this.onKurang,
@@ -44,7 +46,7 @@ class LayananSatuanTile extends StatelessWidget {
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 2),
               child: Text(
-                'Satuan\nRp. ${_currencyFormat(harga)}',
+                '$tipe\nRp. ${_currencyFormat(harga)}', // <-- GANTI "Satuan" DENGAN tipe
                 style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 12.7,

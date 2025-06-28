@@ -1,171 +1,228 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DurasiLayananPage extends StatefulWidget {
-  const DurasiLayananPage({super.key});
+  final String laundryId;
+
+  const DurasiLayananPage({super.key, required this.laundryId});
 
   @override
   State<DurasiLayananPage> createState() => _DurasiLayananPageState();
 }
 
 class _DurasiLayananPageState extends State<DurasiLayananPage> {
-  List<Map<String, String>> durasiList = [
-    {"durasi": "3 Hari", "jenis": "Reguler"},
-    {"durasi": "1 Hari", "jenis": "Ekspress"},
-    {"durasi": "3 Jam", "jenis": "Kilat"},
-  ];
+  final List<String> _jenisList = ['Reguler', 'Ekspress', 'Kilat'];
 
-  void _showDurasiBottomSheet({int? editIdx}) {
-    final namaController = TextEditingController(
-        text: editIdx != null ? durasiList[editIdx]['jenis'] ?? '' : '');
-    final durasiController = TextEditingController(
-        text: editIdx != null ? durasiList[editIdx]['durasi'] ?? '' : '');
+  // Modal tambah/edit durasi layanan
+  void _showDurasiBottomSheet({DocumentSnapshot? editDoc}) {
+    String _jenisSelected = editDoc != null ? editDoc['jenis'] : _jenisList[0];
+    final TextEditingController durasiController = TextEditingController(
+      text: editDoc != null ? (editDoc['durasi'] ?? '') : '',
+    );
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withOpacity(0.22),
       builder: (context) {
-        return AnimatedPadding(
-          padding: MediaQuery.of(context).viewInsets,
-          duration: const Duration(milliseconds: 230),
-          curve: Curves.easeOut,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-            decoration: const BoxDecoration(
-              color: Colors.transparent,
-            ),
+        return StatefulBuilder(
+          builder: (context, setStateSB) => AnimatedPadding(
+            padding: MediaQuery.of(context).viewInsets,
+            duration: const Duration(milliseconds: 200),
             child: Container(
               margin: const EdgeInsets.only(top: 40),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFF40A2E3),
-                    Color(0xFFBBE2EC),
-                  ],
+                  colors: [Color(0xFF40A2E3), Color(0xFFBBE2EC)],
                 ),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(28),
                   topRight: Radius.circular(28),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 23),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      editIdx != null
-                          ? "Edit Durasi Layanan"
-                          : "Tambah Durasi Layanan",
-                      style: const TextStyle(
-                        fontFamily: "Poppins",
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18.5,
-                      ),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 23),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    editDoc != null
+                        ? "Edit Durasi Layanan"
+                        : "Tambah Durasi Layanan",
+                    style: const TextStyle(
+                      fontFamily: "Poppins",
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.5,
                     ),
-                    const SizedBox(height: 23),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            "Nama Layanan",
-                            style: TextStyle(
-                                fontFamily: "Poppins",
-                                fontSize: 15.2,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                        const SizedBox(width: 13),
-                        Expanded(
-                          flex: 2,
-                          child: _inputBox(
-                            controller: namaController,
-                            hint: "Reguler",
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            "Durasi",
-                            style: TextStyle(
-                                fontFamily: "Poppins",
-                                fontSize: 15.2,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                        const SizedBox(width: 13),
-                        Expanded(
-                          flex: 2,
-                          child: _inputBox(
-                            controller: durasiController,
-                            hint: "Contoh: 1 Hari",
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 25),
-                    const Divider(height: 1, color: Color(0x55B6C7E4)),
-                    const SizedBox(height: 14),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 45,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF40A2E3),
-                          foregroundColor: Colors.white,
-                          elevation: 4,
-                          shadowColor: Colors.black12,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          textStyle: const TextStyle(fontFamily: "Poppins"),
-                        ),
-                        onPressed: () {
-                          String nama = namaController.text.trim();
-                          String durasi = durasiController.text.trim();
-                          if (nama.isEmpty || durasi.isEmpty) return;
-                          setState(() {
-                            if (editIdx != null) {
-                              durasiList[editIdx] = {
-                                "durasi": durasi,
-                                "jenis": nama
-                              };
-                            } else {
-                              durasiList.add({
-                                "durasi": durasi,
-                                "jenis": nama,
-                              });
-                            }
-                          });
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          "SIMPAN",
+                  ),
+                  const SizedBox(height: 23),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          "Nama Layanan",
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.7,
-                            letterSpacing: 1.1,
-                            fontFamily: "Poppins",
+                              fontFamily: "Poppins",
+                              fontSize: 15.2,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                      const SizedBox(width: 13),
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF6E9),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.09),
+                                blurRadius: 7,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: DropdownButton<String>(
+                            value: _jenisSelected,
+                            isExpanded: true,
+                            underline: const SizedBox(),
+                            items: _jenisList
+                                .map((e) => DropdownMenuItem(
+                                      value: e,
+                                      child: Text(
+                                        e,
+                                        style: const TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 15.7,
+                                        ),
+                                      ),
+                                    ))
+                                .toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                setStateSB(() => _jenisSelected = val);
+                              }
+                            },
                           ),
                         ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          "Durasi",
+                          style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 15.2,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                      const SizedBox(width: 13),
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF6E9),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.09),
+                                blurRadius: 7,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: TextField(
+                            controller: durasiController,
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 11),
+                              hintText: "Contoh: 1 Hari",
+                              hintStyle: TextStyle(
+                                fontFamily: "Poppins",
+                                color: Colors.grey,
+                                fontSize: 15.5,
+                              ),
+                              border: InputBorder.none,
+                            ),
+                            style: const TextStyle(
+                                fontFamily: "Poppins",
+                                fontSize: 15.7,
+                                color: Colors.black87),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 25),
+                  const Divider(height: 1, color: Color(0x55B6C7E4)),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 45,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF40A2E3),
+                        foregroundColor: Colors.white,
+                        elevation: 4,
+                        shadowColor: Colors.black12,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        textStyle: const TextStyle(fontFamily: "Poppins"),
+                      ),
+                      onPressed: () async {
+                        String jenis = _jenisSelected;
+                        String durasi = durasiController.text.trim();
+                        if (durasi.isEmpty) return;
+
+                        final ref = FirebaseFirestore.instance
+                            .collection('laundries')
+                            .doc(widget.laundryId)
+                            .collection('durasi_layanan');
+
+                        if (editDoc == null) {
+                          // Tambah baru
+                          await ref.add({
+                            'jenis': jenis,
+                            'durasi': durasi,
+                            'createdAt': FieldValue.serverTimestamp(),
+                          });
+                        } else {
+                          // Edit
+                          await ref.doc(editDoc.id).update({
+                            'jenis': jenis,
+                            'durasi': durasi,
+                            'updatedAt': FieldValue.serverTimestamp(),
+                          });
+                        }
+                        if (mounted) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: const Text(
+                        "SIMPAN",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.7,
+                          letterSpacing: 1.1,
+                          fontFamily: "Poppins",
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 18),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 18),
+                ],
               ),
             ),
           ),
@@ -174,7 +231,8 @@ class _DurasiLayananPageState extends State<DurasiLayananPage> {
     );
   }
 
-  void _showDeleteDialog(int idx) {
+  // Konfirmasi hapus
+  void _showDeleteDialog(DocumentSnapshot doc) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -187,7 +245,7 @@ class _DurasiLayananPageState extends State<DurasiLayananPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                "assets/images/icon_delete_list.png", // ganti sesuai asset kamu
+                "assets/images/icon_delete_list.png",
                 width: 98,
                 height: 98,
                 fit: BoxFit.contain,
@@ -227,11 +285,11 @@ class _DurasiLayananPageState extends State<DurasiLayananPage> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          durasiList.removeAt(idx);
-                        });
-                        Navigator.pop(context);
+                      onPressed: () async {
+                        await doc.reference.delete();
+                        if (mounted) {
+                          Navigator.pop(context);
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF40A2E3),
@@ -253,36 +311,6 @@ class _DurasiLayananPageState extends State<DurasiLayananPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  static Widget _inputBox(
-      {required TextEditingController controller, required String hint}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFF6E9),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.09),
-            blurRadius: 7,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 15, vertical: 11),
-          hintText: hint,
-          hintStyle: const TextStyle(
-              fontFamily: "Poppins", color: Colors.grey, fontSize: 15.5),
-          border: InputBorder.none,
-        ),
-        style: const TextStyle(
-            fontFamily: "Poppins", fontSize: 15.7, color: Colors.black87),
       ),
     );
   }
@@ -359,93 +387,134 @@ class _DurasiLayananPageState extends State<DurasiLayananPage> {
             ],
           ),
           const SizedBox(height: 22),
-          // List durasi
+          // List durasi (Firestore)
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              itemCount: durasiList.length,
-              itemBuilder: (context, idx) {
-                final item = durasiList[idx];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 22),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFDF6ED),
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.14),
-                        blurRadius: 14,
-                        offset: const Offset(0, 7),
-                        spreadRadius: 0.2,
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('laundries')
+                  .doc(widget.laundryId)
+                  .collection('durasi_layanan')
+                  .orderBy('jenis')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  // Data kosong
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(38.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset("assets/icons/empty_box.png",
+                              width: 120, height: 120),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Belum ada durasi layanan.\nSilakan tambah terlebih dahulu.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 16.7,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Durasi
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item["durasi"]!,
-                                style: const TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 18,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                item["jenis"]!,
-                                style: const TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14.2,
-                                  color: Color(0xFF565656),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Tombol Edit
-                        Container(
-                          margin: const EdgeInsets.only(left: 8, right: 7),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFBBE2EC),
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                          child: IconButton(
-                            onPressed: () => _showDurasiBottomSheet(editIdx: idx),
-                            icon:
-                                const Icon(Icons.edit, color: Color(0xFF2B303A)),
-                            iconSize: 23,
-                            tooltip: "Edit",
-                          ),
-                        ),
-                        // Tombol Hapus
-                        Container(
-                          margin: const EdgeInsets.only(left: 0),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFBBE2EC),
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                          child: IconButton(
-                            onPressed: () => _showDeleteDialog(idx),
-                            icon: const Icon(Icons.delete,
-                                color: Color(0xFF2B303A)),
-                            iconSize: 23,
-                            tooltip: "Hapus",
-                          ),
-                        ),
-                      ],
                     ),
-                  ),
+                  );
+                }
+                final docs = snapshot.data!.docs;
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  itemCount: docs.length,
+                  itemBuilder: (context, idx) {
+                    final item = docs[idx];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 22),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFDF6ED),
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.14),
+                            blurRadius: 14,
+                            offset: const Offset(0, 7),
+                            spreadRadius: 0.2,
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 15),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Durasi
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item['durasi'],
+                                    style: const TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 18,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    item['jenis'],
+                                    style: const TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 14.2,
+                                      color: Color(0xFF565656),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Tombol Edit
+                            Container(
+                              margin:
+                                  const EdgeInsets.only(left: 8, right: 7),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFBBE2EC),
+                                borderRadius: BorderRadius.circular(9),
+                              ),
+                              child: IconButton(
+                                onPressed: () =>
+                                    _showDurasiBottomSheet(editDoc: item),
+                                icon: const Icon(Icons.edit,
+                                    color: Color(0xFF2B303A)),
+                                iconSize: 23,
+                                tooltip: "Edit",
+                              ),
+                            ),
+                            // Tombol Hapus
+                            Container(
+                              margin: const EdgeInsets.only(left: 0),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFBBE2EC),
+                                borderRadius: BorderRadius.circular(9),
+                              ),
+                              child: IconButton(
+                                onPressed: () => _showDeleteDialog(item),
+                                icon: const Icon(Icons.delete,
+                                    color: Color(0xFF2B303A)),
+                                iconSize: 23,
+                                tooltip: "Hapus",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),

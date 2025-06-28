@@ -6,10 +6,12 @@ class UpdateJenisLayananParfumPage extends StatefulWidget {
   const UpdateJenisLayananParfumPage({super.key, required this.laundryId});
 
   @override
-  State<UpdateJenisLayananParfumPage> createState() => _UpdateJenisLayananParfumPageState();
+  State<UpdateJenisLayananParfumPage> createState() =>
+      _UpdateJenisLayananParfumPageState();
 }
 
-class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumPage> {
+class _UpdateJenisLayananParfumPageState
+    extends State<UpdateJenisLayananParfumPage> {
   final TextEditingController _searchController = TextEditingController();
   String get laundryId => widget.laundryId;
 
@@ -26,21 +28,27 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF40A2E3),
-                  Color(0xFFBBE2EC),
-                ],
+                colors: [Color(0xFF40A2E3), Color(0xFFBBE2EC)],
               ),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(32),
                 bottomRight: Radius.circular(32),
               ),
             ),
-            padding: const EdgeInsets.only(top: 42, left: 0, right: 0, bottom: 22),
+            padding: const EdgeInsets.only(
+              top: 42,
+              left: 0,
+              right: 0,
+              bottom: 22,
+            ),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
                 const Expanded(
@@ -90,7 +98,10 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
                         isDense: true,
                         contentPadding: EdgeInsets.symmetric(vertical: 14),
                       ),
-                      style: const TextStyle(fontFamily: "Poppins", fontSize: 15.2),
+                      style: const TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 15.2,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 7),
@@ -121,12 +132,49 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
                 }).toList();
 
                 if (filtered.isEmpty) {
-                  return const Center(child: Text("Belum ada parfum"));
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(38.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            "assets/icons/empty_box.png", // Ganti sesuai asset kosong kamu
+                            width: 120,
+                            height: 120,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Belum ada parfum yang tersedia.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 16.7,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          const Text(
+                            "Tambahkan jenis parfum favorit pelangganmu untuk\nmemberi pengalaman laundry yang lebih wangi.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 14.2,
+                              color: Colors.black45,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 }
 
                 return ListView.builder(
                   itemCount: filtered.length,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 7,
+                  ),
                   itemBuilder: (context, idx) {
                     final doc = filtered[idx];
                     final parfum = doc.data() as Map<String, dynamic>;
@@ -145,7 +193,10 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
                         ],
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 15,
+                        ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -178,7 +229,9 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
                                     ),
                                   ),
                                   Text(
-                                    parfum["harga"] != null ? "Rp. ${parfum["harga"]}" : "Rp. 0",
+                                    parfum["harga"] != null
+                                        ? "Rp. ${parfum["harga"]}"
+                                        : "Rp. 0",
                                     style: const TextStyle(
                                       fontFamily: "Poppins",
                                       fontStyle: FontStyle.italic,
@@ -197,8 +250,15 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
                                 borderRadius: BorderRadius.circular(9),
                               ),
                               child: IconButton(
-                                onPressed: () => _showParfumModal(context, docId: doc.id, parfum: parfum),
-                                icon: const Icon(Icons.edit, color: Color(0xFF2B303A)),
+                                onPressed: () => _showParfumModal(
+                                  context,
+                                  docId: doc.id,
+                                  parfum: parfum,
+                                ),
+                                icon: const Icon(
+                                  Icons.edit,
+                                  color: Color(0xFF2B303A),
+                                ),
                                 iconSize: 23,
                                 tooltip: "Edit",
                               ),
@@ -211,8 +271,12 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
                                 borderRadius: BorderRadius.circular(9),
                               ),
                               child: IconButton(
-                                onPressed: () => _showDeleteParfumDialog(context, doc.id),
-                                icon: const Icon(Icons.delete, color: Color(0xFF2B303A)),
+                                onPressed: () =>
+                                    _showDeleteParfumDialog(context, doc.id),
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Color(0xFF2B303A),
+                                ),
                                 iconSize: 23,
                                 tooltip: "Hapus",
                               ),
@@ -228,7 +292,12 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
           ),
           // TOMBOL TAMBAH PARFUM
           Padding(
-            padding: const EdgeInsets.only(bottom: 30, top: 3, left: 30, right: 30),
+            padding: const EdgeInsets.only(
+              bottom: 30,
+              top: 3,
+              left: 30,
+              right: 30,
+            ),
             child: SizedBox(
               width: double.infinity,
               height: 46,
@@ -259,9 +328,15 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
   }
 
   // MODAL TAMBAH / EDIT
-  void _showParfumModal(BuildContext context, {String? docId, Map<String, dynamic>? parfum}) {
+  void _showParfumModal(
+    BuildContext context, {
+    String? docId,
+    Map<String, dynamic>? parfum,
+  }) {
     final _namaController = TextEditingController(text: parfum?["nama"] ?? '');
-    final _hargaController = TextEditingController(text: parfum?["harga"]?.toString() ?? '');
+    final _hargaController = TextEditingController(
+      text: parfum?["harga"]?.toString() ?? '',
+    );
 
     showModalBottomSheet(
       context: context,
@@ -269,7 +344,9 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -314,12 +391,19 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
                       filled: true,
                       fillColor: Colors.white,
                       hintText: "Nama parfum",
-                      hintStyle: const TextStyle(fontFamily: "Poppins", color: Colors.grey, fontSize: 15),
+                      hintStyle: const TextStyle(
+                        fontFamily: "Poppins",
+                        color: Colors.grey,
+                        fontSize: 15,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(13),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 14,
+                      ),
                     ),
                     style: const TextStyle(fontFamily: "Poppins", fontSize: 15),
                   ),
@@ -345,12 +429,19 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
                       filled: true,
                       fillColor: Colors.white,
                       hintText: "cth: 2000",
-                      hintStyle: const TextStyle(fontFamily: "Poppins", color: Colors.grey, fontSize: 15),
+                      hintStyle: const TextStyle(
+                        fontFamily: "Poppins",
+                        color: Colors.grey,
+                        fontSize: 15,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(13),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 14,
+                      ),
                     ),
                     style: const TextStyle(fontFamily: "Poppins", fontSize: 15),
                   ),
@@ -391,7 +482,7 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
                                 .collection('parfum')
                                 .add(data);
                           }
-                          Navigator.pop(context);
+                          if (context.mounted) Navigator.pop(context);
                         }
                       },
                       child: Text(
@@ -428,7 +519,7 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                "assets/images/icon_delete_list.png", // Ganti sesuai aset iconmu
+                "assets/images/icon_delete_list.png",
                 width: 98,
                 height: 98,
                 fit: BoxFit.contain,
@@ -475,7 +566,7 @@ class _UpdateJenisLayananParfumPageState extends State<UpdateJenisLayananParfumP
                             .collection('parfum')
                             .doc(docId)
                             .delete();
-                        Navigator.pop(context);
+                        if (context.mounted) Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF40A2E3),
