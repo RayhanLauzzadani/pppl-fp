@@ -49,7 +49,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
   @override
   void initState() {
     super.initState();
-    // Restore barang & qty
     if (widget.barangCustom != null) {
       barangList = List<Map<String, dynamic>>.from(widget.barangCustom!);
     }
@@ -121,7 +120,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
   }
 
   int _hargaKiloan(List<Map<String, dynamic>> layananList) {
-    // Selalu tetap 10000 per kilo, TIDAK tergantung Firestore
     return 10000;
   }
 
@@ -144,7 +142,7 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
     if (!barangQty.containsKey(barang)) {
       setState(() {
         barangList.add({'title': barang});
-        barangQty[barang] = 0; // default qty = 0
+        barangQty[barang] = 0;
       });
     }
     setState(() {
@@ -170,7 +168,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
           child: Column(
             children: [
               GradientAppBar(title: 'Buat Pesanan', onBack: () => _onWillPop()),
-              // SEARCH BOX
               Padding(
                 padding: const EdgeInsets.only(top: 18, left: 18, right: 18),
                 child: Container(
@@ -212,8 +209,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                   ),
                 ),
               ),
-
-              // Field Berat
               Padding(
                 padding: const EdgeInsets.only(
                   top: 12,
@@ -276,8 +271,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                   ],
                 ),
               ),
-
-              // Field Nama Barang (Custom/Satuan)
               Padding(
                 padding: const EdgeInsets.only(
                   top: 12,
@@ -352,8 +345,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                   ],
                 ),
               ),
-
-              // LIST LAYANAN & BARANG
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
@@ -466,8 +457,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                   },
                 ),
               ),
-
-              // INFO USER & BADGE (Kg/Sat)
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('laundries')
@@ -537,8 +526,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                   );
                 },
               ),
-
-              // TOTAL & NEXT BUTTON
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('laundries')
@@ -562,10 +549,9 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                   }
                   final totalHarga = _totalHarga(layananList);
 
-                  // === Tambahan mapping hargaLayanan, tipeLayanan, hargaKiloan ===
                   final Map<String, int> hargaLayanan = {};
                   final Map<String, String> tipeLayanan = {};
-                  int hargaKiloan = 10000; // default
+                  int hargaKiloan = 10000;
 
                   for (final l in layananList) {
                     final nama = l['nama'] ?? '';
@@ -579,7 +565,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                       hargaKiloan = hargaLayanan[nama]!;
                     }
                   }
-                  // =============================================================
 
                   return Container(
                     padding: const EdgeInsets.symmetric(
@@ -620,14 +605,14 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                         ),
                         InkWell(
                           borderRadius: BorderRadius.circular(21),
-                          onTap: () {
+                          onTap: () async {
                             showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,
                               backgroundColor: Colors.transparent,
                               builder: (_) => BottomSheetKonfirmasi(
                                 kodeLaundry: widget.kodeLaundry,
-                                onSubmit: (konfirmasiData) {
+                                onSubmit: (konfirmasiData) async {
                                   final pesananData = {
                                     'nama': widget.nama,
                                     'whatsapp': widget.whatsapp,
@@ -639,27 +624,45 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                     'barangQty': barangQty,
                                     'jumlah': jumlah,
                                     'totalHarga': _totalHarga(layananList),
-                                    // ========= Tambahan mapping ==========
                                     'hargaLayanan': hargaLayanan,
                                     'layananTipe': tipeLayanan,
                                     'hargaKiloan': hargaKiloan,
-                                    // ====================================
                                     'jenisParfum': konfirmasiData['jenisParfum'],
                                     'antarJemput': konfirmasiData['antarJemput'],
                                     'diskon': konfirmasiData['diskon'],
                                     'catatan': konfirmasiData['catatan'],
                                   };
-
-                                  Navigator.pop(context);
-
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => DetailBuatPesananPage(
-                                        data: pesananData,
-                                      ),
-                                    ),
-                                  );
+                                  try {
+                                    await FirebaseFirestore.instance
+                                        .collection('laundries')
+                                        .doc(widget.kodeLaundry)
+                                        .collection('pesanan')
+                                        .add({
+                                          ...pesananData,
+                                          'createdAt': FieldValue.serverTimestamp(),
+                                          'status': 'belum_mulai',
+                                        });
+                                    if (mounted) Navigator.pop(context);
+                                    if (mounted) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => DetailBuatPesananPage(
+                                            data: pesananData,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Gagal menyimpan pesanan: $e'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  }
                                 },
                               ),
                             );

@@ -112,9 +112,8 @@ class DetailPesananScaffold extends StatelessWidget {
             padding: EdgeInsets.zero,
             children: [
               Container(
-                // Full width card: hilangkan margin horizontal!
-                margin: const EdgeInsets.only(top: 15, bottom: 8), // No left/right margin
-                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 18), // Padding horizontal 0!
+                margin: const EdgeInsets.only(top: 15, bottom: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 18),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(22),
@@ -127,11 +126,11 @@ class DetailPesananScaffold extends StatelessWidget {
                   ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16), // Biar konten dalam card rapi, pakai padding kecil
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // HEADER STACK: Nota, user, badge status
+                      // HEADER: Nota, user, badge status
                       Stack(
                         children: [
                           Column(
@@ -139,20 +138,21 @@ class DetailPesananScaffold extends StatelessWidget {
                             children: [
                               RichText(
                                 text: TextSpan(
-                                  text: "Nota–1157.1909.21 ",
+                                  text: "Nota–${pesanan.id} ",
                                   style: const TextStyle(
                                     fontFamily: "Poppins",
                                     color: Colors.black,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 15.3,
                                   ),
-                                  children: const [
+                                  children: [
                                     TextSpan(
-                                      text: "Reguler",
-                                      style: TextStyle(
+                                      text: pesanan.desc,
+                                      style: const TextStyle(
                                         fontFamily: "Poppins",
                                         fontWeight: FontWeight.w400,
                                         fontStyle: FontStyle.italic,
+                                        color: Colors.black,
                                       ),
                                     ),
                                   ],
@@ -185,7 +185,7 @@ class DetailPesananScaffold extends StatelessWidget {
                                         ),
                                       ),
                                       Text(
-                                        pesanan.noHp,
+                                        pesanan.whatsapp,
                                         style: const TextStyle(
                                           fontFamily: "Poppins",
                                           color: Colors.black87,
@@ -241,12 +241,11 @@ class DetailPesananScaffold extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Divider(color: Colors.grey[400], thickness: 0.8, height: 23),
-                      _infoRow("Status", "Dalam Antrian", boldValue: true),
-                      _infoRow("Tanggal Terima", "22/10/2024 – 15:37", boldValue: true),
-                      _infoRow("Tanggal Selesai", "26/10/2024 – 08:00", boldValue: true),
-                      _infoRow("Jenis Parfum", "Junjung Buih", boldValue: true),
-                      _infoRow("Layanan Antar Jemput", "≤ 2 Km", boldValue: true),
-                      _infoRow("Catatan", "-", boldValue: false),
+                      _infoRow("Status", status == "selesai" ? "Selesai" : (status == "proses" ? "Sedang Diproses" : "Dalam Antrian"), boldValue: true),
+                      _infoRow("Tanggal Terima", pesanan.createdAt != null
+                          ? "${pesanan.createdAt!.day}/${pesanan.createdAt!.month}/${pesanan.createdAt!.year}"
+                          : "-", boldValue: true),
+                      // Field info lain jika ada (tambahkan sesuai kebutuhan)
                       Divider(color: Colors.grey[400], thickness: 0.8, height: 24),
                       Row(
                         children: const [
@@ -339,7 +338,7 @@ class DetailPesananScaffold extends StatelessWidget {
         Container(
           width: double.infinity,
           color: const Color(0xFFFFF6E9),
-          padding: const EdgeInsets.symmetric(vertical: 16), // Hapus padding horizontal!
+          padding: const EdgeInsets.symmetric(vertical: 16),
           child: Row(
             children: [
               Expanded(
@@ -364,7 +363,7 @@ class DetailPesananScaffold extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 8), // Gap kecil, bisa dibuat 0 jika ingin total mentok
+              const SizedBox(width: 8),
               Expanded(
                 child: Builder(
                   builder: (context) {
