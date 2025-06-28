@@ -7,15 +7,10 @@ class DetailPesananSelesaiPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ganti dengan data sebenarnya di model kamu
-    final List<Map<String, dynamic>> laundryItems = [
-      {"nama": "Bed Cover Jumbo", "tipe": "Satuan", "pcs": 1, "harga": 30000},
-      {"nama": "Boneka Kecil", "tipe": "Satuan", "pcs": 3, "harga": 10000},
-      {"nama": "Cuci Setrika", "tipe": "Kiloan", "pcs": 4, "harga": 24000},
-      {"nama": "Selimut Single", "tipe": "Satuan", "pcs": 1, "harga": 10000},
-    ];
-
-    int totalBayar = laundryItems.fold(0, (v, item) => v + (item['harga'] as int));
+    // Jika barangList atau barangQty kosong, tampilkan teks "Tidak ada data"
+    final items = pesanan.barangList;
+    final qtyMap = pesanan.barangQty;
+    int totalBayar = pesanan.totalHarga;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -71,7 +66,7 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 44),
+                      SizedBox(width: 44),
                     ],
                   ),
                 ],
@@ -109,7 +104,7 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Nota–1157.1909.21  ${pesanan.tipe}",
+                                  "Nota–${pesanan.id}  ${pesanan.desc}",
                                   style: const TextStyle(
                                     fontFamily: "Poppins",
                                     color: Colors.black,
@@ -123,7 +118,8 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                                   children: [
                                     CircleAvatar(
                                       backgroundImage: NetworkImage(
-                                          'https://randomuser.me/api/portraits/men/32.jpg'),
+                                        'https://randomuser.me/api/portraits/men/32.jpg',
+                                      ),
                                       radius: 24,
                                     ),
                                     const SizedBox(width: 12),
@@ -139,9 +135,9 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                                             color: Colors.black,
                                           ),
                                         ),
-                                        const Text(
-                                          "+6281322214567",
-                                          style: TextStyle(
+                                        Text(
+                                          pesanan.whatsapp,
+                                          style: const TextStyle(
                                             fontFamily: "Poppins",
                                             color: Colors.black87,
                                             fontWeight: FontWeight.w400,
@@ -159,13 +155,13 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                           Column(
                             children: [
                               Icon(
-                                Icons.help_outline_rounded, // status selesai → cek mappingmu
+                                Icons.done_all_rounded, // status selesai
                                 color: Color(0xFF40A2E3),
                                 size: 26,
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                "Belum diambil", // atau "Sudah diambil"
+                                "Selesai",
                                 style: TextStyle(
                                   fontFamily: "Poppins",
                                   fontSize: 13,
@@ -178,12 +174,11 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Divider(color: Colors.grey[400], thickness: 0.8, height: 23),
-                      _infoRow("Status", "Dalam Antrian", boldValue: true),
-                      _infoRow("Tanggal Terima", "22/10/2024 – 15:37", boldValue: true),
-                      _infoRow("Tanggal Selesai", "26/10/2024 – 08:00", boldValue: true),
-                      _infoRow("Jenis Parfum", "Junjung Buih", boldValue: true),
-                      _infoRow("Layanan Antar Jemput", "≤ 2 Km", boldValue: true),
-                      _infoRow("Catatan", "-", boldValue: false),
+                      _infoRow("Status", pesanan.status == "selesai" ? "Selesai" : pesanan.status, boldValue: true),
+                      _infoRow("Tanggal Terima", pesanan.createdAt != null
+                          ? "${pesanan.createdAt!.day}/${pesanan.createdAt!.month}/${pesanan.createdAt!.year}"
+                          : "-", boldValue: true),
+                      // Tambah field lain sesuai kebutuhan
                       Divider(color: Colors.grey[400], thickness: 0.8, height: 24),
                       const Text(
                         "Layanan Laundry :",
@@ -193,16 +188,22 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                           fontSize: 14,
                         ),
                       ),
-                      ...laundryItems.map((item) => Container(
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      if (items.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text("Tidak ada barang."),
+                        )
+                      else
+                        ...items.map((item) {
+                          String nama = item['title'] ?? '-';
+                          int jumlah = qtyMap[nama] ?? 0;
+                          return Container(
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  item['nama'],
+                                  nama,
                                   style: const TextStyle(
                                     fontFamily: "Poppins",
                                     fontWeight: FontWeight.w600,
@@ -210,38 +211,16 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  item['tipe'],
-                                  style: const TextStyle(
-                                    fontFamily: "Poppins",
-                                    color: Colors.black54,
-                                    fontSize: 12.2,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  "${item['pcs']} pcs",
+                                  "$jumlah pcs",
                                   style: const TextStyle(
                                     fontFamily: "Poppins",
                                     fontSize: 13.5,
                                   ),
                                 ),
-                                Text(
-                                  "Rp. ${(item['harga'] as int).toStringAsFixed(0)}",
-                                  style: const TextStyle(
-                                    fontFamily: "Poppins",
-                                    color: Colors.black87,
-                                    fontSize: 13,
-                                  ),
-                                ),
                               ],
                             ),
-                          ],
-                        ),
-                      )),
+                          );
+                        }),
                       Divider(color: Colors.grey[400], thickness: 0.8, height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -258,7 +237,7 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                "Rp. ${totalBayar.toStringAsFixed(0)}",
+                                "Rp. ${totalBayar.toString()}",
                                 style: const TextStyle(
                                   fontFamily: "Poppins",
                                   fontWeight: FontWeight.bold,

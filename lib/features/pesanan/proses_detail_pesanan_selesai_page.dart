@@ -17,22 +17,34 @@ class ProsesDetailPesananSelesaiPage extends StatefulWidget {
 }
 
 class _ProsesDetailPesananSelesaiPageState extends State<ProsesDetailPesananSelesaiPage> {
-  List<Map<String, dynamic>> listItem = [
-    {"nama": "Baju", "jumlah": 11, "konfirmasi": false},
-    {"nama": "Bed Cover Jumbo", "jumlah": 1, "konfirmasi": false},
-    {"nama": "Boneka Kecil", "jumlah": 3, "konfirmasi": false},
-    {"nama": "Celana", "jumlah": 2, "konfirmasi": false},
-    {"nama": "Kemeja", "jumlah": 7, "konfirmasi": false},
-    {"nama": "Selimut Single", "jumlah": 2, "konfirmasi": false},
-    {"nama": "Sprei Single", "jumlah": 2, "konfirmasi": false},
-  ];
+  late List<Map<String, dynamic>> listItem;
+
+  @override
+  void initState() {
+    super.initState();
+    // Mapping barangQty ke listItem
+    listItem = [];
+    widget.pesanan.barangQty.forEach((key, value) {
+      listItem.add({
+        "nama": key,
+        "jumlah": value,
+        "konfirmasi": false,
+      });
+    });
+    // Jika kosong, dummy fallback (bisa dihapus jika pasti ada)
+    if (listItem.isEmpty) {
+      listItem = [
+        {"nama": "Baju", "jumlah": 1, "konfirmasi": false},
+      ];
+    }
+  }
 
   void handleLaporkanKendala() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => KendalaModal(noHp: widget.pesanan.noHp),
+      builder: (_) => KendalaModal(noHp: widget.pesanan.whatsapp),
     );
   }
 

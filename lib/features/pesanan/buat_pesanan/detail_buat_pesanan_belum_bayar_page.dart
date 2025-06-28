@@ -1,84 +1,76 @@
 import 'package:flutter/material.dart';
-import 'detail_buat_pesanan_belum_bayar_page.dart';
-import 'detail_buat_pesanan_selesai_bayar_page.dart';
+import '../../home/home_page.dart';
 
-class DetailBuatPesananPage extends StatelessWidget {
+class DetailBuatPesananBelumBayarPage extends StatelessWidget {
   final Map<String, dynamic> data;
-  const DetailBuatPesananPage({Key? key, required this.data}) : super(key: key);
-
-  // Helper agar aman casting Map
-  static Map<String, int> _safeMapInt(dynamic val) => (val is Map)
-      ? Map<String, int>.from(
-          val.map((k, v) => MapEntry(k.toString(), int.tryParse('$v') ?? 0)),
-        )
-      : {};
-  static Map<String, String> _safeMapString(dynamic val) => (val is Map)
-      ? Map<String, String>.from(
-          val.map((k, v) => MapEntry(k.toString(), v.toString())),
-        )
-      : {};
+  const DetailBuatPesananBelumBayarPage({Key? key, required this.data})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final String nota = "Nota–${DateTime.now().millisecondsSinceEpoch}";
+    // --- DATA PARSING ---
+    final String nota =
+        data['nota'] ?? "Nota–${DateTime.now().millisecondsSinceEpoch}";
     final String layanan = data['layanan'] ?? "-";
     final String nama = data['nama'] ?? "-";
     final String noHp = data['whatsapp'] ?? "-";
-    final String status = "Dalam Antrian";
-    final String tanggalTerima = _nowString();
-    final String tanggalSelesai = "-";
-    final String jenisParfum =
-        (data['jenisParfum']?.toString().trim().isEmpty ?? true)
-        ? "-"
-        : data['jenisParfum'].toString();
-    final String antarJemput =
-        (data['antarJemput']?.toString().trim().isEmpty ?? true)
-        ? "-"
-        : data['antarJemput'].toString();
-    final String diskon = (data['diskon']?.toString().trim().isEmpty ?? true)
-        ? "-"
-        : data['diskon'].toString();
-    final String catatan = (data['catatan']?.toString().trim().isEmpty ?? true)
-        ? "-"
-        : data['catatan'].toString();
+    final String status = data['status'] ?? "Dalam Antrian";
+    final String tanggalTerima = data['tanggalTerima'] ?? _nowString();
+    final String tanggalSelesai = data['tanggalSelesai'] ?? "-";
+    final String jenisParfum = _safeString(data['parfum'] ?? data['jenisParfum']);
+    final String antarJemput = _safeString(data['antarJemput']);
+    final String diskon = _safeString(data['diskon']);
+    final String catatan = _safeString(data['catatan']);
 
-    final double beratKg = data['beratKg'] == null
-        ? 0.0
-        : (data['beratKg'] is double
-              ? data['beratKg']
-              : double.tryParse(data['beratKg'].toString()) ?? 0.0);
+    // DATA LAUNDRY
+    final double beratKg = data['beratKg'] is num
+        ? (data['beratKg'] as num).toDouble()
+        : (data['beratKg'] is String
+            ? double.tryParse(data['beratKg']) ?? 0.0
+            : 0.0);
 
-    final Map<String, int> jumlah = _safeMapInt(data['jumlah']);
-    final List<Map<String, dynamic>> barangList = (data['barangList'] ?? [])
-        .cast<Map<String, dynamic>>();
-    final Map<String, int> barangQty = _safeMapInt(data['barangQty']);
-    final Map<String, int> hargaLayanan = _safeMapInt(data['hargaLayanan']);
-    final Map<String, String> tipeLayanan = _safeMapString(data['layananTipe']);
+    // PASTIKAN laundry kiloan selalu 10.000/kg
+    final Map<String, int> jumlah =
+        data['jumlah'] is Map ? Map<String, int>.from(data['jumlah']) : {};
+    final Map<String, String> tipeLayanan =
+        data['layananTipe'] is Map ? Map<String, String>.from(data['layananTipe']) : {};
+    final Map<String, int> hargaLayanan =
+        data['hargaLayanan'] is Map ? Map<String, int>.from(data['hargaLayanan']) : {};
 
-    // --- Bangun list layanan yang AKAN ditampilkan ---
-    List<Map<String, dynamic>> listBarangFinal = [];
+    // Barang satuan/custom
+    final List<Map<String, dynamic>> barangList =
+        (data['barangList'] ?? []) is List
+            ? List<Map<String, dynamic>>.from(data['barangList'])
+            : [];
+    final Map<String, int> barangQty =
+        data['barangQty'] is Map ? Map<String, int>.from(data['barangQty']) : {};
 
-    // 1. Laundry Kiloan dari berat BAR (selalu 10rb/kg)
+    // --- BANGUN LAYANAN LAUNDRY ---
+    List<Map<String, dynamic>> layananLaundry = [];
+
+    // 1. Laundry Kiloan manual (beratKg dari input bar! SELALU 10rb/kg)
     if (beratKg > 0) {
-      listBarangFinal.add({
-        'nama': "Laundry Kiloan",
-        'satuan': "Kg",
+      layananLaundry.add({
+        'nama': 'Laundry Kiloan',
+        'satuan': 'Kg',
         'qty': beratKg,
         'harga': 10000,
         'total': (10000 * beratKg).round(),
       });
     }
 
-    // 2. Layanan jenis (paket) dari Firestore, tidak pengaruh ke laundry kiloan bar!
-    jumlah.forEach((namaLayanan, qty) {
+    // 2. Semua layanan dari jenis_layanan Firestore
+    jumlah.forEach((nama, qty) {
       if (qty != null && qty > 0) {
-        String tipe = (tipeLayanan[namaLayanan] ?? "").toLowerCase();
-        String satuan = tipe == "kiloan" ? "Kg" : "Sat";
-        int harga = hargaLayanan[namaLayanan] ?? 0;
-        // Cegah double: skip "Laundry Kiloan" dari jenis_layanan (karena sudah dari bar)
-        if (namaLayanan.toLowerCase() != "laundry kiloan") {
-          listBarangFinal.add({
-            'nama': namaLayanan,
+        final tipe = (tipeLayanan[nama] ?? '').toLowerCase();
+        final satuan = tipe == "kiloan" ? "Kg" : "Sat";
+        final harga = hargaLayanan[nama] ?? 0;
+
+        // PENTING: layanan yang labelnya kiloan dari Firestore JANGAN DIANGGAP laundry kiloan
+        // Tidak skip apapun kecuali nama benar2 'Laundry Kiloan' (dari input bar)
+        if (!(nama.toLowerCase() == "laundry kiloan")) {
+          layananLaundry.add({
+            'nama': nama,
             'satuan': satuan,
             'qty': qty,
             'harga': harga,
@@ -88,25 +80,40 @@ class DetailBuatPesananPage extends StatelessWidget {
       }
     });
 
-    // 3. Custom Barang
+    // 3. Barang Custom
     for (final b in barangList) {
-      final nama = b['title'] ?? "";
-      final qty = barangQty[nama] ?? 0;
-      if (qty > 0) {
-        listBarangFinal.add({
-          'nama': nama,
-          'satuan': "Sat",
-          'qty': qty,
+      final namaBarang = (b['title'] ?? b['nama'] ?? '-').toString();
+      final qtyBarang = barangQty[namaBarang] ?? 0;
+      if (qtyBarang > 0) {
+        layananLaundry.add({
+          'nama': namaBarang,
+          'satuan': 'Sat',
+          'qty': qtyBarang,
           'harga': 0,
           'total': 0,
         });
       }
     }
 
-    int totalFromBarang = listBarangFinal.fold(
-      0,
-      (sum, b) => sum + (b['total'] as int? ?? 0),
-    );
+    // 4. Fallback kalau kosong
+    if (layananLaundry.isEmpty && barangQty.isNotEmpty) {
+      barangQty.forEach((nama, qty) {
+        if (qty > 0) {
+          layananLaundry.add({
+            'nama': nama,
+            'satuan': "Sat",
+            'qty': qty,
+            'harga': 0,
+            'total': 0,
+          });
+        }
+      });
+    }
+
+    // Hitung total pembayaran (bener2 dari layananLaundry, jangan ambil field totalHarga)
+    int totalBayar =
+        layananLaundry.fold(0, (sum, e) => sum + (e['total'] as int? ?? 0));
+    if (totalBayar == 0) totalBayar = data['totalHarga'] ?? 0;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F8),
@@ -140,6 +147,7 @@ class DetailBuatPesananPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Nota + Layanan + Print
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -186,7 +194,7 @@ class DetailBuatPesananPage extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      // Foto Dihapus
+                      // Profil
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -222,22 +230,10 @@ class DetailBuatPesananPage extends StatelessWidget {
                         height: 21,
                       ),
                       _InfoRow("Status", status, boldValue: true),
-                      _InfoRow(
-                        "Tanggal Terima",
-                        tanggalTerima,
-                        boldValue: true,
-                      ),
-                      _InfoRow(
-                        "Tanggal Selesai",
-                        tanggalSelesai,
-                        boldValue: true,
-                      ),
+                      _InfoRow("Tanggal Terima", tanggalTerima, boldValue: true),
+                      _InfoRow("Tanggal Selesai", tanggalSelesai, boldValue: true),
                       _InfoRow("Jenis Parfum", jenisParfum, boldValue: true),
-                      _InfoRow(
-                        "Layanan Antar Jemput",
-                        antarJemput,
-                        boldValue: true,
-                      ),
+                      _InfoRow("Layanan Antar Jemput", antarJemput, boldValue: true),
                       _InfoRow("Diskon", diskon, boldValue: true),
                       _InfoRow("Catatan", catatan, boldValue: false),
                       Divider(
@@ -245,9 +241,9 @@ class DetailBuatPesananPage extends StatelessWidget {
                         thickness: 0.7,
                         height: 23,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 5, top: 7),
-                        child: const Text(
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 5, top: 7),
+                        child: Text(
                           "Layanan Laundry :",
                           style: TextStyle(
                             fontFamily: "Poppins",
@@ -256,10 +252,9 @@ class DetailBuatPesananPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      ...listBarangFinal
-                          .map((b) => _LaundryItemTile(b))
-                          .toList(),
+                      ...layananLaundry.map((b) => _LaundryItemTile(b)).toList(),
                       const SizedBox(height: 9),
+                      // TOTAL BAYAR
                       Container(
                         width: double.infinity,
                         margin: const EdgeInsets.only(top: 7),
@@ -287,7 +282,7 @@ class DetailBuatPesananPage extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  "Rp. ${_currencyFormat(totalFromBarang)}",
+                                  "Rp. ${_currencyFormat(totalBayar)}",
                                   style: const TextStyle(
                                     fontFamily: "Poppins",
                                     fontWeight: FontWeight.w800,
@@ -313,86 +308,90 @@ class DetailBuatPesananPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 15),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 22),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    DetailBuatPesananBelumBayarPage(data: data),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            elevation: 5,
-                            backgroundColor: const Color(0xFFE2F4FF),
-                            foregroundColor: const Color(0xFF1D90C6),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 13),
-                          ),
-                          child: const Text(
-                            "Bayar Nanti",
-                            style: TextStyle(
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w500,
-                              fontSize: 17.7,
-                              fontStyle: FontStyle.italic,
-                            ),
+                const SizedBox(height: 30),
+              ],
+            ),
+          ),
+          // Tombol bawah
+          Container(
+            width: double.infinity,
+            color: const Color(0xFFFFF6E9),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Navigate ke HomePage sesuai role dan laundryId
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => HomePage(
+                            role: data['role'] ?? 'owner',
+                            laundryId: data['kodeLaundry'] ?? '',
                           ),
                         ),
+                        (route) => false,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFBDE8F8),
+                      foregroundColor: Colors.black87,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      const SizedBox(width: 13),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    DetailBuatPesananSelesaiBayarPage(
-                                      data: data,
-                                    ),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            elevation: 5,
-                            backgroundColor: const Color(0xFF40A2E3),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 13),
-                          ),
-                          child: const Text(
-                            "Bayar Sekarang",
-                            style: TextStyle(
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w500,
-                              fontSize: 17.7,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text(
+                      "Batalkan Pesanan",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 15.7,
+                        fontWeight: FontWeight.w500,
+                        fontStyle: FontStyle.italic,
                       ),
-                    ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF279AF1),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text(
+                      "Lihat Proses",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 15.7,
+                        fontWeight: FontWeight.w500,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  // Helper
+  static String _safeString(dynamic val) {
+    if (val == null) return "-";
+    final s = val.toString().trim();
+    if (s.isEmpty || s.toLowerCase() == "null") return "-";
+    return s;
   }
 
   static String _currencyFormat(num price) {
@@ -525,18 +524,19 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// Laundry Item Tile
+// Laundry Item Tile (AMAN DARI ERROR!)
 Widget _LaundryItemTile(Map<String, dynamic> b) {
-  final String satuan = b['satuan'] ?? '';
+  final String nama = (b['nama'] ?? '-').toString();
+  final String satuan = (b['satuan'] ?? '-').toString();
   final harga = b['harga'] ?? 0;
   final total = b['total'] ?? 0;
-  final qty = b['qty'];
+  final qty = b['qty'] ?? 0;
   String qtyText = satuan == "Kg" ? "$qty Kg" : "$qty pcs";
   return qty == 0
       ? Padding(
           padding: const EdgeInsets.only(top: 4, bottom: 4),
           child: Text(
-            b['nama'],
+            nama,
             style: const TextStyle(
               fontFamily: "Poppins",
               fontWeight: FontWeight.w500,
@@ -556,7 +556,7 @@ Widget _LaundryItemTile(Map<String, dynamic> b) {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                b['nama'],
+                nama,
                 style: const TextStyle(
                   fontFamily: "Poppins",
                   fontWeight: FontWeight.w600,
@@ -584,7 +584,7 @@ Widget _LaundryItemTile(Map<String, dynamic> b) {
                     ),
                   ),
                   Text(
-                    "Rp. ${DetailBuatPesananPage._currencyFormat(total)}",
+                    "Rp. ${DetailBuatPesananBelumBayarPage._currencyFormat(total)}",
                     style: const TextStyle(
                       fontFamily: "Poppins",
                       fontSize: 13.7,
@@ -597,7 +597,7 @@ Widget _LaundryItemTile(Map<String, dynamic> b) {
                 Padding(
                   padding: const EdgeInsets.only(top: 3, left: 1),
                   child: Text(
-                    "x Rp. ${DetailBuatPesananPage._currencyFormat(harga)}",
+                    "x Rp. ${DetailBuatPesananBelumBayarPage._currencyFormat(harga)}",
                     style: const TextStyle(
                       fontFamily: "Poppins",
                       fontSize: 11.7,

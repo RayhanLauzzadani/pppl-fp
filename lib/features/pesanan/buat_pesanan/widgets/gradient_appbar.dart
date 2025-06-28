@@ -51,10 +51,10 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
                   icon: const Icon(
                     Icons.arrow_back_ios_new_rounded,
                     color: Color(0xFF656565), // Abu-abu gelap sesuai Figma
-                    size: 32,
+                    size: 22,
                   ),
                   onPressed: onBack ?? () => Navigator.pop(context),
-                  splashRadius: 26,
+                  splashRadius: 20,
                 ),
                 Expanded(
                   child: Container(
@@ -83,5 +83,5 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(120);
+  Size get preferredSize => const Size.fromHeight(90);
 }

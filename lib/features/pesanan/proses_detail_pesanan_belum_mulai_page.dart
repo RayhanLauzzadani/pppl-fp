@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import './pesanan_model.dart';
 import 'components/detail_pesanan_proses_scaffold.dart';
 import 'components/kendala_modal.dart';
@@ -17,22 +18,50 @@ class ProsesDetailPesananBelumMulaiPage extends StatefulWidget {
 }
 
 class _ProsesDetailPesananBelumMulaiPageState extends State<ProsesDetailPesananBelumMulaiPage> {
-  List<Map<String, dynamic>> listItem = [
-    {"nama": "Baju", "jumlah": 11, "konfirmasi": false},
-    {"nama": "Bed Cover Jumbo", "jumlah": 1, "konfirmasi": false},
-    {"nama": "Boneka Kecil", "jumlah": 3, "konfirmasi": false},
-    {"nama": "Celana", "jumlah": 2, "konfirmasi": false},
-    {"nama": "Kemeja", "jumlah": 7, "konfirmasi": false},
-    {"nama": "Selimut Single", "jumlah": 2, "konfirmasi": false},
-    {"nama": "Sprei Single", "jumlah": 2, "konfirmasi": false},
-  ];
+  late List<Map<String, dynamic>> listItem;
+
+  @override
+  void initState() {
+    super.initState();
+    // Mapping barangQty ke listItem
+    listItem = [];
+    widget.pesanan.barangQty.forEach((key, value) {
+      listItem.add({
+        "nama": key,
+        "jumlah": value,
+        "konfirmasi": false,
+      });
+    });
+    // Jika kosong, dummy fallback
+    if (listItem.isEmpty) {
+      listItem = [
+        {"nama": "Baju", "jumlah": 1, "konfirmasi": false},
+      ];
+    }
+  }
+
+  Future<void> _updateStatusProses() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('laundries')
+          .doc(widget.pesanan.kodeLaundry)
+          .collection('pesanan')
+          .doc(widget.pesanan.id)
+          .update({'status': 'proses'});
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal update status pesanan: $e')),
+      );
+    }
+  }
 
   void handleLaporkanKendala() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => KendalaModal(noHp: widget.pesanan.noHp),
+      builder: (_) => KendalaModal(noHp: widget.pesanan.whatsapp),
     );
   }
 
@@ -44,7 +73,9 @@ class _ProsesDetailPesananBelumMulaiPageState extends State<ProsesDetailPesananB
         status: 'belum_mulai',
         listItem: listItem,
         onLaporkanKendala: handleLaporkanKendala,
-        onMulaiProses: () {
+        onMulaiProses: () async {
+          await _updateStatusProses();
+          if (!mounted) return;
           if (widget.onMulaiProses != null) widget.onMulaiProses!();
           Navigator.pop(context);
         },
