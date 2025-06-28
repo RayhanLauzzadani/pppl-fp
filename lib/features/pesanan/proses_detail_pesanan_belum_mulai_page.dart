@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import './pesanan_model.dart';
-import 'components/detail_pesanan_scaffold.dart';
+import 'components/detail_pesanan_proses_scaffold.dart';
 import 'components/kendala_modal.dart';
-import 'proses_detail_pesanan_proses_page.dart';
 
 class ProsesDetailPesananBelumMulaiPage extends StatefulWidget {
   final Pesanan pesanan;
-  const ProsesDetailPesananBelumMulaiPage({super.key, required this.pesanan});
+  final VoidCallback? onMulaiProses;
+  const ProsesDetailPesananBelumMulaiPage({
+    super.key,
+    required this.pesanan,
+    this.onMulaiProses,
+  });
 
   @override
   State<ProsesDetailPesananBelumMulaiPage> createState() => _ProsesDetailPesananBelumMulaiPageState();
@@ -39,18 +43,10 @@ class _ProsesDetailPesananBelumMulaiPageState extends State<ProsesDetailPesananB
         pesanan: widget.pesanan,
         status: 'belum_mulai',
         listItem: listItem,
-        onLaporkanKendala: handleLaporkanKendala, // <-- Ini penting
-        // tidak perlu onChangedKonfirmasi
+        onLaporkanKendala: handleLaporkanKendala,
         onMulaiProses: () {
-          // Saat klik, push-replace ke page proses
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ProsesDetailPesananProsesPage(
-                pesanan: widget.pesanan, // Lakukan copyWith/status jika perlu
-              ),
-            ),
-          );
+          if (widget.onMulaiProses != null) widget.onMulaiProses!();
+          Navigator.pop(context);
         },
       ),
     );
