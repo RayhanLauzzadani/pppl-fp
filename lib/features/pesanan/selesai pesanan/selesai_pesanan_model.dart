@@ -44,7 +44,7 @@ class LaundryItem {
 // ===========================
 class Pesanan {
   final String id; // Firestore Document ID
-  final String kodeLaundry; // TAMBAHKAN INI!
+  final String kodeLaundry;
   final String noNota;
   final String nama;
   final String noHp;
@@ -61,7 +61,7 @@ class Pesanan {
 
   Pesanan({
     required this.id,
-    required this.kodeLaundry, // TAMBAHKAN INI!
+    required this.kodeLaundry,
     required this.noNota,
     required this.nama,
     required this.noHp,
@@ -80,31 +80,132 @@ class Pesanan {
   // FACTORY dari Firestore Document
   factory Pesanan.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+
+    // =========== AMBIL DATA KG ==========
+    final double beratKg = (data['kg'] ?? data['beratKg']) is num
+        ? (data['kg'] ?? data['beratKg']).toDouble()
+        : 0.0;
+
+    // =========== HITUNG PCS ==========
+    int totalPcs = 0;
+    if (data['pcs'] is num) {
+      totalPcs = data['pcs'].toInt();
+    } else {
+      // PCS dari barangQty
+      if (data['barangQty'] is Map) {
+        final barangQty = Map<String, dynamic>.from(data['barangQty']);
+        totalPcs += barangQty.values
+            .map((v) => v is num ? v.toInt() : 0)
+            .fold(0, (a, b) => a + b);
+      }
+      // PCS dari jumlah layananTipe = Satuan
+      if (data['jumlah'] is Map && data['layananTipe'] is Map) {
+        final tipeMap = Map<String, dynamic>.from(data['layananTipe']);
+        final jumlahMap = Map<String, dynamic>.from(data['jumlah']);
+        jumlahMap.forEach((nama, qty) {
+          if ((tipeMap[nama]?.toString().toLowerCase() ?? '') == 'satuan') {
+            if (qty is num) totalPcs += qty.toInt();
+          }
+        });
+      }
+    }
+
+    // =========== BUILD LAUNDRY LIST ==========
+    List<LaundryItem> laundryList = [];
+
+    // Laundry Kiloan
+    if (beratKg > 0) {
+      int hargaKiloan = (data['hargaKiloan'] is num)
+          ? data['hargaKiloan'].toInt()
+          : 0;
+      laundryList.add(
+        LaundryItem(
+          nama: 'Laundry Kiloan',
+          tipe: 'Kiloan',
+          jumlah: beratKg.toInt(),
+          harga: hargaKiloan,
+          hargaTotal: hargaKiloan * beratKg.toInt(),
+        ),
+      );
+    }
+
+    // Dari jumlah layanan (jenis layanan dari jumlah + tipe + harga)
+    if (data['jumlah'] is Map && data['layananTipe'] is Map) {
+      final jumlahMap = Map<String, dynamic>.from(data['jumlah']);
+      final hargaMap = Map<String, dynamic>.from(data['hargaLayanan'] ?? {});
+      final tipeMap = Map<String, dynamic>.from(data['layananTipe'] ?? {});
+      jumlahMap.forEach((nama, qty) {
+        if (qty is num && qty > 0) {
+          final harga = (hargaMap[nama] is num) ? hargaMap[nama].toInt() : 0;
+          laundryList.add(
+            LaundryItem(
+              nama: nama,
+              tipe: (tipeMap[nama] ?? '').toString(),
+              jumlah: qty.toInt(),
+              harga: harga,
+              hargaTotal: harga * qty.toInt(),
+            ),
+          );
+        }
+      });
+    }
+
+    // Barang custom
+    if (data['barangQty'] is Map && data['barangList'] is List) {
+      final barangQty = Map<String, dynamic>.from(data['barangQty']);
+      final barangList = List<Map<String, dynamic>>.from(data['barangList']);
+      for (var item in barangList) {
+        final nama = item['title'] ?? '';
+        final qty = (barangQty[nama] is num) ? barangQty[nama].toInt() : 0;
+        if (qty > 0) {
+          laundryList.add(
+            LaundryItem(
+              nama: nama,
+              tipe: 'Satuan',
+              jumlah: qty,
+              harga: 0,
+              hargaTotal: 0,
+            ),
+          );
+        }
+      }
+    }
+
+    // Fallback ke listLaundry lama jika ada (data migrasi baru)
+    if (data['listLaundry'] is List && data['listLaundry'].isNotEmpty) {
+      laundryList = List<Map<String, dynamic>>.from(
+        data['listLaundry'],
+      ).map((item) => LaundryItem.fromMap(item)).toList();
+    }
+
     return Pesanan(
       id: doc.id,
-      kodeLaundry: data['kodeLaundry'] ?? '', // PASTIKAN FIELD INI ADA di Firestore!
+      kodeLaundry: data['kodeLaundry'] ?? '',
       noNota: data['noNota'] ?? '',
       nama: data['nama'] ?? '',
       noHp: data['noHp'] ?? '',
-      tipe: data['tipe'] ?? '',
-      kg: (data['kg'] as num?)?.toDouble() ?? 0.0,
-      pcs: (data['pcs'] as num?)?.toInt() ?? 0,
+      tipe: data['tipe'] ?? data['desc'] ?? '',
+      kg: beratKg,
+      pcs: totalPcs,
       status: data['status'] ?? '',
-      tanggalTerima: (data['tanggalTerima'] as Timestamp?)?.toDate(),
-      tanggalSelesai: (data['tanggalSelesai'] as Timestamp?)?.toDate(),
-      jenisParfum: data['jenisParfum'] ?? '',
-      antarJemput: data['antarJemput'] ?? '',
-      totalBayar: (data['totalBayar'] as num?)?.toInt() ?? 0,
-      listLaundry: (data['listLaundry'] as List<dynamic>? ?? [])
-          .map((item) => LaundryItem.fromMap(item as Map<String, dynamic>))
-          .toList(),
+      tanggalTerima: (data['tanggalTerima'] is Timestamp)
+          ? (data['tanggalTerima'] as Timestamp).toDate()
+          : null,
+      tanggalSelesai: (data['tanggalSelesai'] is Timestamp)
+          ? (data['tanggalSelesai'] as Timestamp).toDate()
+          : null,
+      jenisParfum: data['jenisParfum']?.toString() ?? '',
+      antarJemput: data['antarJemput']?.toString() ?? '',
+      totalBayar: (data['totalBayar'] is num)
+          ? data['totalBayar'].toInt()
+          : (data['totalHarga'] is num)
+          ? data['totalHarga'].toInt()
+          : 0,
+      listLaundry: laundryList,
     );
   }
 
-  Pesanan copyWith({
-    String? status,
-    String? kodeLaundry, // Agar flexible, walau biasanya tidak perlu diubah
-  }) {
+  Pesanan copyWith({String? status, String? kodeLaundry}) {
     return Pesanan(
       id: id,
       kodeLaundry: kodeLaundry ?? this.kodeLaundry,
@@ -124,10 +225,9 @@ class Pesanan {
     );
   }
 
-  // Untuk upload/update Firestore
   Map<String, dynamic> toMap() {
     return {
-      'kodeLaundry': kodeLaundry, // PASTIKAN DISIMPAN
+      'kodeLaundry': kodeLaundry,
       'noNota': noNota,
       'nama': nama,
       'noHp': noHp,
