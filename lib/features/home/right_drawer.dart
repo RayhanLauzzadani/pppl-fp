@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-// Import halaman-halaman lain sesuai path project kamu
 import '../auth/presentation/pages/edit_layanan_page.dart';
 import '../auth/presentation/pages/edit_profile_page.dart';
 import '../auth/presentation/pages/sign_in_page.dart';
-import 'package:laundryin/features/pesanan/riwayat_pesanan_page.dart'; 
+import 'package:laundryin/features/pesanan/riwayat_pesanan_page.dart';
 import '../general/tentang_kami_page.dart';
 
-// ======================
-// DRAWER WIDGET UTAMA
-// ======================
 class ModernDrawerWidget extends StatelessWidget {
   final VoidCallback? onLogout;
   final String laundryId;
@@ -24,8 +21,7 @@ class ModernDrawerWidget extends StatelessWidget {
     this.onClose,
   });
 
-  // Fungsi logout sederhana
-  void _handleLogout(BuildContext context) {
+  void _handleLogout(BuildContext context) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -56,15 +52,11 @@ class ModernDrawerWidget extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Tutup dialog
-                
-                // Panggil callback jika ada
-                if (onLogout != null) {
-                  onLogout!();
-                }
-                
-                // Navigate ke SignInPage dan hapus semua route sebelumnya
+              onPressed: () async {
+                Navigator.of(context).pop();
+                // Tambahkan signOut Firebase
+                await FirebaseAuth.instance.signOut();
+                if (onLogout != null) onLogout!();
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (context) => const SignInPage()),
                   (Route<dynamic> route) => false,
@@ -88,18 +80,23 @@ class ModernDrawerWidget extends StatelessWidget {
     );
   }
 
+  void pushAfterCloseDrawer(BuildContext context, Widget page) {
+    Navigator.of(context).pop();
+    Future.delayed(const Duration(milliseconds: 120), () {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: SafeArea(
         child: Column(
           children: [
-            // Header
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 30, 16, 4),
               child: Row(
                 children: [
-                  // Avatar/Logo
                   CircleAvatar(
                     radius: 32,
                     backgroundColor: const Color(0xFF40A2E3),
@@ -110,7 +107,6 @@ class ModernDrawerWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 14),
-                  // Info Laundry
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,7 +130,6 @@ class ModernDrawerWidget extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Optional: close button
                   if (onClose != null)
                     IconButton(
                       icon: const Icon(Icons.close_rounded, size: 32, color: Colors.black54),
@@ -151,61 +146,27 @@ class ModernDrawerWidget extends StatelessWidget {
               endIndent: 18,
             ),
             const SizedBox(height: 8),
-
-            // MENU ITEM: Profil Akun
             _drawerMenuItem(
               Icons.person_outline,
               "Profil Akun",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditProfilePage(isOwner: isOwner),
-                  ),
-                );
-              },
+              onTap: () => pushAfterCloseDrawer(context, EditProfilePage(isOwner: isOwner)),
             ),
-            // MENU ITEM: Edit Layanan
             _drawerMenuItem(
-              Icons.notifications_outlined,
+              Icons.miscellaneous_services_rounded,
               "Layanan",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditLayananPage(isOwner: isOwner, laundryId: laundryId,), 
-                  ),
-                );
-              },
+              onTap: () => pushAfterCloseDrawer(context, EditLayananPage(isOwner: isOwner, laundryId: laundryId)),
             ),
-            // MENU ITEM: Riwayat Pesanan
             _drawerMenuItem(
               Icons.history,
               "Riwayat Pesanan",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const RiwayatPesananPage(),
-                  ),
-                );
-              },
+              onTap: () => pushAfterCloseDrawer(context, const RiwayatPesananPage()),
             ),
-            // MENU ITEM: Tentang Kami
             _drawerMenuItem(
               Icons.info_outline,
               "Tentang Kami",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AboutPage(),
-                  ),
-                );
-              },
+              onTap: () => pushAfterCloseDrawer(context, const AboutPage()),
             ),
             const Spacer(),
-            // Logout Button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
               child: SizedBox(
@@ -234,7 +195,6 @@ class ModernDrawerWidget extends StatelessWidget {
     );
   }
 
-  // Drawer menu item builder
   static Widget _drawerMenuItem(
     IconData icon,
     String label, {

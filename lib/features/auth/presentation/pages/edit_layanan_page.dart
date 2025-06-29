@@ -21,7 +21,7 @@ class EditLayananPage extends StatelessWidget {
       backgroundColor: const Color(0xFFFDFBF6),
       body: Column(
         children: [
-          // HEADER GRADIENT CUSTOM (seperti Edit Profil)
+          // HEADER GRADIENT
           Container(
             width: double.infinity,
             decoration: const BoxDecoration(
@@ -75,130 +75,124 @@ class EditLayananPage extends StatelessWidget {
               ],
             ),
           ),
-          // Body
           const SizedBox(height: 19),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.only(top: 0, left: 16, right: 16),
               children: [
-                // Navigasi ke DurasiLayananPage
+                // Durasi Layanan
                 _LayananTile(
                   icon: 'assets/icons/clock.png',
                   title: 'Durasi layanan',
-                  subtitle: 'Tambah, ubah, hapus durasi layanan',
+                  subtitle: isOwner
+                      ? 'Tambah, ubah, hapus durasi layanan'
+                      : 'Lihat daftar durasi layanan',
                   enabled: isOwner,
-                  onTap: () {
-                    if (isOwner) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => DurasiLayananPage(laundryId: laundryId),
-                        ),
-                      );
-                    } else {
-                      _showNoEditDialog(context);
-                    }
-                  },
+                  onTap: isOwner
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DurasiLayananPage(
+                                laundryId: laundryId,
+                                isOwner: isOwner,
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
                 ),
                 const SizedBox(height: 18),
-                // Navigasi ke JenisLayananPage
+                // Jenis Layanan
                 _LayananTile(
                   icon: 'assets/icons/layer.png',
                   title: 'Jenis layanan',
-                  subtitle: 'Tambah, ubah, hapus jenis layanan',
+                  subtitle: isOwner
+                      ? 'Tambah, ubah, hapus jenis layanan'
+                      : 'Lihat daftar jenis layanan',
                   enabled: isOwner,
-                  onTap: () {
-                    if (isOwner) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => JenisLayananPage(laundryId: laundryId),
-                        ),
-                      );
-                    } else {
-                      _showNoEditDialog(context);
-                    }
-                  },
+                  onTap: isOwner
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => JenisLayananPage(
+                                laundryId: laundryId,
+                                isOwner: isOwner,
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
                 ),
                 const SizedBox(height: 18),
+                // Diskon
                 _LayananTile(
                   icon: 'assets/icons/discount.png',
                   title: 'Diskon',
-                  subtitle: 'Tambah, ubah, hapus diskon',
+                  subtitle: isOwner
+                      ? 'Tambah, ubah, hapus diskon'
+                      : 'Lihat daftar diskon',
                   enabled: isOwner,
-                  onTap: () {
-                    if (isOwner) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => DiskonPage(laundryId: laundryId),
-                        ),
-                      );
-                    } else {
-                      _showNoEditDialog(context);
-                    }
-                  },
+                  onTap: isOwner
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DiskonPage(laundryId: laundryId),
+                            ),
+                          );
+                        }
+                      : null,
                 ),
                 const SizedBox(height: 18),
+                // Antar Jemput
                 _LayananTile(
                   icon: 'assets/icons/delivery.png',
                   title: 'Layanan antar jemput',
-                  subtitle: 'Tambah, ubah, hapus layanan',
+                  subtitle: isOwner
+                      ? 'Tambah, ubah, hapus layanan'
+                      : 'Lihat daftar layanan antar jemput',
                   enabled: isOwner,
-                  onTap: () {
-                    if (isOwner) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => AntarJemputPage(laundryId: laundryId),
-                        ),
-                      );
-                    } else {
-                      _showNoEditDialog(context);
-                    }
-                  },
+                  onTap: isOwner
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AntarJemputPage(
+                                laundryId: laundryId,
+                                isOwner: isOwner,
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
                 ),
                 const SizedBox(height: 18),
+                // Parfum
                 _LayananTile(
                   icon: 'assets/icons/perfume.png',
                   title: 'Parfum',
-                  subtitle: 'Tambah, ubah, hapus parfum',
+                  subtitle: isOwner
+                      ? 'Tambah, ubah, hapus parfum'
+                      : 'Lihat daftar parfum',
                   enabled: isOwner,
-                  onTap: () {
-                    if (isOwner) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => UpdateJenisLayananParfumPage(
-                            laundryId: laundryId,
-                          ),
-                        ),
-                      );
-                    } else {
-                      _showNoEditDialog(context);
-                    }
-                  },
+                  onTap: isOwner
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => UpdateJenisLayananParfumPage(
+                                laundryId: laundryId,
+                                isOwner: isOwner,
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showNoEditDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Hanya dapat melihat"),
-        content: const Text(
-          "Hanya owner yang bisa mengedit layanan. Hubungi owner jika ingin menambah/mengubah.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Tutup"),
           ),
         ],
       ),
@@ -210,14 +204,14 @@ class _LayananTile extends StatelessWidget {
   final String icon;
   final String title;
   final String subtitle;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool enabled;
 
   const _LayananTile({
     required this.icon,
     required this.title,
     required this.subtitle,
-    required this.onTap,
+    this.onTap,
     this.enabled = true,
   });
 
@@ -225,56 +219,59 @@ class _LayananTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Opacity(
       opacity: enabled ? 1.0 : 0.60,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(13),
-          onTap: onTap,
-          child: Row(
-            children: [
-              Container(
-                width: 54,
-                height: 54,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFBBE2EC),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Center(
-                  child: Image.asset(
-                    icon,
-                    width: 32,
-                    height: 32,
-                    fit: BoxFit.contain,
+      child: IgnorePointer(
+        ignoring: !enabled,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(13),
+            onTap: onTap,
+            child: Row(
+              children: [
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFBBE2EC),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      icon,
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 18),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.7,
+                const SizedBox(width: 18),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.7,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 13.5,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.black87,
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 13.5,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

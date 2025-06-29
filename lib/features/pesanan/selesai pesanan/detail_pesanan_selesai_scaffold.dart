@@ -16,11 +16,12 @@ class DetailPesananSelesaiScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color statusColor;
-    IconData statusIcon;
-    String statusText;
-    String statusDetailText;
-    Color totalColor;
+    // Konfigurasi warna dan status berdasarkan status pesanan
+    late Color statusColor;
+    late IconData statusIcon;
+    late String statusText;
+    late String statusDetailText;
+    late Color totalColor;
 
     if (status == 'belum_bayar') {
       statusColor = Colors.red[400]!;
@@ -210,7 +211,7 @@ class DetailPesananSelesaiScaffold extends StatelessWidget {
                   1: FlexColumnWidth(),
                 },
                 children: [
-                  _tableRow("Status", "Dalam Antrian", isBold: true),
+                  _tableRow("Status", _getStatusLabel(status), isBold: true),
                   _tableRow("Tanggal Terima", _formatTanggal(pesanan.tanggalTerima)),
                   _tableRow("Tanggal Selesai", _formatTanggal(pesanan.tanggalSelesai)),
                   _tableRow("Jenis Parfum", pesanan.jenisParfum),
@@ -442,12 +443,27 @@ class DetailPesananSelesaiScaffold extends StatelessWidget {
     );
   }
 
-  static String _formatTanggal(DateTime dt) {
+  static String _formatTanggal(DateTime? dt) {
+    if (dt == null) return "-";
     return "${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} - ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
   }
 
-  static String _formatRupiah(int number) {
+  static String _formatRupiah(int? number) {
+    if (number == null) return "0";
     return number.toString().replaceAllMapped(
         RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => "${m[1]}.");
+  }
+
+  static String _getStatusLabel(String status) {
+    switch (status) {
+      case 'belum_bayar':
+        return "Belum Bayar";
+      case 'belum_diambil':
+        return "Belum Diambil";
+      case 'sudah_diambil':
+        return "Sudah Diambil";
+      default:
+        return "-";
+    }
   }
 }

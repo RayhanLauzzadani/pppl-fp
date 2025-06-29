@@ -6,7 +6,13 @@ import '../../pesanan/buat_pesanan/buat_pesanan_page.dart';
 
 class HomePageOwner extends StatefulWidget {
   final String laundryId;
-  const HomePageOwner({super.key, required this.laundryId});
+  final String role; // Sudah wajib param role
+
+  const HomePageOwner({
+    super.key,
+    required this.laundryId,
+    required this.role,
+  });
 
   @override
   State<HomePageOwner> createState() => _HomePageOwnerState();
@@ -14,7 +20,7 @@ class HomePageOwner extends StatefulWidget {
 
 class _HomePageOwnerState extends State<HomePageOwner> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  String namaLaundry = "Laundry Lakso"; // Ganti sesuai kebutuhan
+  String namaLaundry = "Laundry Lakso"; // Bisa dari database / API nanti
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +29,8 @@ class _HomePageOwnerState extends State<HomePageOwner> {
       endDrawer: ModernDrawerWidget(
         onLogout: () => Navigator.pop(context),
         laundryId: widget.laundryId,
-        isOwner: true, // <-- TAMBAHKAN INI!
+        isOwner: true,
+        // Jika right_drawer.dart butuh param role: widget.role,
       ),
       backgroundColor: Colors.white,
       body: Column(
@@ -120,9 +127,9 @@ class _HomePageOwnerState extends State<HomePageOwner> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         "Selamat datang Owner!",
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontFamily: "Poppins",
                           color: Colors.white,
                           fontWeight: FontWeight.w400,
@@ -256,7 +263,10 @@ class _HomePageOwnerState extends State<HomePageOwner> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const BuatPesananPage(),
+                        builder: (_) => BuatPesananPage(
+                          role: widget.role,
+                          laundryId: widget.laundryId,
+                        ),
                       ),
                     );
                   },
@@ -268,7 +278,10 @@ class _HomePageOwnerState extends State<HomePageOwner> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const ProsesPesananPage(),
+                        builder: (_) => ProsesPesananPage(
+                          kodeLaundry: widget.laundryId,
+                          role: widget.role,
+                        ),
                       ),
                     );
                   },
@@ -280,7 +293,10 @@ class _HomePageOwnerState extends State<HomePageOwner> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const SelesaiPesananPage(),
+                        builder: (_) => SelesaiPesananPage(
+                          kodeLaundry: widget.laundryId,
+                          role: widget.role,
+                        ),
                       ),
                     );
                   },

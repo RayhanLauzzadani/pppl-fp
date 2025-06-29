@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'owner/home_page_owner.dart';
 import 'karyawan/home_page_karyawan.dart';
 
@@ -22,33 +20,51 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _routeByRole() {
-    if (widget.role == 'owner') {
+    final role = widget.role.toLowerCase();
+    if (role == 'owner') {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => HomePageOwner(laundryId: widget.laundryId),
+          builder: (_) => HomePageOwner(
+            laundryId: widget.laundryId,
+            role: widget.role, // Opsional, kalau HomePageOwner butuh info role
+          ),
         ),
       );
-    } else if (widget.role == 'karyawan') {
+    } else if (role == 'karyawan') {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => HomePageKaryawan(laundryId: widget.laundryId),
+          builder: (_) => HomePageKaryawan(
+            laundryId: widget.laundryId,
+            role: widget.role, // WAJIB, HomePageKaryawan minta param role
+          ),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Role tidak dikenali.")),
+        const SnackBar(content: Text("Role tidak dikenali. Silakan login ulang.")),
       );
-      Navigator.pop(context);
+      Navigator.of(context).maybePop();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Hanya loader sementara routing
     return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 24),
+            Text(
+              "Mengalihkan ke halaman utama...",
+              style: TextStyle(fontFamily: "Poppins"),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

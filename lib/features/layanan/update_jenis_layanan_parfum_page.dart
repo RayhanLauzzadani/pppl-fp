@@ -3,7 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UpdateJenisLayananParfumPage extends StatefulWidget {
   final String laundryId;
-  const UpdateJenisLayananParfumPage({super.key, required this.laundryId});
+  final bool isOwner;
+
+  const UpdateJenisLayananParfumPage({
+    super.key,
+    required this.laundryId,
+    required this.isOwner,
+  });
 
   @override
   State<UpdateJenisLayananParfumPage> createState() =>
@@ -13,6 +19,7 @@ class UpdateJenisLayananParfumPage extends StatefulWidget {
 class _UpdateJenisLayananParfumPageState
     extends State<UpdateJenisLayananParfumPage> {
   final TextEditingController _searchController = TextEditingController();
+
   String get laundryId => widget.laundryId;
 
   @override
@@ -243,42 +250,54 @@ class _UpdateJenisLayananParfumPageState
                               ),
                             ),
                             // Tombol Edit
-                            Container(
-                              margin: const EdgeInsets.only(left: 8, right: 7),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFBBE2EC),
-                                borderRadius: BorderRadius.circular(9),
-                              ),
-                              child: IconButton(
-                                onPressed: () => _showParfumModal(
-                                  context,
-                                  docId: doc.id,
-                                  parfum: parfum,
+                            IgnorePointer(
+                              ignoring: !widget.isOwner,
+                              child: Opacity(
+                                opacity: widget.isOwner ? 1.0 : 0.3,
+                                child: Container(
+                                  margin: const EdgeInsets.only(left: 8, right: 7),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFBBE2EC),
+                                    borderRadius: BorderRadius.circular(9),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: () => _showParfumModal(
+                                      context,
+                                      docId: doc.id,
+                                      parfum: parfum,
+                                    ),
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Color(0xFF2B303A),
+                                    ),
+                                    iconSize: 23,
+                                    tooltip: "Edit",
+                                  ),
                                 ),
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Color(0xFF2B303A),
-                                ),
-                                iconSize: 23,
-                                tooltip: "Edit",
                               ),
                             ),
                             // Tombol Hapus
-                            Container(
-                              margin: const EdgeInsets.only(left: 0),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFBBE2EC),
-                                borderRadius: BorderRadius.circular(9),
-                              ),
-                              child: IconButton(
-                                onPressed: () =>
-                                    _showDeleteParfumDialog(context, doc.id),
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Color(0xFF2B303A),
+                            IgnorePointer(
+                              ignoring: !widget.isOwner,
+                              child: Opacity(
+                                opacity: widget.isOwner ? 1.0 : 0.3,
+                                child: Container(
+                                  margin: const EdgeInsets.only(left: 0),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFBBE2EC),
+                                    borderRadius: BorderRadius.circular(9),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: () =>
+                                        _showDeleteParfumDialog(context, doc.id),
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Color(0xFF2B303A),
+                                    ),
+                                    iconSize: 23,
+                                    tooltip: "Hapus",
+                                  ),
                                 ),
-                                iconSize: 23,
-                                tooltip: "Hapus",
                               ),
                             ),
                           ],
@@ -301,22 +320,28 @@ class _UpdateJenisLayananParfumPageState
             child: SizedBox(
               width: double.infinity,
               height: 46,
-              child: ElevatedButton(
-                onPressed: () => _showParfumModal(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF40A2E3),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(13),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  "Tambah Parfum",
-                  style: TextStyle(
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16.5,
+              child: IgnorePointer(
+                ignoring: !widget.isOwner,
+                child: Opacity(
+                  opacity: widget.isOwner ? 1.0 : 0.4,
+                  child: ElevatedButton(
+                    onPressed: () => _showParfumModal(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF40A2E3),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      "Tambah Parfum",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16.5,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -333,6 +358,19 @@ class _UpdateJenisLayananParfumPageState
     String? docId,
     Map<String, dynamic>? parfum,
   }) {
+    if (!widget.isOwner) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Hanya dapat melihat"),
+          content: const Text("Karyawan hanya dapat melihat data parfum, tidak bisa menambah/mengedit."),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Tutup")),
+          ],
+        ),
+      );
+      return;
+    }
     final _namaController = TextEditingController(text: parfum?["nama"] ?? '');
     final _hargaController = TextEditingController(
       text: parfum?["harga"]?.toString() ?? '',
@@ -507,6 +545,19 @@ class _UpdateJenisLayananParfumPageState
 
   // DIALOG HAPUS PARFUM
   void _showDeleteParfumDialog(BuildContext context, String docId) {
+    if (!widget.isOwner) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Hanya dapat melihat"),
+          content: const Text("Karyawan hanya dapat melihat data parfum, tidak bisa menghapus."),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Tutup")),
+          ],
+        ),
+      );
+      return;
+    }
     showDialog(
       context: context,
       barrierDismissible: false,

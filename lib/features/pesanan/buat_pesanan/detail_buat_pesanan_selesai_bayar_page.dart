@@ -75,7 +75,7 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
 
     // Layanan paket
     jumlah.forEach((namaLayanan, qty) {
-      if (qty != null && qty > 0) {
+      if (qty > 0) {
         String tipe = (tipeLayanan[namaLayanan] ?? "").toLowerCase();
         String satuan = tipe == "kiloan" ? "Kg" : "Sat";
         int harga = hargaLayanan[namaLayanan] ?? 0;
@@ -336,7 +336,9 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const ProsesPesananPage(),
+                          builder: (_) => ProsesPesananPage(
+                            kodeLaundry: data['kodeLaundry'] ?? '',
+                          ),
                         ),
                       );
                     },

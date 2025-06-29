@@ -3,10 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class JenisLayananPage extends StatefulWidget {
   final String laundryId;
+  final bool isOwner;
 
   const JenisLayananPage({
     super.key,
     required this.laundryId,
+    required this.isOwner,
   });
 
   @override
@@ -17,7 +19,6 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
   String filterJenis = "";
   String search = "";
 
-  // Untuk show/hide modal
   void showDurasiModal(List<Map<String, dynamic>> jenisDurasi) async {
     showDialog(
       context: context,
@@ -98,7 +99,6 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
     );
   }
 
-  // Input field helper
   Widget _inputField(String label, TextEditingController c, {bool isNumber = false}) {
     return Row(
       children: [
@@ -174,11 +174,23 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
     );
   }
 
-  // Tambah/Edit Layanan Modal
   void showTambahEditLayanan({
     Map<String, dynamic>? layanan,
     bool isEdit = false,
   }) {
+    if (!widget.isOwner) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Hanya dapat melihat"),
+          content: const Text("Karyawan hanya dapat melihat data layanan, tidak bisa menambah/mengedit."),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Tutup")),
+          ],
+        ),
+      );
+      return;
+    }
     final TextEditingController namaController =
         TextEditingController(text: layanan?["nama"] ?? "");
     String tipeValue = layanan?["tipe"] ?? "Satuan";
@@ -249,7 +261,7 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
                         "nama": nama,
                         "tipe": tipe,
                         "harga": harga,
-                        "jenis": filterJenis, // sesuai filter saat tambah
+                        "jenis": filterJenis,
                         "createdAt": FieldValue.serverTimestamp(),
                       });
                     }
@@ -283,8 +295,20 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
     );
   }
 
-  // Konfirmasi hapus
   void showHapusDialog(Map<String, dynamic> layanan) {
+    if (!widget.isOwner) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Hanya dapat melihat"),
+          content: const Text("Karyawan hanya dapat melihat data layanan, tidak bisa menghapus."),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Tutup")),
+          ],
+        ),
+      );
+      return;
+    }
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -349,7 +373,6 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Listen ke koleksi durasi_layanan untuk filter
     return Scaffold(
       backgroundColor: Colors.white,
       body: StreamBuilder<QuerySnapshot>(
@@ -367,12 +390,10 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
                 "durasi": doc['durasi'],
               });
             }
-            // Set default filter jenis pertama kali
             if (filterJenis.isEmpty && jenisDurasi.isNotEmpty) {
               filterJenis = jenisDurasi.first['jenis'];
             }
           }
-
           return Column(
             children: [
               // HEADER
@@ -428,7 +449,6 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
                 padding: const EdgeInsets.fromLTRB(17, 14, 17, 5),
                 child: Row(
                   children: [
-                    // Dropdown Durasi (pake modal Firestore)
                     OutlinedButton(
                       onPressed: () => showDurasiModal(jenisDurasi),
                       style: OutlinedButton.styleFrom(
@@ -474,23 +494,29 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
                       ),
                     ),
                     const SizedBox(width: 13),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(30),
-                      onTap: () => showTambahEditLayanan(isEdit: false),
-                      child: Container(
-                        padding: const EdgeInsets.all(9),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF40A2E3),
-                          borderRadius: BorderRadius.circular(28),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.13),
-                              blurRadius: 6,
-                              offset: const Offset(0, 3),
+                    IgnorePointer(
+                      ignoring: !widget.isOwner,
+                      child: Opacity(
+                        opacity: widget.isOwner ? 1.0 : 0.4,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(30),
+                          onTap: () => showTambahEditLayanan(isEdit: false),
+                          child: Container(
+                            padding: const EdgeInsets.all(9),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF40A2E3),
+                              borderRadius: BorderRadius.circular(28),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.13),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
                             ),
-                          ],
+                            child: const Icon(Icons.add, color: Colors.white, size: 27),
+                          ),
                         ),
-                        child: const Icon(Icons.add, color: Colors.white, size: 27),
                       ),
                     ),
                   ],
@@ -500,7 +526,7 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: filterJenis.isEmpty
-                      ? null // Jika belum ada filter, list kosong
+                      ? null
                       : FirebaseFirestore.instance
                           .collection('laundries')
                           .doc(widget.laundryId)
@@ -512,7 +538,6 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
                       return const Center(child: CircularProgressIndicator());
                     }
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      // Data kosong
                       return Center(
                         child: Padding(
                           padding: const EdgeInsets.all(38.0),
@@ -520,7 +545,7 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Image.asset(
-                                "assets/icons/empty_box.png", // Ganti sesuai aset kosong kamu
+                                "assets/icons/empty_box.png",
                                 width: 120,
                                 height: 120,
                               ),
@@ -568,7 +593,6 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
                         return Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Nama layanan
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 8.5),
@@ -604,35 +628,45 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
                                 ),
                               ),
                             ),
-                            // Edit button
-                            Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 3),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFBBE2EC),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: IconButton(
-                                onPressed: () => showTambahEditLayanan(
-                                  layanan: item,
-                                  isEdit: true,
+                            IgnorePointer(
+                              ignoring: !widget.isOwner,
+                              child: Opacity(
+                                opacity: widget.isOwner ? 1.0 : 0.3,
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFBBE2EC),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: () => showTambahEditLayanan(
+                                      layanan: item,
+                                      isEdit: true,
+                                    ),
+                                    icon: const Icon(Icons.edit, color: Color(0xFF2B303A)),
+                                    iconSize: 22,
+                                    tooltip: "Edit",
+                                  ),
                                 ),
-                                icon: const Icon(Icons.edit, color: Color(0xFF2B303A)),
-                                iconSize: 22,
-                                tooltip: "Edit",
                               ),
                             ),
-                            // Delete button
-                            Container(
-                              margin: const EdgeInsets.only(left: 5),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFBBE2EC),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: IconButton(
-                                onPressed: () => showHapusDialog(item),
-                                icon: const Icon(Icons.delete, color: Color(0xFF2B303A)),
-                                iconSize: 22,
-                                tooltip: "Hapus",
+                            IgnorePointer(
+                              ignoring: !widget.isOwner,
+                              child: Opacity(
+                                opacity: widget.isOwner ? 1.0 : 0.3,
+                                child: Container(
+                                  margin: const EdgeInsets.only(left: 5),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFBBE2EC),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: () => showHapusDialog(item),
+                                    icon: const Icon(Icons.delete, color: Color(0xFF2B303A)),
+                                    iconSize: 22,
+                                    tooltip: "Hapus",
+                                  ),
+                                ),
                               ),
                             ),
                           ],

@@ -5,12 +5,15 @@ import 'package:laundryin/features/pesanan/proses_detail_pesanan_belum_mulai_pag
 import 'package:laundryin/features/pesanan/proses_detail_pesanan_proses_page.dart';
 import 'package:laundryin/features/pesanan/proses_detail_pesanan_selesai_page.dart';
 
-// GANTI INI DENGAN kode laundry user yang benar, 
-// atau bisa kamu passing dari halaman sebelumnya
-const String kodeLaundry = 'laksolaundry';
-
 class ProsesPesananPage extends StatefulWidget {
-  const ProsesPesananPage({super.key});
+  final String kodeLaundry;
+  final String role;
+
+  const ProsesPesananPage({
+    Key? key,
+    required this.kodeLaundry,
+    required this.role,
+  }) : super(key: key);
 
   @override
   State<ProsesPesananPage> createState() => _ProsesPesananPageState();
@@ -26,7 +29,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('laundries')
-            .doc(kodeLaundry)
+            .doc(widget.kodeLaundry)
             .collection('pesanan')
             .orderBy('createdAt', descending: true)
             .snapshots(),
@@ -38,19 +41,20 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
             return const Center(child: Text("Belum ada pesanan."));
           }
 
-          // mapping document ke model
           final pesananList = snapshot.data!.docs
               .map((doc) => Pesanan.fromFirestore(doc))
               .toList();
 
-          // count tab
-          final countBelumMulai = pesananList.where((e) => e.status == 'belum_mulai').length;
-          final countProses = pesananList.where((e) => e.status == 'proses').length;
-          final countSelesai = pesananList.where((e) => e.status == 'selesai').length;
+          final countBelumMulai =
+              pesananList.where((e) => e.status == 'belum_mulai').length;
+          final countProses =
+              pesananList.where((e) => e.status == 'proses').length;
+          final countSelesai =
+              pesananList.where((e) => e.status == 'selesai').length;
 
-          // filter + sort
           final filteredList = pesananList
-              .where((p) => p.nama.toLowerCase().contains(search.toLowerCase()))
+              .where((p) =>
+                  p.nama.toLowerCase().contains(search.toLowerCase()))
               .toList()
             ..sort((a, b) {
               int getOrder(String status) {
@@ -58,14 +62,16 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                 if (status == 'proses') return 1;
                 return 2;
               }
+
               int cmp = getOrder(a.status).compareTo(getOrder(b.status));
               if (cmp != 0) return cmp;
-              return (b.createdAt ?? DateTime.now()).compareTo(a.createdAt ?? DateTime.now());
+              return (b.createdAt ?? DateTime.now())
+                  .compareTo(a.createdAt ?? DateTime.now());
             });
 
           return Column(
             children: [
-              // HEADER & GRADIENT
+              // HEADER
               Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
@@ -84,7 +90,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                     bottomRight: Radius.circular(32),
                   ),
                 ),
-                padding: const EdgeInsets.only(top: 42, left: 0, right: 0, bottom: 26),
+                padding: const EdgeInsets.only(top: 42, bottom: 26),
                 child: SafeArea(
                   bottom: false,
                   child: Column(
@@ -112,13 +118,14 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                               ),
                             ),
                           ),
-                          SizedBox(width: 44),
+                          const SizedBox(width: 44),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Container(
                         margin: const EdgeInsets.symmetric(horizontal: 16),
-                        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 9),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 11, horizontal: 9),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.70),
                           borderRadius: BorderRadius.circular(20),
@@ -134,21 +141,21 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                           children: [
                             _statusTab(
                               icon: Icons.close_rounded,
-                              iconColor: Color(0xFFFF6A6A),
+                              iconColor: const Color(0xFFFF6A6A),
                               count: countBelumMulai,
                               label: "Belum Mulai",
                             ),
                             const SizedBox(width: 13),
                             _statusTab(
                               icon: Icons.radio_button_checked_rounded,
-                              iconColor: Color(0xFF52E18C),
+                              iconColor: const Color(0xFF52E18C),
                               count: countProses,
                               label: "Proses",
                             ),
                             const SizedBox(width: 13),
                             _statusTab(
                               icon: Icons.done_all_rounded,
-                              iconColor: Color(0xFF40A2E3),
+                              iconColor: const Color(0xFF40A2E3),
                               count: countSelesai,
                               label: "Selesai",
                             ),
@@ -171,7 +178,8 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                             ],
                           ),
                           child: TextField(
-                            onChanged: (value) => setState(() => search = value),
+                            onChanged: (value) =>
+                                setState(() => search = value),
                             style: const TextStyle(
                               fontFamily: "Poppins",
                               fontSize: 15,
@@ -190,7 +198,8 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                                 fontWeight: FontWeight.w500,
                               ),
                               border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(vertical: 16),
+                              contentPadding:
+                                  EdgeInsets.symmetric(vertical: 16),
                             ),
                           ),
                         ),
@@ -204,143 +213,145 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
               // LIST PESANAN
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.only(left: 0, right: 0, top: 7, bottom: 15),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 18, vertical: 15),
                   itemCount: filteredList.length,
                   itemBuilder: (context, index) {
                     final p = filteredList[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(22),
-                        onTap: () async {
-                          if (p.status == 'belum_mulai') {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ProsesDetailPesananBelumMulaiPage(
-                                  pesanan: p,
-                                ),
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(22),
+                      onTap: () async {
+                        if (p.status == 'belum_mulai') {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProsesDetailPesananBelumMulaiPage(
+                                pesanan: p,
+                                role: widget.role,
                               ),
-                            );
-                          } else if (p.status == 'proses') {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ProsesDetailPesananProsesPage(
-                                  pesanan: p,
-                                ),
-                              ),
-                            );
-                          } else if (p.status == 'selesai') {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ProsesDetailPesananSelesaiPage(
-                                  pesanan: p,
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 15),
-                          padding: const EdgeInsets.symmetric(horizontal: 19, vertical: 18),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(
-                              color: Colors.black.withOpacity(0.13),
-                              width: 1.15,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.13),
-                                blurRadius: 14,
-                                offset: const Offset(0, 6),
+                          );
+                        } else if (p.status == 'proses') {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProsesDetailPesananProsesPage(
+                                pesanan: p,
+                                role: widget.role,
                               ),
-                            ],
+                            ),
+                          );
+                        } else {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProsesDetailPesananSelesaiPage(
+                                pesanan: p,
+                                role: widget.role,
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 15),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 19, vertical: 18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(
+                            color: Colors.black.withOpacity(0.13),
+                            width: 1.15,
                           ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      p.nama,
-                                      style: const TextStyle(
-                                        fontFamily: "Poppins",
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 17.8,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          p.layanan,
-                                          style: TextStyle(
-                                            fontFamily: "Poppins",
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 15,
-                                            color: Colors.black.withOpacity(0.66),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 3),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "${p.beratKg} kgs",
-                                          style: TextStyle(
-                                            fontFamily: "Poppins",
-                                            fontSize: 13,
-                                            fontStyle: FontStyle.italic,
-                                            color: Colors.black.withOpacity(0.54),
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 7),
-                                        Text(
-                                          "•",
-                                          style: TextStyle(
-                                            fontFamily: "Poppins",
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.grey[400],
-                                            fontSize: 13.7,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 7),
-                                        Text(
-                                          "${p.barangQty.values.fold<int>(0, (prev, el) => prev + el)} pcs",
-                                          style: TextStyle(
-                                            fontFamily: "Poppins",
-                                            fontSize: 13,
-                                            fontStyle: FontStyle.italic,
-                                            color: Colors.black.withOpacity(0.54),
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Row(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.13),
+                              blurRadius: 14,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  _statusIcon(p.status),
-                                  const SizedBox(width: 12),
-                                  const Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    color: Colors.black87,
-                                    size: 29,
+                                  Text(
+                                    p.nama,
+                                    style: const TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 17.8,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        p.layanan,
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 15,
+                                          color: Colors.black.withOpacity(0.66),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "${p.beratKg} kgs",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 13,
+                                          fontStyle: FontStyle.italic,
+                                          color: Colors.black.withOpacity(0.54),
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 7),
+                                      Text(
+                                        "•",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey[400],
+                                          fontSize: 13.7,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 7),
+                                      Text(
+                                        "${p.barangQty.values.fold<int>(0, (prev, el) => prev + el)} pcs",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 13,
+                                          fontStyle: FontStyle.italic,
+                                          color: Colors.black.withOpacity(0.54),
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
+                            ),
+                            Row(
+                              children: [
+                                _statusIcon(p.status),
+                                const SizedBox(width: 12),
+                                const Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  color: Colors.black87,
+                                  size: 29,
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     );
@@ -412,11 +423,14 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
 
   Widget _statusIcon(String status) {
     if (status == 'belum_mulai') {
-      return const Icon(Icons.close_rounded, color: Color(0xFFFF6A6A), size: 29);
+      return const Icon(Icons.close_rounded,
+          color: Color(0xFFFF6A6A), size: 29);
     } else if (status == 'proses') {
-      return const Icon(Icons.radio_button_checked_rounded, color: Color(0xFF52E18C), size: 29);
+      return const Icon(Icons.radio_button_checked_rounded,
+          color: Color(0xFF52E18C), size: 29);
     } else {
-      return const Icon(Icons.done_all_rounded, color: Color(0xFF40A2E3), size: 29);
+      return const Icon(Icons.done_all_rounded,
+          color: Color(0xFF40A2E3), size: 29);
     }
   }
 }
