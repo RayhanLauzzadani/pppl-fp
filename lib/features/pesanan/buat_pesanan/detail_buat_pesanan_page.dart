@@ -4,7 +4,15 @@ import 'detail_buat_pesanan_selesai_bayar_page.dart';
 
 class DetailBuatPesananPage extends StatelessWidget {
   final Map<String, dynamic> data;
-  const DetailBuatPesananPage({Key? key, required this.data}) : super(key: key);
+  final String role;
+  final String laundryId;
+
+  const DetailBuatPesananPage({
+    super.key,
+    required this.data,
+    required this.role,
+    required this.laundryId,
+  });
 
   // Helper agar aman casting Map
   static Map<String, int> _safeMapInt(dynamic val) => (val is Map)
@@ -71,7 +79,7 @@ class DetailBuatPesananPage extends StatelessWidget {
 
     // 2. Layanan jenis (paket) dari Firestore, tidak pengaruh ke laundry kiloan bar!
     jumlah.forEach((namaLayanan, qty) {
-      if (qty != null && qty > 0) {
+      if (qty > 0) {
         String tipe = (tipeLayanan[namaLayanan] ?? "").toLowerCase();
         String satuan = tipe == "kiloan" ? "Kg" : "Sat";
         int harga = hargaLayanan[namaLayanan] ?? 0;
@@ -186,7 +194,6 @@ class DetailBuatPesananPage extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      // Foto Dihapus
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -256,9 +263,7 @@ class DetailBuatPesananPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      ...listBarangFinal
-                          .map((b) => _LaundryItemTile(b))
-                          .toList(),
+                      ...listBarangFinal.map((b) => laundryItemTile(b)),
                       const SizedBox(height: 9),
                       Container(
                         width: double.infinity,
@@ -324,8 +329,11 @@ class DetailBuatPesananPage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    DetailBuatPesananBelumBayarPage(data: data),
+                                builder: (_) => DetailBuatPesananBelumBayarPage(
+                                  data: data,
+                                  role: role,
+                                  laundryId: laundryId,
+                                ),
                               ),
                             );
                           },
@@ -356,10 +364,11 @@ class DetailBuatPesananPage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    DetailBuatPesananSelesaiBayarPage(
-                                      data: data,
-                                    ),
+                                builder: (_) => DetailBuatPesananSelesaiBayarPage(
+                                  data: data,
+                                  role: role,
+                                  laundryId: laundryId,
+                                ),
                               ),
                             );
                           },
@@ -525,8 +534,8 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// Laundry Item Tile
-Widget _LaundryItemTile(Map<String, dynamic> b) {
+// Laundry Item Tile (pakai lowerCamelCase)
+Widget laundryItemTile(Map<String, dynamic> b) {
   final String satuan = b['satuan'] ?? '';
   final harga = b['harga'] ?? 0;
   final total = b['total'] ?? 0;

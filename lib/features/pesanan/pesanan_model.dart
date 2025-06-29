@@ -4,8 +4,8 @@ class Pesanan {
   final String id;
   final String nama;
   final String whatsapp;
-  final String layanan;   // (misal: 5 Hari, dst)
-  final String desc;      // (misal: Reguler, dst)
+  final String layanan;   // Contoh: 5 Hari
+  final String desc;      // Contoh: Reguler
   final String status;
   final double beratKg;
   final Map<String, int> barangQty;
@@ -19,6 +19,7 @@ class Pesanan {
   final int? hargaKiloan;
   final Map<String, int>? hargaLayanan;
   final Map<String, String>? layananTipe;
+  final Map<String, int>? jumlah; // Field jumlah ditambahkan
   final DateTime? createdAt;
 
   Pesanan({
@@ -40,10 +41,11 @@ class Pesanan {
     this.hargaKiloan,
     this.hargaLayanan,
     this.layananTipe,
+    this.jumlah, // Jangan lupa di constructor
     this.createdAt,
   });
 
-  /// Getter: Total PCS dihitung dari barangQty
+  /// Getter untuk total pcs dari barangQty
   int get pcs => barangQty.values.fold(0, (a, b) => a + b);
 
   factory Pesanan.fromFirestore(DocumentSnapshot doc) {
@@ -67,6 +69,7 @@ class Pesanan {
       hargaKiloan: (data['hargaKiloan'] as num?)?.toInt(),
       hargaLayanan: (data['hargaLayanan'] as Map?)?.map((k, v) => MapEntry(k.toString(), (v as num).toInt())),
       layananTipe: (data['layananTipe'] as Map?)?.map((k, v) => MapEntry(k.toString(), v.toString())),
+      jumlah: (data['jumlah'] as Map?)?.map((k, v) => MapEntry(k.toString(), (v as num).toInt())), // Mapping jumlah
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
     );
   }
@@ -90,6 +93,7 @@ class Pesanan {
     int? hargaKiloan,
     Map<String, int>? hargaLayanan,
     Map<String, String>? layananTipe,
+    Map<String, int>? jumlah, // Field jumlah di copyWith
     DateTime? createdAt,
   }) {
     return Pesanan(
@@ -111,6 +115,7 @@ class Pesanan {
       hargaKiloan: hargaKiloan ?? this.hargaKiloan,
       hargaLayanan: hargaLayanan ?? this.hargaLayanan,
       layananTipe: layananTipe ?? this.layananTipe,
+      jumlah: jumlah ?? this.jumlah, // Jangan lupa di copyWith
       createdAt: createdAt ?? this.createdAt,
     );
   }

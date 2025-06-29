@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'onboarding_page.dart';
 
 class SignInPage extends StatefulWidget {
@@ -26,21 +27,45 @@ class _SignInPageState extends State<SignInPage> {
       return;
     }
 
-    setState(() {
-      isLoading = true;
-    });
+    setState(() { isLoading = true; });
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      // Step 1: Sign in
+      final result = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      if (!mounted) return;
+      // Step 2: Fetch user doc Firestore (pastikan koleksi 'users' ada & uid dipakai)
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(result.user!.uid)
+          .get();
 
+      final data = userDoc.data();
+      if (data == null || data['kodeLaundry'] == null || data['role'] == null) {
+        await FirebaseAuth.instance.signOut();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Akun tidak valid. Hubungi admin!")),
+        );
+        setState(() { isLoading = false; });
+        return;
+      }
+
+      final String kodeLaundry = data['kodeLaundry'];
+      final String role = data['role'];
+
+      // Step 3: Navigasi ke OnBoardingPage, pass parameter kodeLaundry + role
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const OnBoardingPage()),
+        MaterialPageRoute(
+          builder: (_) => OnBoardingPage(
+            kodeLaundry: kodeLaundry,
+            role: role,
+          ),
+        ),
       );
     } on FirebaseAuthException catch (e) {
       String msg = "Gagal login!";
@@ -59,11 +84,15 @@ class _SignInPageState extends State<SignInPage> {
         SnackBar(content: Text("Terjadi kesalahan: ${e.toString()}")),
       );
     }
-
     if (!mounted) return;
-    setState(() {
-      isLoading = false;
-    });
+    setState(() { isLoading = false; });
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override

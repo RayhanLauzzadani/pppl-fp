@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../home/home_page.dart';
+import '../proses_pesanan_page.dart';
 
 class DetailBuatPesananBelumBayarPage extends StatelessWidget {
   final Map<String, dynamic> data;
-  const DetailBuatPesananBelumBayarPage({Key? key, required this.data})
-      : super(key: key);
+  final String role;
+  final String laundryId;
+
+  const DetailBuatPesananBelumBayarPage({
+    super.key,
+    required this.data,
+    required this.role,
+    required this.laundryId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +25,9 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
     final String status = data['status'] ?? "Dalam Antrian";
     final String tanggalTerima = data['tanggalTerima'] ?? _nowString();
     final String tanggalSelesai = data['tanggalSelesai'] ?? "-";
-    final String jenisParfum = _safeString(data['parfum'] ?? data['jenisParfum']);
+    final String jenisParfum = _safeString(
+      data['parfum'] ?? data['jenisParfum'],
+    );
     final String antarJemput = _safeString(data['antarJemput']);
     final String diskon = _safeString(data['diskon']);
     final String catatan = _safeString(data['catatan']);
@@ -29,26 +39,29 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
             ? double.tryParse(data['beratKg']) ?? 0.0
             : 0.0);
 
-    // PASTIKAN laundry kiloan selalu 10.000/kg
-    final Map<String, int> jumlah =
-        data['jumlah'] is Map ? Map<String, int>.from(data['jumlah']) : {};
-    final Map<String, String> tipeLayanan =
-        data['layananTipe'] is Map ? Map<String, String>.from(data['layananTipe']) : {};
-    final Map<String, int> hargaLayanan =
-        data['hargaLayanan'] is Map ? Map<String, int>.from(data['hargaLayanan']) : {};
+    // Layanan Firestore
+    final Map<String, int> jumlah = data['jumlah'] is Map
+        ? Map<String, int>.from(data['jumlah'])
+        : {};
+    final Map<String, String> tipeLayanan = data['layananTipe'] is Map
+        ? Map<String, String>.from(data['layananTipe'])
+        : {};
+    final Map<String, int> hargaLayanan = data['hargaLayanan'] is Map
+        ? Map<String, int>.from(data['hargaLayanan'])
+        : {};
 
     // Barang satuan/custom
     final List<Map<String, dynamic>> barangList =
         (data['barangList'] ?? []) is List
             ? List<Map<String, dynamic>>.from(data['barangList'])
             : [];
-    final Map<String, int> barangQty =
-        data['barangQty'] is Map ? Map<String, int>.from(data['barangQty']) : {};
+    final Map<String, int> barangQty = data['barangQty'] is Map
+        ? Map<String, int>.from(data['barangQty'])
+        : {};
 
-    // --- BANGUN LAYANAN LAUNDRY ---
+    // --- Build layananLaundry ---
     List<Map<String, dynamic>> layananLaundry = [];
 
-    // 1. Laundry Kiloan manual (beratKg dari input bar! SELALU 10rb/kg)
     if (beratKg > 0) {
       layananLaundry.add({
         'nama': 'Laundry Kiloan',
@@ -59,15 +72,11 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
       });
     }
 
-    // 2. Semua layanan dari jenis_layanan Firestore
     jumlah.forEach((nama, qty) {
-      if (qty != null && qty > 0) {
+      if (qty > 0) {
         final tipe = (tipeLayanan[nama] ?? '').toLowerCase();
         final satuan = tipe == "kiloan" ? "Kg" : "Sat";
         final harga = hargaLayanan[nama] ?? 0;
-
-        // PENTING: layanan yang labelnya kiloan dari Firestore JANGAN DIANGGAP laundry kiloan
-        // Tidak skip apapun kecuali nama benar2 'Laundry Kiloan' (dari input bar)
         if (!(nama.toLowerCase() == "laundry kiloan")) {
           layananLaundry.add({
             'nama': nama,
@@ -80,7 +89,6 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
       }
     });
 
-    // 3. Barang Custom
     for (final b in barangList) {
       final namaBarang = (b['title'] ?? b['nama'] ?? '-').toString();
       final qtyBarang = barangQty[namaBarang] ?? 0;
@@ -95,7 +103,6 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
       }
     }
 
-    // 4. Fallback kalau kosong
     if (layananLaundry.isEmpty && barangQty.isNotEmpty) {
       barangQty.forEach((nama, qty) {
         if (qty > 0) {
@@ -110,9 +117,10 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
       });
     }
 
-    // Hitung total pembayaran (bener2 dari layananLaundry, jangan ambil field totalHarga)
-    int totalBayar =
-        layananLaundry.fold(0, (sum, e) => sum + (e['total'] as int? ?? 0));
+    int totalBayar = layananLaundry.fold(
+      0,
+      (sum, e) => sum + (e['total'] as int? ?? 0),
+    );
     if (totalBayar == 0) totalBayar = data['totalHarga'] ?? 0;
 
     return Scaffold(
@@ -230,10 +238,22 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
                         height: 21,
                       ),
                       _InfoRow("Status", status, boldValue: true),
-                      _InfoRow("Tanggal Terima", tanggalTerima, boldValue: true),
-                      _InfoRow("Tanggal Selesai", tanggalSelesai, boldValue: true),
+                      _InfoRow(
+                        "Tanggal Terima",
+                        tanggalTerima,
+                        boldValue: true,
+                      ),
+                      _InfoRow(
+                        "Tanggal Selesai",
+                        tanggalSelesai,
+                        boldValue: true,
+                      ),
                       _InfoRow("Jenis Parfum", jenisParfum, boldValue: true),
-                      _InfoRow("Layanan Antar Jemput", antarJemput, boldValue: true),
+                      _InfoRow(
+                        "Layanan Antar Jemput",
+                        antarJemput,
+                        boldValue: true,
+                      ),
                       _InfoRow("Diskon", diskon, boldValue: true),
                       _InfoRow("Catatan", catatan, boldValue: false),
                       Divider(
@@ -252,7 +272,7 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      ...layananLaundry.map((b) => _LaundryItemTile(b)).toList(),
+                      ...layananLaundry.map((b) => laundryItemTile(b)),
                       const SizedBox(height: 9),
                       // TOTAL BAYAR
                       Container(
@@ -322,13 +342,12 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // Navigate ke HomePage sesuai role dan laundryId
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
                           builder: (_) => HomePage(
-                            role: data['role'] ?? 'owner',
-                            laundryId: data['kodeLaundry'] ?? '',
+                            role: role,
+                            laundryId: laundryId,
                           ),
                         ),
                         (route) => false,
@@ -357,7 +376,17 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProsesPesananPage(
+                            kodeLaundry: laundryId,
+                            role: role,
+                          ),
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF279AF1),
                       foregroundColor: Colors.white,
@@ -524,8 +553,8 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// Laundry Item Tile (AMAN DARI ERROR!)
-Widget _LaundryItemTile(Map<String, dynamic> b) {
+// Laundry Item Tile
+Widget laundryItemTile(Map<String, dynamic> b) {
   final String nama = (b['nama'] ?? '-').toString();
   final String satuan = (b['satuan'] ?? '-').toString();
   final harga = b['harga'] ?? 0;

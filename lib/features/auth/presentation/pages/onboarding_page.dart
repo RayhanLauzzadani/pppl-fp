@@ -4,7 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../home/home_page.dart';
 
 class OnBoardingPage extends StatefulWidget {
-  const OnBoardingPage({super.key});
+  final String kodeLaundry;
+  final String role;
+
+  const OnBoardingPage({
+    Key? key,
+    required this.kodeLaundry,
+    required this.role,
+  }) : super(key: key);
 
   @override
   State<OnBoardingPage> createState() => _OnBoardingPageState();
@@ -39,9 +46,6 @@ class _OnBoardingPageState extends State<OnBoardingPage>
     });
   }
 
-  // Fix: Langsung return 'laksolaundry'
-  String getLaundryId() => 'laksolaundry';
-
   Future<void> _navigateToHome() async {
     final user = FirebaseAuth.instance.currentUser;
 
@@ -51,12 +55,14 @@ class _OnBoardingPageState extends State<OnBoardingPage>
     }
 
     final uid = user.uid;
-    final laundryId = getLaundryId();
+    final kodeLaundry = widget.kodeLaundry;
+    final role = widget.role;
 
+    // Pastikan data user memang ada di Firestore & valid
     try {
       final userDoc = await FirebaseFirestore.instance
           .collection('laundries')
-          .doc(laundryId)
+          .doc(kodeLaundry)
           .collection('users')
           .doc(uid)
           .get();
@@ -66,14 +72,15 @@ class _OnBoardingPageState extends State<OnBoardingPage>
         return;
       }
 
+      // Pastikan role dari Firestore konsisten
       final data = userDoc.data()!;
-      final role = data['role'] ?? '';
+      final firestoreRole = data['role'] ?? role;
 
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => HomePage(role: role, laundryId: laundryId),
+          builder: (_) => HomePage(role: firestoreRole, laundryId: kodeLaundry),
         ),
       );
     } catch (e) {
@@ -83,9 +90,7 @@ class _OnBoardingPageState extends State<OnBoardingPage>
 
   void _showErrorAndExit(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     Navigator.pop(context); // kembali ke SignInPage
   }
 

@@ -3,8 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DurasiLayananPage extends StatefulWidget {
   final String laundryId;
+  final bool isOwner;
 
-  const DurasiLayananPage({super.key, required this.laundryId});
+  const DurasiLayananPage({
+    super.key,
+    required this.laundryId,
+    required this.isOwner,
+  });
 
   @override
   State<DurasiLayananPage> createState() => _DurasiLayananPageState();
@@ -15,6 +20,8 @@ class _DurasiLayananPageState extends State<DurasiLayananPage> {
 
   // Modal tambah/edit durasi layanan
   void _showDurasiBottomSheet({DocumentSnapshot? editDoc}) {
+    if (!widget.isOwner) return; // Batasi akses untuk karyawan
+
     String _jenisSelected = editDoc != null ? editDoc['jenis'] : _jenisList[0];
     final TextEditingController durasiController = TextEditingController(
       text: editDoc != null ? (editDoc['durasi'] ?? '') : '',
@@ -233,6 +240,7 @@ class _DurasiLayananPageState extends State<DurasiLayananPage> {
 
   // Konfirmasi hapus
   void _showDeleteDialog(DocumentSnapshot doc) {
+    if (!widget.isOwner) return; // Batasi akses untuk karyawan
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -479,37 +487,39 @@ class _DurasiLayananPageState extends State<DurasiLayananPage> {
                               ),
                             ),
                             // Tombol Edit
-                            Container(
-                              margin:
-                                  const EdgeInsets.only(left: 8, right: 7),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFBBE2EC),
-                                borderRadius: BorderRadius.circular(9),
+                            if (widget.isOwner)
+                              Container(
+                                margin:
+                                    const EdgeInsets.only(left: 8, right: 7),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFBBE2EC),
+                                  borderRadius: BorderRadius.circular(9),
+                                ),
+                                child: IconButton(
+                                  onPressed: () =>
+                                      _showDurasiBottomSheet(editDoc: item),
+                                  icon: const Icon(Icons.edit,
+                                      color: Color(0xFF2B303A)),
+                                  iconSize: 23,
+                                  tooltip: "Edit",
+                                ),
                               ),
-                              child: IconButton(
-                                onPressed: () =>
-                                    _showDurasiBottomSheet(editDoc: item),
-                                icon: const Icon(Icons.edit,
-                                    color: Color(0xFF2B303A)),
-                                iconSize: 23,
-                                tooltip: "Edit",
-                              ),
-                            ),
                             // Tombol Hapus
-                            Container(
-                              margin: const EdgeInsets.only(left: 0),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFBBE2EC),
-                                borderRadius: BorderRadius.circular(9),
+                            if (widget.isOwner)
+                              Container(
+                                margin: const EdgeInsets.only(left: 0),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFBBE2EC),
+                                  borderRadius: BorderRadius.circular(9),
+                                ),
+                                child: IconButton(
+                                  onPressed: () => _showDeleteDialog(item),
+                                  icon: const Icon(Icons.delete,
+                                      color: Color(0xFF2B303A)),
+                                  iconSize: 23,
+                                  tooltip: "Hapus",
+                                ),
                               ),
-                              child: IconButton(
-                                onPressed: () => _showDeleteDialog(item),
-                                icon: const Icon(Icons.delete,
-                                    color: Color(0xFF2B303A)),
-                                iconSize: 23,
-                                tooltip: "Hapus",
-                              ),
-                            ),
                           ],
                         ),
                       ),
@@ -519,34 +529,35 @@ class _DurasiLayananPageState extends State<DurasiLayananPage> {
               },
             ),
           ),
-          // Tombol Tambah Durasi
-          Padding(
-            padding: const EdgeInsets.only(
-                bottom: 28, top: 3, left: 32, right: 32),
-            child: SizedBox(
-              width: double.infinity,
-              height: 46,
-              child: ElevatedButton(
-                onPressed: () => _showDurasiBottomSheet(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF40A2E3),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(13),
+          // Tombol Tambah Durasi (hanya untuk owner)
+          if (widget.isOwner)
+            Padding(
+              padding: const EdgeInsets.only(
+                  bottom: 28, top: 3, left: 32, right: 32),
+              child: SizedBox(
+                width: double.infinity,
+                height: 46,
+                child: ElevatedButton(
+                  onPressed: () => _showDurasiBottomSheet(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF40A2E3),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    elevation: 0,
                   ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  "Tambah Durasi",
-                  style: TextStyle(
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16.2,
+                  child: const Text(
+                    "Tambah Durasi",
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16.2,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

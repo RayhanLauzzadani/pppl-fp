@@ -3,7 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AntarJemputPage extends StatefulWidget {
   final String laundryId;
-  const AntarJemputPage({super.key, required this.laundryId});
+  final bool isOwner; // <-- Tambah param ini
+
+  const AntarJemputPage({
+    super.key,
+    required this.laundryId,
+    required this.isOwner,
+  });
 
   @override
   State<AntarJemputPage> createState() => _AntarJemputPageState();
@@ -16,7 +22,10 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
       .doc(widget.laundryId)
       .collection('antar_jemput');
 
+  // ---------- MODAL TAMBAH/EDIT ----------
   void _showEditSheet({DocumentSnapshot? doc}) {
+    if (!widget.isOwner) return; // Karyawan tidak boleh buka modal
+
     bool isEdit = doc != null;
     final TextEditingController hargaController = TextEditingController(
       text: isEdit ? doc['harga'].toString() : "",
@@ -131,6 +140,8 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
   }
 
   void _showDeleteDialog(DocumentSnapshot doc) {
+    if (!widget.isOwner) return; // Karyawan tidak boleh hapus
+
     showDialog(
       context: context,
       builder: (_) => Dialog(
@@ -142,7 +153,7 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'assets/images/icon_delete_list.png', // Pastikan gambar ini ada
+                'assets/images/icon_delete_list.png',
                 height: 80,
                 width: 80,
                 fit: BoxFit.contain,
@@ -301,7 +312,6 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  // Data kosong dengan motivasi/empty box
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(38.0),
@@ -309,7 +319,7 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Image.asset(
-                            "assets/icons/empty_box.png", // Ganti aset sesuai punya kamu
+                            "assets/icons/empty_box.png",
                             width: 120,
                             height: 120,
                           ),
@@ -397,40 +407,41 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
                                 ],
                               ),
                             ),
-                            // Tombol Edit
-                            Container(
-                              margin: const EdgeInsets.only(left: 8, right: 7),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFBBE2EC),
-                                borderRadius: BorderRadius.circular(9),
-                              ),
-                              child: IconButton(
-                                onPressed: () => _showEditSheet(doc: item),
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Color(0xFF2B303A),
+                            // Tombol Edit dan Hapus (hanya owner)
+                            if (widget.isOwner) ...[
+                              Container(
+                                margin: const EdgeInsets.only(left: 8, right: 7),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFBBE2EC),
+                                  borderRadius: BorderRadius.circular(9),
                                 ),
-                                iconSize: 23,
-                                tooltip: "Edit",
-                              ),
-                            ),
-                            // Tombol Hapus
-                            Container(
-                              margin: const EdgeInsets.only(left: 0),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFBBE2EC),
-                                borderRadius: BorderRadius.circular(9),
-                              ),
-                              child: IconButton(
-                                onPressed: () => _showDeleteDialog(item),
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Color(0xFF2B303A),
+                                child: IconButton(
+                                  onPressed: () => _showEditSheet(doc: item),
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Color(0xFF2B303A),
+                                  ),
+                                  iconSize: 23,
+                                  tooltip: "Edit",
                                 ),
-                                iconSize: 23,
-                                tooltip: "Hapus",
                               ),
-                            ),
+                              Container(
+                                margin: const EdgeInsets.only(left: 0),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFBBE2EC),
+                                  borderRadius: BorderRadius.circular(9),
+                                ),
+                                child: IconButton(
+                                  onPressed: () => _showDeleteDialog(item),
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Color(0xFF2B303A),
+                                  ),
+                                  iconSize: 23,
+                                  tooltip: "Hapus",
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -440,38 +451,39 @@ class _AntarJemputPageState extends State<AntarJemputPage> {
               },
             ),
           ),
-          // Tombol Tambah Antar Jemput
-          Padding(
-            padding: const EdgeInsets.only(
-              bottom: 30,
-              top: 3,
-              left: 30,
-              right: 30,
-            ),
-            child: SizedBox(
-              width: double.infinity,
-              height: 46,
-              child: ElevatedButton(
-                onPressed: () => _showEditSheet(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF40A2E3),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(13),
+          // Tombol Tambah Antar Jemput (hanya owner)
+          if (widget.isOwner)
+            Padding(
+              padding: const EdgeInsets.only(
+                bottom: 30,
+                top: 3,
+                left: 30,
+                right: 30,
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                height: 46,
+                child: ElevatedButton(
+                  onPressed: () => _showEditSheet(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF40A2E3),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    elevation: 0,
                   ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  "Tambah Layanan",
-                  style: TextStyle(
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16.5,
+                  child: const Text(
+                    "Tambah Layanan",
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16.5,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

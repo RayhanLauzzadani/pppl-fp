@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import '../pesanan_model.dart';
+import '../selesai pesanan/selesai_pesanan_page.dart';
 
 class DetailPesananScaffold extends StatelessWidget {
   final Pesanan pesanan;
   final String status;
   final List<Map<String, dynamic>> listItem;
+  final String role;       // Tambahkan parameter role
+  final String laundryId;  // Tambahkan parameter laundryId
   final void Function(int, bool)? onChangedKonfirmasi;
   final VoidCallback? onMulaiProses;
   final VoidCallback? onHentikanProses;
@@ -16,6 +19,8 @@ class DetailPesananScaffold extends StatelessWidget {
     required this.pesanan,
     required this.status,
     required this.listItem,
+    required this.role,      // wajib diisi
+    required this.laundryId, // wajib diisi
     this.onChangedKonfirmasi,
     this.onMulaiProses,
     this.onHentikanProses,
@@ -159,41 +164,26 @@ class DetailPesananScaffold extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 10),
-                              Row(
+                              Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(40),
-                                    child: Image.network(
-                                      'https://randomuser.me/api/portraits/men/32.jpg',
-                                      width: 48,
-                                      height: 48,
-                                      fit: BoxFit.cover,
+                                  Text(
+                                    pesanan.nama,
+                                    style: const TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15.4,
+                                      color: Colors.black,
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        pesanan.nama,
-                                        style: const TextStyle(
-                                          fontFamily: "Poppins",
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15.4,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      Text(
-                                        pesanan.whatsapp,
-                                        style: const TextStyle(
-                                          fontFamily: "Poppins",
-                                          color: Colors.black87,
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 13.1,
-                                        ),
-                                      ),
-                                    ],
+                                  Text(
+                                    pesanan.whatsapp,
+                                    style: const TextStyle(
+                                      fontFamily: "Poppins",
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 13.1,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -241,11 +231,20 @@ class DetailPesananScaffold extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Divider(color: Colors.grey[400], thickness: 0.8, height: 23),
-                      _infoRow("Status", status == "selesai" ? "Selesai" : (status == "proses" ? "Sedang Diproses" : "Dalam Antrian"), boldValue: true),
-                      _infoRow("Tanggal Terima", pesanan.createdAt != null
-                          ? "${pesanan.createdAt!.day}/${pesanan.createdAt!.month}/${pesanan.createdAt!.year}"
-                          : "-", boldValue: true),
-                      // Field info lain jika ada (tambahkan sesuai kebutuhan)
+                      _infoRow(
+                        "Status",
+                        status == "selesai"
+                            ? "Selesai"
+                            : (status == "proses" ? "Sedang Diproses" : "Dalam Antrian"),
+                        boldValue: true,
+                      ),
+                      _infoRow(
+                        "Tanggal Terima",
+                        pesanan.createdAt != null
+                            ? "${pesanan.createdAt!.day}/${pesanan.createdAt!.month}/${pesanan.createdAt!.year} – ${pesanan.createdAt!.hour.toString().padLeft(2,'0')}.${pesanan.createdAt!.minute.toString().padLeft(2,'0')}"
+                            : "-",
+                        boldValue: true,
+                      ),
                       Divider(color: Colors.grey[400], thickness: 0.8, height: 24),
                       Row(
                         children: const [
@@ -317,7 +316,7 @@ class DetailPesananScaffold extends StatelessWidget {
                               child: Center(
                                 child: Checkbox(
                                   value: item["konfirmasi"] as bool,
-                                  onChanged: (status == 'proses' && onChangedKonfirmasi != null)
+                                  onChanged: (onChangedKonfirmasi != null)
                                       ? (val) => onChangedKonfirmasi!(idx, val ?? false)
                                       : null,
                                 ),
@@ -410,8 +409,19 @@ class DetailPesananScaffold extends StatelessWidget {
                         ),
                       );
                     } else {
+                      // status selesai
                       return ElevatedButton(
-                        onPressed: onSelesaikanProses,
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SelesaiPesananPage(
+                                kodeLaundry: laundryId, // gunakan parameter laundryId
+                                role: role,              // kirimkan parameter role
+                              ),
+                            ),
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF40A2E3),
                           foregroundColor: Colors.white,

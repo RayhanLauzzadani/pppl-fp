@@ -13,6 +13,7 @@ class PilihLayananPage extends StatefulWidget {
   final String layanan;
   final String desc;
   final String kodeLaundry;
+  final String role;
   final List<Map<String, dynamic>>? barangCustom;
   final Map<String, int>? barangQtyCustom;
   final double? beratKgSebelumnya;
@@ -24,6 +25,7 @@ class PilihLayananPage extends StatefulWidget {
     required this.layanan,
     required this.desc,
     required this.kodeLaundry,
+    required this.role,
     this.barangCustom,
     this.barangQtyCustom,
     this.beratKgSebelumnya,
@@ -429,8 +431,8 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                             harga: (item['harga'] is int)
                                 ? item['harga']
                                 : (item['harga'] is double)
-                                    ? (item['harga'] as double).toInt()
-                                    : int.tryParse('${item['harga']}') ?? 0,
+                                ? (item['harga'] as double).toInt()
+                                : int.tryParse('${item['harga']}') ?? 0,
                             jumlah: jumlah[item['nama']] ?? 0,
                             tipe: (item['tipe'] ?? '').toString(),
                             onTambah: () {
@@ -558,10 +560,11 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                     hargaLayanan[nama] = (l['harga'] is int)
                         ? l['harga']
                         : (l['harga'] is double)
-                            ? (l['harga'] as double).toInt()
-                            : int.tryParse('${l['harga']}') ?? 0;
+                        ? (l['harga'] as double).toInt()
+                        : int.tryParse('${l['harga']}') ?? 0;
                     tipeLayanan[nama] = (l['tipe'] ?? '').toString();
-                    if ((l['tipe'] ?? '').toString().toLowerCase() == 'kiloan') {
+                    if ((l['tipe'] ?? '').toString().toLowerCase() ==
+                        'kiloan') {
                       hargaKiloan = hargaLayanan[nama]!;
                     }
                   }
@@ -627,8 +630,10 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                     'hargaLayanan': hargaLayanan,
                                     'layananTipe': tipeLayanan,
                                     'hargaKiloan': hargaKiloan,
-                                    'jenisParfum': konfirmasiData['jenisParfum'],
-                                    'antarJemput': konfirmasiData['antarJemput'],
+                                    'jenisParfum':
+                                        konfirmasiData['jenisParfum'],
+                                    'antarJemput':
+                                        konfirmasiData['antarJemput'],
                                     'diskon': konfirmasiData['diskon'],
                                     'catatan': konfirmasiData['catatan'],
                                   };
@@ -639,7 +644,8 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                         .collection('pesanan')
                                         .add({
                                           ...pesananData,
-                                          'createdAt': FieldValue.serverTimestamp(),
+                                          'createdAt':
+                                              FieldValue.serverTimestamp(),
                                           'status': 'belum_mulai',
                                         });
                                     if (mounted) Navigator.pop(context);
@@ -649,15 +655,21 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                         MaterialPageRoute(
                                           builder: (_) => DetailBuatPesananPage(
                                             data: pesananData,
+                                            role: widget.role,
+                                            laundryId: widget.kodeLaundry,
                                           ),
                                         ),
                                       );
                                     }
                                   } catch (e) {
                                     if (mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         SnackBar(
-                                          content: Text('Gagal menyimpan pesanan: $e'),
+                                          content: Text(
+                                            'Gagal menyimpan pesanan: $e',
+                                          ),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
