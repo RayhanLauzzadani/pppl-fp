@@ -29,7 +29,9 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
       data['parfum'] ?? data['jenisParfum'],
     );
     final String antarJemput = _safeString(data['antarJemput']);
+    // Gunakan labelDiskon jika ada, fallback ke diskon/string
     final String diskon = _safeString(data['diskon']);
+    final String labelDiskon = _safeString(data['labelDiskon']);
     final String catatan = _safeString(data['catatan']);
 
     // DATA LAUNDRY
@@ -117,11 +119,9 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
       });
     }
 
-    int totalBayar = layananLaundry.fold(
-      0,
-      (sum, e) => sum + (e['total'] as int? ?? 0),
-    );
-    if (totalBayar == 0) totalBayar = data['totalHarga'] ?? 0;
+    // Diskon logic
+    final int hargaSebelumDiskon = data['hargaSebelumDiskon'] ?? data['totalHarga'] ?? 0;
+    final int totalBayar = data['totalHarga'] ?? 0;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F8),
@@ -254,7 +254,12 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
                         antarJemput,
                         boldValue: true,
                       ),
-                      _InfoRow("Diskon", diskon, boldValue: true),
+                      _InfoRow(
+                        "Diskon",
+                        // Tampilkan label diskon, jika tidak ada pakai diskon, kalau tidak ada juga "-".
+                        (labelDiskon != "-" ? labelDiskon : (diskon != "-" ? diskon : "-")),
+                        boldValue: true,
+                      ),
                       _InfoRow("Catatan", catatan, boldValue: false),
                       Divider(
                         color: Colors.grey[300],
@@ -274,6 +279,36 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
                       ),
                       ...layananLaundry.map((b) => laundryItemTile(b)),
                       const SizedBox(height: 9),
+                      // Jika ada diskon, tampilkan harga sebelum diskon
+                      if (hargaSebelumDiskon > totalBayar)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 2, left: 2, right: 2),
+                          child: Row(
+                            children: [
+                              const Text(
+                                "Harga Sebelum Diskon:",
+                                style: TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 13.7,
+                                  color: Colors.black54,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                              const SizedBox(width: 7),
+                              Text(
+                                "Rp. ${_currencyFormat(hargaSebelumDiskon)}",
+                                style: const TextStyle(
+                                  decoration: TextDecoration.lineThrough,
+                                  color: Colors.redAccent,
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       // TOTAL BAYAR
                       Container(
                         width: double.infinity,
