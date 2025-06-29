@@ -9,12 +9,16 @@ import '../../home/karyawan/home_page_karyawan.dart';
 
 class BuatPesananPage extends StatefulWidget {
   final String role;
-  final String laundryId; // <--- WAJIB ada untuk balik ke home!
+  final String laundryId;
+  final String emailUser;
+  final String passwordUser;
 
   const BuatPesananPage({
     super.key,
     required this.role,
     required this.laundryId,
+    required this.emailUser,
+    required this.passwordUser,
   });
 
   @override
@@ -144,6 +148,8 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
           desc: desc,
           kodeLaundry: kodeLaundryUser!,
           role: widget.role,
+          emailUser: widget.emailUser,          // <--- WAJIB DITAMBAHKAN
+          passwordUser: widget.passwordUser,    // <--- WAJIB DITAMBAHKAN
           barangCustom: draft?['barangCustom'],
           barangQtyCustom: draft?['barangQty'],
           beratKgSebelumnya: draft?['beratKg'],
@@ -163,9 +169,19 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
-        builder: (_) => widget.role == 'owner'
-            ? HomePageOwner(laundryId: widget.laundryId, role: widget.role)
-            : HomePageKaryawan(laundryId: widget.laundryId, role: widget.role),
+        builder: (_) => widget.role.toLowerCase() == 'owner'
+            ? HomePageOwner(
+                laundryId: widget.laundryId,
+                role: widget.role,
+                emailUser: widget.emailUser,
+                passwordUser: widget.passwordUser,
+              )
+            : HomePageKaryawan(
+                laundryId: widget.laundryId,
+                role: widget.role,
+                emailUser: widget.emailUser,
+                passwordUser: widget.passwordUser,
+              ),
       ),
       (route) => false,
     );
@@ -189,8 +205,7 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
                     children: [
                       GradientAppBar(
                         title: "Buat Pesanan",
-                        onBack:
-                            _navigateToHome, // Back arrow juga balik ke home!
+                        onBack: _navigateToHome,
                       ),
                       Expanded(
                         child: SingleChildScrollView(

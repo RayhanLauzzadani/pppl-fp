@@ -8,11 +8,15 @@ import 'package:laundryin/features/pesanan/proses_detail_pesanan_selesai_page.da
 class ProsesPesananPage extends StatefulWidget {
   final String kodeLaundry;
   final String role;
+  final String emailUser;      // Wajib untuk semua navigasi ke bawah
+  final String passwordUser;
 
   const ProsesPesananPage({
     Key? key,
     required this.kodeLaundry,
     required this.role,
+    required this.emailUser,
+    required this.passwordUser,
   }) : super(key: key);
 
   @override
@@ -228,6 +232,8 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                               builder: (_) => ProsesDetailPesananBelumMulaiPage(
                                 pesanan: p,
                                 role: widget.role,
+                                emailUser: widget.emailUser,
+                                passwordUser: widget.passwordUser,
                               ),
                             ),
                           );
@@ -238,6 +244,8 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                               builder: (_) => ProsesDetailPesananProsesPage(
                                 pesanan: p,
                                 role: widget.role,
+                                emailUser: widget.emailUser,
+                                passwordUser: widget.passwordUser,
                               ),
                             ),
                           );
@@ -248,6 +256,8 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                               builder: (_) => ProsesDetailPesananSelesaiPage(
                                 pesanan: p,
                                 role: widget.role,
+                                emailUser: widget.emailUser,
+                                passwordUser: widget.passwordUser,
                               ),
                             ),
                           );

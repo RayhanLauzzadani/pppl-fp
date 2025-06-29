@@ -5,8 +5,16 @@ import 'karyawan/home_page_karyawan.dart';
 class HomePage extends StatefulWidget {
   final String role;
   final String laundryId;
+  final String emailUser;
+  final String passwordUser;
 
-  const HomePage({super.key, required this.role, required this.laundryId});
+  const HomePage({
+    super.key,
+    required this.role,
+    required this.laundryId,
+    required this.emailUser,
+    required this.passwordUser,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -27,7 +35,9 @@ class _HomePageState extends State<HomePage> {
         MaterialPageRoute(
           builder: (_) => HomePageOwner(
             laundryId: widget.laundryId,
-            role: widget.role, // Opsional, kalau HomePageOwner butuh info role
+            role: widget.role,
+            emailUser: widget.emailUser,
+            passwordUser: widget.passwordUser,
           ),
         ),
       );
@@ -37,7 +47,9 @@ class _HomePageState extends State<HomePage> {
         MaterialPageRoute(
           builder: (_) => HomePageKaryawan(
             laundryId: widget.laundryId,
-            role: widget.role, // WAJIB, HomePageKaryawan minta param role
+            role: widget.role,
+            emailUser: widget.emailUser,
+            passwordUser: widget.passwordUser,
           ),
         ),
       );

@@ -6,12 +6,16 @@ class DetailBuatPesananPage extends StatelessWidget {
   final Map<String, dynamic> data;
   final String role;
   final String laundryId;
+  final String emailUser;
+  final String passwordUser;
 
   const DetailBuatPesananPage({
     super.key,
     required this.data,
     required this.role,
     required this.laundryId,
+    required this.emailUser,
+    required this.passwordUser,
   });
 
   // Helper agar aman casting Map
@@ -37,12 +41,12 @@ class DetailBuatPesananPage extends StatelessWidget {
     final String tanggalSelesai = "-";
     final String jenisParfum =
         (data['jenisParfum']?.toString().trim().isEmpty ?? true)
-        ? "-"
-        : data['jenisParfum'].toString();
+            ? "-"
+            : data['jenisParfum'].toString();
     final String antarJemput =
         (data['antarJemput']?.toString().trim().isEmpty ?? true)
-        ? "-"
-        : data['antarJemput'].toString();
+            ? "-"
+            : data['antarJemput'].toString();
     final String diskon = (data['diskon']?.toString().trim().isEmpty ?? true)
         ? "-"
         : data['diskon'].toString();
@@ -53,12 +57,12 @@ class DetailBuatPesananPage extends StatelessWidget {
     final double beratKg = data['beratKg'] == null
         ? 0.0
         : (data['beratKg'] is double
-              ? data['beratKg']
-              : double.tryParse(data['beratKg'].toString()) ?? 0.0);
+            ? data['beratKg']
+            : double.tryParse(data['beratKg'].toString()) ?? 0.0);
 
     final Map<String, int> jumlah = _safeMapInt(data['jumlah']);
-    final List<Map<String, dynamic>> barangList = (data['barangList'] ?? [])
-        .cast<Map<String, dynamic>>();
+    final List<Map<String, dynamic>> barangList =
+        (data['barangList'] ?? []).cast<Map<String, dynamic>>();
     final Map<String, int> barangQty = _safeMapInt(data['barangQty']);
     final Map<String, int> hargaLayanan = _safeMapInt(data['hargaLayanan']);
     final Map<String, String> tipeLayanan = _safeMapString(data['layananTipe']);
@@ -382,6 +386,8 @@ class DetailBuatPesananPage extends StatelessWidget {
                                   data: data,
                                   role: role,
                                   laundryId: laundryId,
+                                  emailUser: emailUser,        // WAJIB!
+                                  passwordUser: passwordUser,  // WAJIB!
                                 ),
                               ),
                             );
@@ -416,6 +422,8 @@ class DetailBuatPesananPage extends StatelessWidget {
                                 builder: (_) => DetailBuatPesananSelesaiBayarPage(
                                   data: data,
                                   role: role,
+                                  emailUser: emailUser,         // WAJIB!
+                                  passwordUser: passwordUser,   // WAJIB!
                                 ),
                               ),
                             );

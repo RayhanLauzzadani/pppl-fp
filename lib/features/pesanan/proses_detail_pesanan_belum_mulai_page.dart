@@ -8,12 +8,16 @@ import 'proses_detail_pesanan_proses_page.dart';
 class ProsesDetailPesananBelumMulaiPage extends StatefulWidget {
   final Pesanan pesanan;
   final String role;
+  final String emailUser;      // Tambah
+  final String passwordUser;   // Tambah
   final VoidCallback? onMulaiProses;
 
   const ProsesDetailPesananBelumMulaiPage({
     Key? key,
     required this.pesanan,
     required this.role,
+    required this.emailUser,     // Tambah
+    required this.passwordUser,  // Tambah
     this.onMulaiProses,
   }) : super(key: key);
 
@@ -85,6 +89,8 @@ class _ProsesDetailPesananBelumMulaiPageState
             builder: (_) => ProsesDetailPesananProsesPage(
               pesanan: prosesPesanan,
               role: widget.role,
+              emailUser: widget.emailUser,        // WAJIB
+              passwordUser: widget.passwordUser,  // WAJIB
             ),
           ),
         );
@@ -125,6 +131,8 @@ class _ProsesDetailPesananBelumMulaiPageState
             listItem: listItem,
             role: widget.role,
             laundryId: widget.pesanan.kodeLaundry ?? '',
+            emailUser: widget.emailUser,         // WAJIB!
+            passwordUser: widget.passwordUser,   // WAJIB!
             onChangedKonfirmasi: handleKonfirmasi,
             onLaporkanKendala: handleLaporkanKendala,
             onMulaiProses: _updateStatusProsesAndNavigate,

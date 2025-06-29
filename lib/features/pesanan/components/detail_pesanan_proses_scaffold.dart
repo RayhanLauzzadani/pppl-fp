@@ -6,8 +6,10 @@ class DetailPesananScaffold extends StatelessWidget {
   final Pesanan pesanan;
   final String status;
   final List<Map<String, dynamic>> listItem;
-  final String role;       // Tambahkan parameter role
-  final String laundryId;  // Tambahkan parameter laundryId
+  final String role;         // Wajib
+  final String laundryId;    // Wajib
+  final String emailUser;    // WAJIB TAMBAHKAN
+  final String passwordUser; // WAJIB TAMBAHKAN
   final void Function(int, bool)? onChangedKonfirmasi;
   final VoidCallback? onMulaiProses;
   final VoidCallback? onHentikanProses;
@@ -19,8 +21,10 @@ class DetailPesananScaffold extends StatelessWidget {
     required this.pesanan,
     required this.status,
     required this.listItem,
-    required this.role,      // wajib diisi
-    required this.laundryId, // wajib diisi
+    required this.role,
+    required this.laundryId,
+    required this.emailUser,      // <-- WAJIB
+    required this.passwordUser,   // <-- WAJIB
     this.onChangedKonfirmasi,
     this.onMulaiProses,
     this.onHentikanProses,
@@ -416,8 +420,10 @@ class DetailPesananScaffold extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (_) => SelesaiPesananPage(
-                                kodeLaundry: laundryId, // gunakan parameter laundryId
-                                role: role,              // kirimkan parameter role
+                                kodeLaundry: laundryId,
+                                role: role,
+                                emailUser: emailUser,         // <-- Tambahkan!
+                                passwordUser: passwordUser,   // <-- Tambahkan!
                               ),
                             ),
                           );

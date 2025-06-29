@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'selesai_pesanan_model.dart';
-import 'detail_pesanan_selesai_scaffold.dart'; // kalau ada
+import 'detail_pesanan_selesai_scaffold.dart';
+import 'package:laundryin/features/home/home_page.dart'; // kalau ada
 
 class SelesaiPesananPage extends StatefulWidget {
   final String kodeLaundry;
   final String role;
+  final String emailUser;      // <--- WAJIB TAMBAH
+  final String passwordUser;   // <--- WAJIB TAMBAH
 
   const SelesaiPesananPage({
     Key? key,
     required this.kodeLaundry,
     required this.role,
+    required this.emailUser,
+    required this.passwordUser,
   }) : super(key: key);
 
   @override
@@ -30,10 +35,32 @@ class _SelesaiPesananPageState extends State<SelesaiPesananPage> {
           whereIn: ['belum_diambil', 'belum_bayar', 'sudah_diambil'],
         )
         .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs.map((doc) => Pesanan.fromFirestore(doc)).toList(),
-        );
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Pesanan.fromFirestore(doc)).toList());
+  }
+
+  Future<void> _updatePesananStatus(String docId, String newStatus) async {
+    await FirebaseFirestore.instance
+        .collection('laundries')
+        .doc(widget.kodeLaundry)
+        .collection('pesanan')
+        .doc(docId)
+        .update({'status': newStatus});
+  }
+
+  void _goToHomePage() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (_) => HomePage(
+          laundryId: widget.kodeLaundry,
+          role: widget.role,
+          emailUser: widget.emailUser,        // <--- WAJIB DITAMBAHKAN
+          passwordUser: widget.passwordUser,  // <--- WAJIB DITAMBAHKAN
+        ),
+      ),
+      (route) => false,
+    );
   }
 
   @override

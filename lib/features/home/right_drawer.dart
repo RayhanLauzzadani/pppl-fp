@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../auth/presentation/pages/edit_layanan_page.dart';
-import '../auth/presentation/pages/edit_profile_page.dart';
+import 'package:laundryin/features/profile/edit_profile_page.dart';
 import '../auth/presentation/pages/sign_in_page.dart';
 import 'package:laundryin/features/pesanan/riwayat_pesanan_page.dart';
 import '../general/tentang_kami_page.dart';
@@ -12,6 +12,8 @@ class ModernDrawerWidget extends StatelessWidget {
   final String laundryId;
   final bool isOwner;
   final VoidCallback? onClose;
+  final String emailUser;
+  final String passwordUser;
 
   const ModernDrawerWidget({
     super.key,
@@ -19,6 +21,8 @@ class ModernDrawerWidget extends StatelessWidget {
     required this.laundryId,
     required this.isOwner,
     this.onClose,
+    required this.emailUser,
+    required this.passwordUser,
   });
 
   void _handleLogout(BuildContext context) async {
@@ -54,7 +58,6 @@ class ModernDrawerWidget extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                // Tambahkan signOut Firebase
                 await FirebaseAuth.instance.signOut();
                 if (onLogout != null) onLogout!();
                 Navigator.of(context).pushAndRemoveUntil(
@@ -149,12 +152,26 @@ class ModernDrawerWidget extends StatelessWidget {
             _drawerMenuItem(
               Icons.person_outline,
               "Profil Akun",
-              onTap: () => pushAfterCloseDrawer(context, EditProfilePage(isOwner: isOwner)),
+              onTap: () => pushAfterCloseDrawer(
+                context,
+                EditProfilePage(
+                  isOwner: isOwner,
+                  kodeLaundry: laundryId,
+                  email: emailUser,
+                  password: passwordUser,
+                ),
+              ),
             ),
             _drawerMenuItem(
               Icons.miscellaneous_services_rounded,
               "Layanan",
-              onTap: () => pushAfterCloseDrawer(context, EditLayananPage(isOwner: isOwner, laundryId: laundryId)),
+              onTap: () => pushAfterCloseDrawer(
+                context,
+                EditLayananPage(
+                  isOwner: isOwner,
+                  laundryId: laundryId,
+                ),
+              ),
             ),
             _drawerMenuItem(
               Icons.history,
