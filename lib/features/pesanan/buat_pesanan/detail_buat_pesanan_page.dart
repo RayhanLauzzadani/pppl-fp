@@ -67,6 +67,11 @@ class DetailBuatPesananPage extends StatelessWidget {
     final Map<String, int> hargaLayanan = _safeMapInt(data['hargaLayanan']);
     final Map<String, String> tipeLayanan = _safeMapString(data['layananTipe']);
 
+    // Diskon - hargaSebelumDiskon: total sebelum diskon, hargaDiskon: setelah diskon
+    final int hargaSebelumDiskon = data['hargaSebelumDiskon'] ?? data['totalHarga'] ?? 0;
+    final int hargaDiskon = data['totalHarga'] ?? 0;
+    final String labelDiskon = data['labelDiskon'] ?? (diskon != '-' ? diskon : '');
+
     // --- Bangun list layanan yang AKAN ditampilkan ---
     List<Map<String, dynamic>> listBarangFinal = [];
 
@@ -115,10 +120,10 @@ class DetailBuatPesananPage extends StatelessWidget {
       }
     }
 
-    int totalFromBarang = listBarangFinal.fold(
-      0,
-      (sum, b) => sum + (b['total'] as int? ?? 0),
-    );
+    // final int totalFromBarang = listBarangFinal.fold(
+    //   0,
+    //   (sum, b) => sum + (b['total'] as int? ?? 0),
+    // );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F8),
@@ -269,6 +274,7 @@ class DetailBuatPesananPage extends StatelessWidget {
                       ),
                       ...listBarangFinal.map((b) => laundryItemTile(b)),
                       const SizedBox(height: 9),
+                      // ========== Total Bayar w/ Diskon ==========
                       Container(
                         width: double.infinity,
                         margin: const EdgeInsets.only(top: 7),
@@ -295,8 +301,50 @@ class DetailBuatPesananPage extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
+                                if (hargaSebelumDiskon > hargaDiskon) ...[
+                                  Text(
+                                    "Rp. ${_currencyFormat(hargaSebelumDiskon)}",
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.redAccent,
+                                      fontSize: 16,
+                                      fontFamily: "Poppins",
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      if (labelDiskon.isNotEmpty)
+                                        Container(
+                                          margin: const EdgeInsets.only(right: 6),
+                                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF40A2E3),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            labelDiskon,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: "Poppins",
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      Text(
+                                        "-Rp. ${_currencyFormat(hargaSebelumDiskon - hargaDiskon)}",
+                                        style: const TextStyle(
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: "Poppins",
+                                          fontSize: 15.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                                 Text(
-                                  "Rp. ${_currencyFormat(totalFromBarang)}",
+                                  "Rp. ${_currencyFormat(hargaDiskon)}",
                                   style: const TextStyle(
                                     fontFamily: "Poppins",
                                     fontWeight: FontWeight.w800,
@@ -319,6 +367,7 @@ class DetailBuatPesananPage extends StatelessWidget {
                           ],
                         ),
                       ),
+                      // ========== END ==========
                     ],
                   ),
                 ),

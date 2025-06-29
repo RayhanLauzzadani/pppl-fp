@@ -164,6 +164,29 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
     super.dispose();
   }
 
+  // Tambahan: Fungsi untuk ambil data diskon dari firestore berdasarkan label yang dipilih user
+  Future<Map<String, dynamic>?> _getDiskonDariPilihan(String? diskonLabel) async {
+    if (diskonLabel == null || diskonLabel.isEmpty) return null;
+    final query = await FirebaseFirestore.instance
+        .collection('laundries')
+        .doc(widget.kodeLaundry)
+        .collection('diskon')
+        .get();
+    for (final doc in query.docs) {
+      final data = doc.data();
+      final jenis = data['jenisDiskon']?.toString() ?? '';
+      final jumlah = data['jumlahDiskon']?.toString() ?? '';
+      final tipe = (data['tipeDiskon']?.toString() ?? 'Persen').toLowerCase();
+      final label = tipe == "persen"
+          ? "$jenis ($jumlah%)"
+          : "$jenis (Rp. $jumlah)";
+      if (diskonLabel == label) {
+        return data;
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -552,6 +575,34 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                               builder: (_) => BottomSheetKonfirmasi(
                                 kodeLaundry: widget.kodeLaundry,
                                 onSubmit: (konfirmasiData) async {
+                                  // --- MODIFIKASI DISINI ---
+                                  // Dapatkan data diskon sesuai pilihan user
+                                  final diskonData = await _getDiskonDariPilihan(
+                                    konfirmasiData['diskon'] as String?,
+                                  );
+                                  int hargaSebelumDiskon = _totalHarga(layananList);
+                                  int hargaSetelahDiskon = hargaSebelumDiskon;
+                                  String? labelDiskon;
+                                  if (diskonData != null) {
+                                    labelDiskon = diskonData['jenisDiskon'];
+                                    final tipe = diskonData['tipeDiskon'];
+                                    final jumlahDiskon = int.tryParse(
+                                          diskonData['jumlahDiskon'].toString(),
+                                        ) ??
+                                        0;
+                                    if (jumlahDiskon > 0) {
+                                      if (tipe == 'Persen') {
+                                        hargaSetelahDiskon =
+                                            hargaSebelumDiskon -
+                                            ((hargaSebelumDiskon * jumlahDiskon) ~/ 100);
+                                      } else {
+                                        hargaSetelahDiskon =
+                                            hargaSebelumDiskon - jumlahDiskon;
+                                      }
+                                      if (hargaSetelahDiskon < 0)
+                                        hargaSetelahDiskon = 0;
+                                    }
+                                  }
                                   final pesananData = {
                                     'nama': widget.nama,
                                     'whatsapp': widget.whatsapp,
@@ -562,7 +613,9 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                     'barangList': barangList,
                                     'barangQty': barangQty,
                                     'jumlah': jumlah,
-                                    'totalHarga': _totalHarga(layananList),
+                                    'totalHarga': hargaSetelahDiskon,
+                                    'hargaSebelumDiskon': hargaSebelumDiskon,
+                                    'labelDiskon': labelDiskon,
                                     'hargaLayanan': hargaLayanan,
                                     'layananTipe': tipeLayanan,
                                     'hargaKiloan': hargaKiloan,
@@ -582,7 +635,7 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                           ...pesananData,
                                           'createdAt':
                                               FieldValue.serverTimestamp(),
-                                          'status': 'belum_mulai',
+                                          'status': 'belum_bayar',
                                         });
                                     if (mounted) Navigator.pop(context);
                                     if (mounted) {

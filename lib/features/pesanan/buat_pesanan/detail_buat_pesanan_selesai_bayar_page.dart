@@ -39,22 +39,24 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
     final String tanggalSelesai = data['tanggalSelesai'] ?? "-";
     final String jenisParfum =
         (data['parfum']?.toString().trim().isNotEmpty ?? false)
-        ? data['parfum'].toString()
-        : (data['jenisParfum']?.toString().trim().isNotEmpty ?? false)
-        ? data['jenisParfum'].toString()
-        : "-";
+            ? data['parfum'].toString()
+            : (data['jenisParfum']?.toString().trim().isNotEmpty ?? false)
+                ? data['jenisParfum'].toString()
+                : "-";
     final String antarJemput =
         (data['antarJemput']?.toString().trim().isNotEmpty ?? false)
-        ? data['antarJemput'].toString()
-        : "-";
+            ? data['antarJemput'].toString()
+            : "-";
     final String catatan =
         (data['catatan']?.toString().trim().isNotEmpty ?? false)
-        ? data['catatan'].toString()
-        : "-";
-    final String diskon =
-        (data['diskon']?.toString().trim().isNotEmpty ?? false)
-        ? data['diskon'].toString()
-        : "-";
+            ? data['catatan'].toString()
+            : "-";
+    // ambil label diskon
+    final String diskon = (data['labelDiskon']?.toString().trim().isNotEmpty ?? false)
+        ? data['labelDiskon'].toString()
+        : ((data['diskon']?.toString().trim().isNotEmpty ?? false)
+            ? data['diskon'].toString()
+            : "-");
 
     // Data layanan laundry
     final double beratKg = data['beratKg'] == null
@@ -115,11 +117,15 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
       }
     }
 
-    int totalHarga = layananLaundry.fold(
-      0,
-      (sum, e) => sum + (e['total'] as int? ?? 0),
-    );
-    if (totalHarga == 0) totalHarga = data['totalHarga'] ?? 0;
+    // Harga total dan harga sebelum diskon
+    final int hargaSebelumDiskon = data['hargaSebelumDiskon'] ?? data['totalHarga'] ?? 0;
+    int totalHarga = data['totalHarga'] ?? 0;
+    if (totalHarga == 0) {
+      totalHarga = layananLaundry.fold(
+        0,
+        (sum, e) => sum + (e['total'] as int? ?? 0),
+      );
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F8),
@@ -274,6 +280,38 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
                           .map((b) => _LaundryItemTile(b))
                           .toList(),
                       const SizedBox(height: 9),
+
+                      // Harga sebelum diskon, jika memang diskon
+                      if (hargaSebelumDiskon > totalHarga)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 2, left: 2, right: 2),
+                          child: Row(
+                            children: [
+                              const Text(
+                                "Harga Sebelum Diskon:",
+                                style: TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 13.7,
+                                  color: Colors.black54,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                              const SizedBox(width: 7),
+                              Text(
+                                "Rp. ${_currencyFormat(hargaSebelumDiskon)}",
+                                style: const TextStyle(
+                                  decoration: TextDecoration.lineThrough,
+                                  color: Colors.redAccent,
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
                       // TOTAL BAYAR
                       Container(
                         width: double.infinity,
