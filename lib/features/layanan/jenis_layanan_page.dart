@@ -134,6 +134,7 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
     );
   }
 
+  // ------------ Perubahan hanya di bagian ini --------------
   Widget _dropdownTipe(String value, Function(String?) onChanged) {
     return Row(
       children: [
@@ -162,10 +163,21 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
                 borderSide: BorderSide.none,
               ),
             ),
-            style: const TextStyle(fontFamily: "Poppins", fontSize: 15),
+            style: const TextStyle(
+              fontFamily: "Poppins",
+              fontSize: 15,
+              color: Colors.black, // <-- Kunci!
+            ),
+            dropdownColor: const Color(0xFFF9F5ED), // Biar dropdown ngga putih
             items: const [
-              DropdownMenuItem(value: "Satuan", child: Text("Satuan")),
-              DropdownMenuItem(value: "Kiloan", child: Text("Kiloan")),
+              DropdownMenuItem(
+                value: "Satuan",
+                child: Text("Satuan", style: TextStyle(color: Colors.black)), // Pastikan tetap hitam
+              ),
+              DropdownMenuItem(
+                value: "Kiloan",
+                child: Text("Kiloan", style: TextStyle(color: Colors.black)),
+              ),
             ],
             onChanged: onChanged,
           ),
@@ -173,6 +185,7 @@ class _JenisLayananPageState extends State<JenisLayananPage> {
       ],
     );
   }
+  // ------------ End perubahan -------------
 
   void showTambahEditLayanan({
     Map<String, dynamic>? layanan,
