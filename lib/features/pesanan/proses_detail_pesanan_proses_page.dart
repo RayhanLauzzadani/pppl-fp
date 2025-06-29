@@ -124,6 +124,8 @@ class _ProsesDetailPesananProsesPageState
             pesanan: widget.pesanan,
             status: 'proses',
             listItem: listItem,
+            role: widget.role,
+            laundryId: widget.pesanan.kodeLaundry ?? '',
             onChangedKonfirmasi: (idx, val) {
               setState(() {
                 listItem[idx]["konfirmasi"] = val;

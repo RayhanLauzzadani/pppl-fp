@@ -143,6 +143,7 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
           layanan: label,
           desc: desc,
           kodeLaundry: kodeLaundryUser!,
+          role: widget.role,
           barangCustom: draft?['barangCustom'],
           barangQtyCustom: draft?['barangQty'],
           beratKgSebelumnya: draft?['beratKg'],
@@ -369,13 +370,6 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
                                   },
                                 ),
                               const SizedBox(height: 36),
-                              Center(
-                                child: ElevatedButton.icon(
-                                  icon: Icon(Icons.save),
-                                  label: Text("Simpan & Kembali ke Home"),
-                                  onPressed: _navigateToHome,
-                                ),
-                              ),
                             ],
                           ),
                         ),

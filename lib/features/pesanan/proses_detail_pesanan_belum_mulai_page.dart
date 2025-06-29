@@ -123,6 +123,8 @@ class _ProsesDetailPesananBelumMulaiPageState
             pesanan: widget.pesanan,
             status: 'belum_mulai',
             listItem: listItem,
+            role: widget.role,
+            laundryId: widget.pesanan.kodeLaundry ?? '',
             onChangedKonfirmasi: handleKonfirmasi,
             onLaporkanKendala: handleLaporkanKendala,
             onMulaiProses: _updateStatusProsesAndNavigate,
