@@ -6,12 +6,16 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
   final Map<String, dynamic> data;
   final String role;
   final String laundryId;
+  final String emailUser;
+  final String passwordUser;
 
   const DetailBuatPesananBelumBayarPage({
     super.key,
     required this.data,
     required this.role,
     required this.laundryId,
+    required this.emailUser,
+    required this.passwordUser,
   });
 
   @override
@@ -348,6 +352,8 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
                           builder: (_) => HomePage(
                             role: role,
                             laundryId: laundryId,
+                            emailUser: emailUser,
+                            passwordUser: passwordUser,
                           ),
                         ),
                         (route) => false,
@@ -383,6 +389,8 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
                           builder: (_) => ProsesPesananPage(
                             kodeLaundry: laundryId,
                             role: role,
+                            emailUser: emailUser,
+                            passwordUser: passwordUser,
                           ),
                         ),
                       );

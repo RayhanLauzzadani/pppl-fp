@@ -9,11 +9,15 @@ import 'package:laundryin/features/home/home_page.dart';
 class SelesaiPesananPage extends StatefulWidget {
   final String kodeLaundry;
   final String role;
+  final String emailUser;      // <--- WAJIB TAMBAH
+  final String passwordUser;   // <--- WAJIB TAMBAH
 
   const SelesaiPesananPage({
     Key? key,
     required this.kodeLaundry,
     required this.role,
+    required this.emailUser,
+    required this.passwordUser,
   }) : super(key: key);
 
   @override
@@ -50,6 +54,8 @@ class _SelesaiPesananPageState extends State<SelesaiPesananPage> {
         builder: (_) => HomePage(
           laundryId: widget.kodeLaundry,
           role: widget.role,
+          emailUser: widget.emailUser,        // <--- WAJIB DITAMBAHKAN
+          passwordUser: widget.passwordUser,  // <--- WAJIB DITAMBAHKAN
         ),
       ),
       (route) => false,

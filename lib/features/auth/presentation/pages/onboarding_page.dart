@@ -6,11 +6,15 @@ import '../../../home/home_page.dart';
 class OnBoardingPage extends StatefulWidget {
   final String kodeLaundry;
   final String role;
+  final String emailUser;
+  final String passwordUser;
 
   const OnBoardingPage({
     Key? key,
     required this.kodeLaundry,
     required this.role,
+    required this.emailUser,
+    required this.passwordUser,
   }) : super(key: key);
 
   @override
@@ -57,6 +61,8 @@ class _OnBoardingPageState extends State<OnBoardingPage>
     final uid = user.uid;
     final kodeLaundry = widget.kodeLaundry;
     final role = widget.role;
+    final emailUser = widget.emailUser;
+    final passwordUser = widget.passwordUser;
 
     // Pastikan data user memang ada di Firestore & valid
     try {
@@ -80,7 +86,12 @@ class _OnBoardingPageState extends State<OnBoardingPage>
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => HomePage(role: firestoreRole, laundryId: kodeLaundry),
+          builder: (_) => HomePage(
+            role: firestoreRole,
+            laundryId: kodeLaundry,
+            emailUser: emailUser,
+            passwordUser: passwordUser,
+          ),
         ),
       );
     } catch (e) {

@@ -4,10 +4,15 @@ import 'package:laundryin/features/pesanan/proses_pesanan_page.dart';
 class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
   final Map<String, dynamic> data;
   final String role;
+  final String emailUser;      // WAJIB TAMBAH
+  final String passwordUser;   // WAJIB TAMBAH
+
   const DetailBuatPesananSelesaiBayarPage({
     Key? key,
     required this.data,
     required this.role,
+    required this.emailUser,      // WAJIB
+    required this.passwordUser,   // WAJIB
   }) : super(key: key);
 
   // Helper agar aman casting Map
@@ -343,6 +348,8 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
                           builder: (_) => ProsesPesananPage(
                             kodeLaundry: data['kodeLaundry'] ?? '',
                             role: role,
+                            emailUser: emailUser,        // WAJIB!
+                            passwordUser: passwordUser,  // WAJIB!
                           ),
                         ),
                       );

@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:laundryin/features/home/right_drawer.dart';
 import '../../pesanan/selesai pesanan/selesai_pesanan_page.dart';
 import '../../pesanan/proses_pesanan_page.dart';
 import '../../pesanan/buat_pesanan/buat_pesanan_page.dart';
+import 'package:laundryin/features/profile/edit_profile_page.dart'; // Pastikan path sudah benar
 
 class HomePageOwner extends StatefulWidget {
   final String laundryId;
-  final String role; // Sudah wajib param role
+  final String role;
+  final String emailUser;
+  final String passwordUser;
 
   const HomePageOwner({
     super.key,
     required this.laundryId,
     required this.role,
+    required this.emailUser,
+    required this.passwordUser,
   });
 
   @override
@@ -20,7 +26,51 @@ class HomePageOwner extends StatefulWidget {
 
 class _HomePageOwnerState extends State<HomePageOwner> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  String namaLaundry = "Laundry Lakso"; // Bisa dari database / API nanti
+  String namaLaundry = "-";
+  bool isLoadingNama = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNamaLaundry();
+  }
+
+  Future<void> _loadNamaLaundry() async {
+    setState(() => isLoadingNama = true);
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('laundries')
+          .doc(widget.laundryId)
+          .get();
+      setState(() {
+        namaLaundry = doc.data()?['namaLaundry'] ?? "-";
+        isLoadingNama = false;
+      });
+    } catch (e) {
+      setState(() {
+        namaLaundry = "-";
+        isLoadingNama = false;
+      });
+    }
+  }
+
+  // Fungsi buka edit profile & refresh setelah update
+  Future<void> _openEditProfilePage() async {
+    final updated = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditProfilePage(
+          isOwner: true,
+          kodeLaundry: widget.laundryId,
+          email: widget.emailUser,
+          password: widget.passwordUser,
+        ),
+      ),
+    );
+    if (updated == true) {
+      await _loadNamaLaundry();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,15 +80,15 @@ class _HomePageOwnerState extends State<HomePageOwner> {
         onLogout: () => Navigator.pop(context),
         laundryId: widget.laundryId,
         isOwner: true,
-        // Jika right_drawer.dart butuh param role: widget.role,
+        emailUser: widget.emailUser,
+        passwordUser: widget.passwordUser,
       ),
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // ===== Custom Gradient AppBar =====
+          // ===== Gradient AppBar (UI persis yang kamu mau) =====
           Stack(
             children: [
-              // Gradient BG
               Container(
                 width: double.infinity,
                 height: 196,
@@ -67,6 +117,7 @@ class _HomePageOwnerState extends State<HomePageOwner> {
                 ),
               ),
               SafeArea(
+                bottom: false,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
                   child: Row(
@@ -118,7 +169,7 @@ class _HomePageOwnerState extends State<HomePageOwner> {
                   ),
                 ),
               ),
-              // Welcome text absolute
+              // Welcome text absolute, persis dengan contoh
               Positioned(
                 left: 24,
                 top: 110,
@@ -127,9 +178,9 @@ class _HomePageOwnerState extends State<HomePageOwner> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         "Selamat datang Owner!",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: "Poppins",
                           color: Colors.white,
                           fontWeight: FontWeight.w400,
@@ -137,22 +188,34 @@ class _HomePageOwnerState extends State<HomePageOwner> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        namaLaundry,
-                        style: const TextStyle(
-                          fontFamily: "Poppins",
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 22,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black12,
-                              offset: Offset(0, 1),
-                              blurRadius: 2,
+                      isLoadingNama
+                          ? const SizedBox(
+                              height: 24,
+                              width: 90,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : GestureDetector(
+                              onTap: _openEditProfilePage,
+                              child: Text(
+                                namaLaundry,
+                                style: const TextStyle(
+                                  fontFamily: "Poppins",
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 22,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black12,
+                                      offset: Offset(0, 1),
+                                      blurRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -266,6 +329,8 @@ class _HomePageOwnerState extends State<HomePageOwner> {
                         builder: (_) => BuatPesananPage(
                           role: widget.role,
                           laundryId: widget.laundryId,
+                          emailUser: widget.emailUser,
+                          passwordUser: widget.passwordUser,
                         ),
                       ),
                     );
@@ -281,6 +346,8 @@ class _HomePageOwnerState extends State<HomePageOwner> {
                         builder: (_) => ProsesPesananPage(
                           kodeLaundry: widget.laundryId,
                           role: widget.role,
+                          emailUser: widget.emailUser,
+                          passwordUser: widget.passwordUser,
                         ),
                       ),
                     );
@@ -296,6 +363,8 @@ class _HomePageOwnerState extends State<HomePageOwner> {
                         builder: (_) => SelesaiPesananPage(
                           kodeLaundry: widget.laundryId,
                           role: widget.role,
+                          emailUser: widget.emailUser,
+                          passwordUser: widget.passwordUser,
                         ),
                       ),
                     );
