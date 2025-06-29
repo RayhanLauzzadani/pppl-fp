@@ -30,34 +30,36 @@ class _ProsesDetailPesananSelesaiPageState
     super.initState();
     listItem = [];
 
+    // Masukkan semua jumlah layanan tanpa filter laundry kiloan
     if (widget.pesanan.jumlah != null && widget.pesanan.jumlah!.isNotEmpty) {
       widget.pesanan.jumlah!.forEach((nama, qty) {
-        if (nama.toLowerCase() == "laundry kiloan") return;
         if (qty > 0) {
           listItem.add({
             "nama": nama,
-            "jumlah": qty.toString(),
+            "jumlah": qty,
             "konfirmasi": false,
           });
         }
       });
     }
 
+    // Masukkan barang dari barangList dan barangQty
     for (final barang in widget.pesanan.barangList) {
       final nama = barang['title'] ?? barang['nama'] ?? '';
       final qty = widget.pesanan.barangQty[nama] ?? 0;
       if (nama.toString().isNotEmpty && qty > 0) {
         listItem.add({
           "nama": nama,
-          "jumlah": qty.toString(),
+          "jumlah": qty,
           "konfirmasi": false,
         });
       }
     }
 
+    // Jika kosong, buat dummy item
     if (listItem.isEmpty) {
       listItem = [
-        {"nama": "Item Kosong", "jumlah": "0", "konfirmasi": false},
+        {"nama": "Item Kosong", "jumlah": 0, "konfirmasi": false},
       ];
     }
   }
@@ -77,12 +79,13 @@ class _ProsesDetailPesananSelesaiPageState
       final kodeLaundry = widget.pesanan.kodeLaundry ?? '';
       if (kodeLaundry.isEmpty) throw Exception('Kode laundry kosong!');
 
+      // Update status pesanan jadi 'selesai' (atau sesuai status final)
       await FirebaseFirestore.instance
           .collection('laundries')
           .doc(kodeLaundry)
           .collection('pesanan')
           .doc(widget.pesanan.id)
-          .update({'status': 'belum_diambil'});
+          .update({'status': 'selesai'});
 
       if (mounted) {
         Navigator.pushAndRemoveUntil(

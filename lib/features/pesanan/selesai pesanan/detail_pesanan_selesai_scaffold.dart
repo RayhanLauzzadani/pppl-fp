@@ -156,10 +156,6 @@ class DetailPesananSelesaiScaffold extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      const CircleAvatar(
-                        radius: 25,
-                        backgroundImage: AssetImage('assets/images/user_dummy.png'),
-                      ),
                       const SizedBox(width: 13),
                       Expanded(
                         child: Column(
