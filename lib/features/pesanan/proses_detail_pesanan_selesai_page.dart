@@ -116,6 +116,8 @@ class _ProsesDetailPesananSelesaiPageState
             pesanan: widget.pesanan,
             status: 'selesai',
             listItem: listItem,
+            role: widget.role,
+            laundryId: widget.pesanan.kodeLaundry ?? '',
             onLaporkanKendala: handleLaporkanKendala,
             onSelesaikanProses: isLoading ? null : handleSelesaikanProses,
           ),

@@ -3,8 +3,12 @@ import 'package:laundryin/features/pesanan/proses_pesanan_page.dart';
 
 class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
   final Map<String, dynamic> data;
-  const DetailBuatPesananSelesaiBayarPage({Key? key, required this.data})
-    : super(key: key);
+  final String role;
+  const DetailBuatPesananSelesaiBayarPage({
+    Key? key,
+    required this.data,
+    required this.role,
+  }) : super(key: key);
 
   // Helper agar aman casting Map
   static Map<String, int> _safeMapInt(dynamic val) => (val is Map)
@@ -338,6 +342,7 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (_) => ProsesPesananPage(
                             kodeLaundry: data['kodeLaundry'] ?? '',
+                            role: role,
                           ),
                         ),
                       );

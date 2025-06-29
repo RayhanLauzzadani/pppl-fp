@@ -367,7 +367,6 @@ class DetailBuatPesananPage extends StatelessWidget {
                                 builder: (_) => DetailBuatPesananSelesaiBayarPage(
                                   data: data,
                                   role: role,
-                                  laundryId: laundryId,
                                 ),
                               ),
                             );
