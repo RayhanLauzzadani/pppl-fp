@@ -126,7 +126,15 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
   }
 
   int _hargaKiloan(List<Map<String, dynamic>> layananList) {
-    return 10000;
+    for (var l in layananList) {
+      if ((l['tipe'] ?? '').toLowerCase() == 'kiloan') {
+        final harga = l['harga'];
+        if (harga is int) return harga;
+        if (harga is double) return harga.toInt();
+        return int.tryParse('$harga') ?? 10000;
+      }
+    }
+    return 10000; // default jika tidak ada
   }
 
   List<Map<String, dynamic>> _filteredLayanan(
@@ -164,8 +172,10 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
     super.dispose();
   }
 
-  // Tambahan: Fungsi untuk ambil data diskon dari firestore berdasarkan label yang dipilih user
-  Future<Map<String, dynamic>?> _getDiskonDariPilihan(String? diskonLabel) async {
+  // Fungsi untuk ambil data diskon dari firestore berdasarkan label yang dipilih user
+  Future<Map<String, dynamic>?> _getDiskonDariPilihan(
+    String? diskonLabel,
+  ) async {
     if (diskonLabel == null || diskonLabel.isEmpty) return null;
     final query = await FirebaseFirestore.instance
         .collection('laundries')
@@ -185,6 +195,14 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
       }
     }
     return null;
+  }
+
+  static String _currencyFormat(int price) {
+    final s = price.toString();
+    return s.replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]}.',
+    );
   }
 
   @override
@@ -486,7 +504,98 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                   },
                 ),
               ),
-              // ... (Bagian info badge dan total harga tidak perlu diubah)
+
+              // === Summary Customer Info (MIRIP GAMBAR) ===
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('laundries')
+                    .doc(widget.kodeLaundry)
+                    .collection('jenis_layanan')
+                    .where('jenis', isEqualTo: widget.desc)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  List<Map<String, dynamic>> layananList = [];
+                  if (snapshot.hasData) {
+                    layananList = snapshot.data!.docs.map((doc) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      return {
+                        ...data,
+                        'id': doc.id,
+                        'nama': data['nama'] ?? '',
+                        'harga': data['harga'] ?? 0,
+                        'tipe': data['tipe'] ?? '',
+                      };
+                    }).toList();
+                  }
+                  // Hitung total Kg dan Sat
+                  int kg = beratKg > 0 ? beratKg.round() : 0;
+                  int sat = 0;
+                  for (var l in layananList) {
+                    if ((l['tipe'] ?? '').toLowerCase() == 'satuan') {
+                      sat += jumlah[l['nama']] ?? 0;
+                    }
+                  }
+                  for (var v in barangQty.values) {
+                    sat += v;
+                  }
+
+                  return Container(
+                    margin: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(13),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.07),
+                          blurRadius: 7,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        // Nama & WA
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.nama,
+                                style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14.8,
+                                  color: Color(0xFF232323),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                widget.whatsapp,
+                                style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 12.7,
+                                  color: Color(0xFF888888),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            InfoBadge('$kg', 'Kg'),
+                            const SizedBox(width: 7),
+                            InfoBadge('$sat', 'Sat'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+
+              // === Total Harga & Next Button ===
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('laundries')
@@ -519,11 +628,10 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                     hargaLayanan[nama] = (l['harga'] is int)
                         ? l['harga']
                         : (l['harga'] is double)
-                        ? (l['harga'] as double).toInt()
-                        : int.tryParse('${l['harga']}') ?? 0;
+                            ? (l['harga'] as double).toInt()
+                            : int.tryParse('${l['harga']}') ?? 0;
                     tipeLayanan[nama] = (l['tipe'] ?? '').toString();
-                    if ((l['tipe'] ?? '').toString().toLowerCase() ==
-                        'kiloan') {
+                    if ((l['tipe'] ?? '').toString().toLowerCase() == 'kiloan') {
                       hargaKiloan = hargaLayanan[nama]!;
                     }
                   }
@@ -575,26 +683,32 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                               builder: (_) => BottomSheetKonfirmasi(
                                 kodeLaundry: widget.kodeLaundry,
                                 onSubmit: (konfirmasiData) async {
-                                  // --- MODIFIKASI DISINI ---
-                                  // Dapatkan data diskon sesuai pilihan user
-                                  final diskonData = await _getDiskonDariPilihan(
+                                  // Ambil data diskon dari pilihan user
+                                  final diskonData =
+                                      await _getDiskonDariPilihan(
                                     konfirmasiData['diskon'] as String?,
                                   );
-                                  int hargaSebelumDiskon = _totalHarga(layananList);
+                                  int hargaSebelumDiskon = _totalHarga(
+                                    layananList,
+                                  );
                                   int hargaSetelahDiskon = hargaSebelumDiskon;
                                   String? labelDiskon;
                                   if (diskonData != null) {
                                     labelDiskon = diskonData['jenisDiskon'];
                                     final tipe = diskonData['tipeDiskon'];
-                                    final jumlahDiskon = int.tryParse(
-                                          diskonData['jumlahDiskon'].toString(),
-                                        ) ??
-                                        0;
+                                    final jumlahDiskon =
+                                        int.tryParse(
+                                              diskonData['jumlahDiskon']
+                                                  .toString(),
+                                            ) ??
+                                            0;
                                     if (jumlahDiskon > 0) {
                                       if (tipe == 'Persen') {
                                         hargaSetelahDiskon =
                                             hargaSebelumDiskon -
-                                            ((hargaSebelumDiskon * jumlahDiskon) ~/ 100);
+                                                ((hargaSebelumDiskon *
+                                                        jumlahDiskon) ~/
+                                                    100);
                                       } else {
                                         hargaSetelahDiskon =
                                             hargaSebelumDiskon - jumlahDiskon;
@@ -603,6 +717,7 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                         hargaSetelahDiskon = 0;
                                     }
                                   }
+
                                   final pesananData = {
                                     'nama': widget.nama,
                                     'whatsapp': widget.whatsapp,
@@ -619,12 +734,13 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                     'hargaLayanan': hargaLayanan,
                                     'layananTipe': tipeLayanan,
                                     'hargaKiloan': hargaKiloan,
-                                    'jenisParfum':
-                                        konfirmasiData['jenisParfum'],
-                                    'antarJemput':
-                                        konfirmasiData['antarJemput'],
+                                    'jenisParfum': konfirmasiData['jenisParfum'],
+                                    'antarJemput': konfirmasiData['antarJemput'],
                                     'diskon': konfirmasiData['diskon'],
                                     'catatan': konfirmasiData['catatan'],
+                                    // Tambahkan 2 status berikut:
+                                    'statusProses': 'belum_mulai',
+                                    'statusTransaksi': 'belum_bayar',
                                   };
                                   try {
                                     await FirebaseFirestore.instance
@@ -632,11 +748,12 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                         .doc(widget.kodeLaundry)
                                         .collection('pesanan')
                                         .add({
-                                          ...pesananData,
-                                          'createdAt':
-                                              FieldValue.serverTimestamp(),
-                                          'status': 'belum_bayar',
-                                        });
+                                      ...pesananData,
+                                      'createdAt':
+                                          FieldValue.serverTimestamp(),
+                                      'statusProses': 'belum_mulai',
+                                      'statusTransaksi': 'belum_bayar',
+                                    });
                                     if (mounted) Navigator.pop(context);
                                     if (mounted) {
                                       Navigator.push(
@@ -717,14 +834,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
           ),
         ),
       ),
-    );
-  }
-
-  static String _currencyFormat(int price) {
-    final s = price.toString();
-    return s.replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]}.',
     );
   }
 }

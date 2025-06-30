@@ -40,10 +40,10 @@ class LaundryItem {
 }
 
 // ===========================
-// Model Pesanan (FINAL FIRESTORE)
+// Model Pesanan FINAL FIRESTORE
 // ===========================
 class Pesanan {
-  final String id; // Firestore Document ID
+  final String id;
   final String kodeLaundry;
   final String noNota;
   final String nama;
@@ -51,7 +51,8 @@ class Pesanan {
   final String tipe;
   final double kg;
   final int pcs;
-  String status; // Bisa diedit lewat copyWith
+  final String statusProses;       // BARU
+  final String statusTransaksi;    // BARU
   final DateTime? tanggalTerima;
   final DateTime? tanggalSelesai;
   final String jenisParfum;
@@ -68,7 +69,8 @@ class Pesanan {
     required this.tipe,
     required this.kg,
     required this.pcs,
-    required this.status,
+    required this.statusProses,
+    required this.statusTransaksi,
     required this.tanggalTerima,
     required this.tanggalSelesai,
     required this.jenisParfum,
@@ -129,7 +131,7 @@ class Pesanan {
       );
     }
 
-    // Dari jumlah layanan (jenis layanan dari jumlah + tipe + harga)
+    // Dari jumlah layanan
     if (data['jumlah'] is Map && data['layananTipe'] is Map) {
       final jumlahMap = Map<String, dynamic>.from(data['jumlah']);
       final hargaMap = Map<String, dynamic>.from(data['hargaLayanan'] ?? {});
@@ -171,23 +173,28 @@ class Pesanan {
       }
     }
 
-    // Fallback ke listLaundry lama jika ada (data migrasi baru)
+    // Fallback ke listLaundry lama jika ada
     if (data['listLaundry'] is List && data['listLaundry'].isNotEmpty) {
       laundryList = List<Map<String, dynamic>>.from(
         data['listLaundry'],
       ).map((item) => LaundryItem.fromMap(item)).toList();
     }
 
+    // =========== FIELD STATUS =============
+    String statusProses = data['statusProses'] ?? data['status'] ?? 'belum_mulai';
+    String statusTransaksi = data['statusTransaksi'] ?? 'belum_bayar';
+
     return Pesanan(
       id: doc.id,
       kodeLaundry: data['kodeLaundry'] ?? '',
       noNota: data['noNota'] ?? '',
       nama: data['nama'] ?? '',
-      noHp: data['noHp'] ?? '',
+      noHp: data['noHp'] ?? data['whatsapp'] ?? '',
       tipe: data['tipe'] ?? data['desc'] ?? '',
       kg: beratKg,
       pcs: totalPcs,
-      status: data['status'] ?? '',
+      statusProses: statusProses,
+      statusTransaksi: statusTransaksi,
       tanggalTerima: (data['tanggalTerima'] is Timestamp)
           ? (data['tanggalTerima'] as Timestamp).toDate()
           : null,
@@ -205,7 +212,11 @@ class Pesanan {
     );
   }
 
-  Pesanan copyWith({String? status, String? kodeLaundry}) {
+  Pesanan copyWith({
+    String? statusProses,
+    String? statusTransaksi,
+    String? kodeLaundry,
+  }) {
     return Pesanan(
       id: id,
       kodeLaundry: kodeLaundry ?? this.kodeLaundry,
@@ -215,7 +226,8 @@ class Pesanan {
       tipe: tipe,
       kg: kg,
       pcs: pcs,
-      status: status ?? this.status,
+      statusProses: statusProses ?? this.statusProses,
+      statusTransaksi: statusTransaksi ?? this.statusTransaksi,
       tanggalTerima: tanggalTerima,
       tanggalSelesai: tanggalSelesai,
       jenisParfum: jenisParfum,
@@ -234,7 +246,8 @@ class Pesanan {
       'tipe': tipe,
       'kg': kg,
       'pcs': pcs,
-      'status': status,
+      'statusProses': statusProses,
+      'statusTransaksi': statusTransaksi,
       'tanggalTerima': tanggalTerima,
       'tanggalSelesai': tanggalSelesai,
       'jenisParfum': jenisParfum,
