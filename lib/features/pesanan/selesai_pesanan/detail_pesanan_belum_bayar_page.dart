@@ -1,335 +1,391 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:laundryin/features/pesanan/pesanan_model.dart';
 import 'package:laundryin/features/pesanan/components/kendala_modal.dart';
 
-class DetailPesananSudahDiambilPage extends StatelessWidget {
+class DetailPesananBelumBayarPage extends StatelessWidget {
   final Pesanan pesanan;
+  final VoidCallback? onKonfirmasiBayar;
 
-  const DetailPesananSudahDiambilPage({super.key, required this.pesanan});
+  const DetailPesananBelumBayarPage({
+    super.key,
+    required this.pesanan,
+    this.onKonfirmasiBayar,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Status UI
-    final statusColor = Colors.blue[700]!;
-    const statusText = "Sudah Diambil";
-    const statusIcon = Icons.done_all_rounded;
-
-    // Build list item gabungan
+    // List items gabungan layanan dan barang satuan
     final List<Map<String, dynamic>> listItem = [];
-    if (pesanan.jumlah != null && pesanan.jumlah!.isNotEmpty) {
+    if (pesanan.jumlah != null) {
       pesanan.jumlah!.forEach((nama, qty) {
-        if (nama.toLowerCase() == "laundry kiloan") return;
-        if ((qty ?? 0) > 0) {
+        if (qty > 0) {
+          final harga = pesanan.hargaLayanan?[nama] ?? 0;
+          final tipe = pesanan.layananTipe?[nama] ?? '';
           listItem.add({
-            "nama": nama,
-            "tipe": pesanan.layananTipe?[nama] ?? "",
-            "jumlah": qty,
-            "harga": pesanan.hargaLayanan?[nama] ?? 0,
-            "hargaTotal": ((pesanan.hargaLayanan?[nama] ?? 0) * (qty ?? 0)),
+            'nama': nama,
+            'tipe': tipe,
+            'jumlah': qty,
+            'harga': harga,
+            'hargaTotal': harga * qty,
           });
         }
       });
     }
-    pesanan.barangList.where((b) {
-      final nama = b['title'] ?? b['nama'] ?? '';
-      return (pesanan.barangQty[nama] ?? 0) > 0 && !(listItem.any((item) => item['nama'] == nama));
-    }).forEach((b) {
-      final nama = b['title'] ?? b['nama'] ?? '';
+    // Barang custom/satuan
+    for (final barang in pesanan.barangList) {
+      final nama = barang['title'] ?? barang['nama'] ?? '';
       final qty = pesanan.barangQty[nama] ?? 0;
-      listItem.add({
-        "nama": nama,
-        "tipe": "",
-        "jumlah": qty,
-        "harga": 0,
-        "hargaTotal": 0,
-      });
-    });
+      if (nama.toString().isNotEmpty && qty > 0) {
+        listItem.add({
+          'nama': nama,
+          'tipe': 'Satuan',
+          'jumlah': qty,
+          'harga': 0,
+          'hargaTotal': 0,
+        });
+      }
+    }
+    // Jika item kosong
     if (listItem.isEmpty) {
       listItem.add({
-        "nama": "Item Kosong",
-        "tipe": "",
-        "jumlah": 0,
-        "harga": 0,
-        "hargaTotal": 0
+        'nama': 'Item Kosong',
+        'tipe': '',
+        'jumlah': 0,
+        'harga': 0,
+        'hargaTotal': 0,
       });
     }
 
-    // ---------- UI ----------
+    final double screenHeight = 1.sh;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8FB),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(82),
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF40A2E3), Color(0xFFBBE2EC)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(26)),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x29000000),
-                blurRadius: 12,
-                offset: Offset(0, 6),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 16, bottom: 8),
-                child: const Text(
-                  "Detail Pesanan",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 130),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(19),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.07),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
-                    ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ===== HEADER =====
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.only(top: 8, bottom: 15),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomLeft,
+                  end: Alignment.topRight,
+                  stops: [0.02, 0.38, 0.83],
+                  colors: [
+                    Color(0xFFFFF6E9),
+                    Color(0xFFBBE2EC),
+                    Color(0xFF40A2E3),
                   ],
                 ),
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(26)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x29000000),
+                    blurRadius: 10,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 0, top: 4),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.black87, // <-- HITAM
+                          size: 22,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        SizedBox(height: 12),
+                        Text(
+                          "Detail Pesanan",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // ===== CONTENT =====
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 20.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // HEADER
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
+                    // ==== MAIN CARD ====
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 20.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20.r),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x1F88A5B4),
+                            blurRadius: 16,
+                            offset: Offset(0, 7),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ===== HEADER NOTA & NAMA =====
+                          Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              RichText(
-                                text: TextSpan(
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    TextSpan(
-                                      text: "Nota–${pesanan.id} ",
-                                      style: const TextStyle(
-                                        fontFamily: "Poppins",
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15.8,
+                                    RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: "Nota–${pesanan.id} ",
+                                            style: TextStyle(
+                                              fontFamily: "Poppins",
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15.8.sp,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: pesanan.desc.isEmpty ? "Reguler" : pesanan.desc,
+                                            style: TextStyle(
+                                              fontFamily: "Poppins",
+                                              fontStyle: FontStyle.italic,
+                                              color: Colors.black54,
+                                              fontSize: 13.7.sp,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    TextSpan(
-                                      text: pesanan.desc,
-                                      style: const TextStyle(
+                                    SizedBox(height: 10.h),
+                                    Text(
+                                      pesanan.nama,
+                                      style: TextStyle(
                                         fontFamily: "Poppins",
-                                        fontStyle: FontStyle.italic,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 15.4.sp,
+                                      ),
+                                    ),
+                                    Text(
+                                      pesanan.whatsapp,
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 13.2.sp,
                                         color: Colors.black54,
-                                        fontSize: 13.7,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 10),
-                              Text(
-                                pesanan.nama,
-                                style: const TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15.5,
-                                ),
-                              ),
-                              Text(
-                                pesanan.whatsapp,
-                                style: const TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontSize: 13.5,
-                                  color: Colors.black54,
-                                ),
+                              // Status badge (merah X)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Container(
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFFF6A6A),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(7.w),
+                                      child: Icon(
+                                        Icons.close_rounded,
+                                        color: Colors.white,
+                                        size: 26.sp,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 6.h),
+                                  Text(
+                                    "Belum Bayar",
+                                    style: TextStyle(
+                                      color: const Color(0xFFFF6A6A),
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12.8.sp,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ),
-                        Column(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: statusColor,
-                                shape: BoxShape.circle,
+                          SizedBox(height: 15.h),
+                          // TABEL INFO
+                          Table(
+                            columnWidths: const {
+                              0: IntrinsicColumnWidth(),
+                              1: FlexColumnWidth(),
+                            },
+                            children: [
+                              _tableRow(
+                                "Status",
+                                "Dalam Antrian",
+                                boldRight: true,
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(7),
-                                child: Icon(
-                                  statusIcon,
-                                  color: Colors.white,
-                                  size: 26,
-                                ),
+                              _tableRow(
+                                "Tanggal Terima",
+                                _formatTanggal(pesanan.createdAt),
+                                boldRight: true,
                               ),
+                              _tableRow(
+                                "Tanggal Selesai",
+                                "-",
+                                boldRight: true,
+                              ),
+                              _tableRow(
+                                "Jenis Parfum",
+                                pesanan.jenisParfum ?? "-",
+                                boldRight: false,
+                              ),
+                              _tableRow(
+                                "Layanan Antar Jemput",
+                                pesanan.antarJemput ?? "-",
+                                boldRight: false,
+                              ),
+                              _tableRow(
+                                "Catatan",
+                                pesanan.catatan ?? "-",
+                                boldRight: false,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 14.h),
+                          Divider(color: Colors.grey[400], thickness: 1.1),
+                          SizedBox(height: 7.h),
+                          Text(
+                            "Layanan Laundry :",
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14.7.sp,
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              statusText,
-                              style: TextStyle(
-                                color: statusColor,
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12.8,
+                          ),
+                          SizedBox(height: 12.h),
+                          ...listItem.map((item) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 11.h),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item['nama'],
+                                    style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15.5.sp,
+                                    ),
+                                  ),
+                                  if ((item['tipe'] ?? "").toString().isNotEmpty)
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          top: 1.h, left: 1.w, bottom: 1.h),
+                                      child: Text(
+                                        "${item['tipe']}  ${item['jumlah']}pcs",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 12.7.sp,
+                                        ),
+                                      ),
+                                    ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "x Rp. ${_formatRupiah(item['harga'])}",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 12.4.sp,
+                                          fontStyle: FontStyle.italic,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      Text(
+                                        "Rp. ${_formatRupiah(item['hargaTotal'])}",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15.sp,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    // TABEL INFO
-                    Table(
-                      columnWidths: const {
-                        0: IntrinsicColumnWidth(),
-                        1: FlexColumnWidth(),
-                      },
-                      children: [
-                        _tableRow("Status", "Selesai", boldRight: true),
-                        _tableRow("Tanggal Terima", _formatTanggal(pesanan.createdAt), boldRight: true),
-                        _tableRow("Tanggal Selesai", _formatTanggal(pesanan.tanggalSelesai), boldRight: true),
-                        _tableRow("Jenis Parfum", pesanan.jenisParfum ?? "-", boldRight: false),
-                        _tableRow("Layanan Antar Jemput", pesanan.antarJemput ?? "-", boldRight: false),
-                        _tableRow("Catatan", pesanan.catatan ?? "-", boldRight: false),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    Divider(color: Colors.grey[400], thickness: 1.1),
-                    const SizedBox(height: 7),
-                    // LIST ITEM
-                    const Text(
-                      "Layanan Laundry :",
-                      style: TextStyle(
-                        fontFamily: "Poppins",
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.7,
+                            );
+                          }).toList(),
+
+                          // Anti overflowed
+                          SizedBox(height: screenHeight * 0.01),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    ...listItem.map((item) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 11),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Nama
-                            Text(
-                              item['nama'],
-                              style: const TextStyle(
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15.5,
-                              ),
-                            ),
-                            // Tipe
-                            if ((item['tipe'] ?? "").toString().isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 1, left: 1, bottom: 1),
-                                child: Text(
-                                  item['tipe'],
-                                  style: const TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 12.7,
-                                  ),
-                                ),
-                              ),
-                            // Jumlah + Harga
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "${item['jumlah']} pcs",
-                                  style: const TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontSize: 13.3,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Text(
-                                  "Rp. ${_formatRupiah(item['hargaTotal'])}",
-                                  style: const TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontSize: 14.2,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            // Harga satuan
-                            if ((item['harga'] ?? 0) > 0)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 2, top: 2),
-                                child: Text(
-                                  "x Rp. ${_formatRupiah(item['harga'])}",
-                                  style: const TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 12.4,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
                   ],
                 ),
               ),
             ),
-          ),
-          // BOTTOM BAR: Total & Buttons
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFF6F8FB),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+            // ===== BOTTOM BAR =====
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(22.r),
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0x13000000),
+                    color: Colors.grey.withOpacity(0.23),
                     blurRadius: 18,
-                    offset: Offset(0, -4),
+                    offset: const Offset(0, -6),
                   ),
                 ],
               ),
-              padding: const EdgeInsets.fromLTRB(16, 13, 16, 19),
+              padding: EdgeInsets.fromLTRB(
+                18.w,
+                18.h,
+                18.w,
+                18.h + MediaQuery.of(context).padding.bottom,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch, // Kiri, bukan center
                 children: [
-                  // Total
+                  // Total pembayaran (kiri)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         "Total Pembayaran",
                         style: TextStyle(
                           fontFamily: "Poppins",
                           fontWeight: FontWeight.bold,
-                          fontSize: 16.1,
+                          fontSize: 16.1.sp,
                         ),
                       ),
                       Column(
@@ -340,24 +396,25 @@ class DetailPesananSudahDiambilPage extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: "Poppins",
                               fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: statusColor,
+                              fontSize: 21.sp,
+                              color: Colors.black,
                             ),
                           ),
-                          const Text(
-                            "(Sudah Bayar)",
+                          SizedBox(height: 3.h),
+                          Text(
+                            "(Belum Bayar)",
                             style: TextStyle(
                               fontFamily: "Poppins",
-                              color: Color(0xFF1976D2),
-                              fontSize: 13.5,
+                              color: const Color(0xFFD32F2F),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13.7.sp,
                             ),
                           ),
                         ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
-                  // BUTTONS
+                  SizedBox(height: 18.h),
                   Row(
                     children: [
                       Expanded(
@@ -367,41 +424,47 @@ class DetailPesananSudahDiambilPage extends StatelessWidget {
                               context: context,
                               isScrollControlled: true,
                               backgroundColor: Colors.transparent,
-                              builder: (ctx) => KendalaModal(noHp: pesanan.whatsapp),
+                              builder: (ctx) =>
+                                  KendalaModal(noHp: pesanan.whatsapp),
                             );
                           },
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF40A2E3),
-                            side: const BorderSide(color: Color(0xFF40A2E3), width: 1.5),
-                            backgroundColor: const Color(0xFFE7F3FB),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                            foregroundColor: const Color(0xFF1976D2),
+                            side: const BorderSide(
+                              color: Color(0xFF1976D2),
+                              width: 1.5,
                             ),
-                            textStyle: const TextStyle(fontFamily: "Poppins"),
-                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(13.r),
+                            ),
+                            textStyle: TextStyle(fontFamily: "Poppins"),
+                            padding: EdgeInsets.symmetric(vertical: 13.h),
+                            elevation: 0,
                           ),
-                          icon: const Icon(Icons.phone, size: 20),
-                          label: const Text("Hubungi Pelanggan"),
+                          icon: Icon(Icons.phone, size: 19.sp),
+                          label: Text("Hubungi Pelanggan"),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 13.w),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: null,
+                          onPressed: onKonfirmasiBayar,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1976D2),
+                            backgroundColor: const Color(0xFF1976D2), // Biru
                             foregroundColor: Colors.white,
                             elevation: 2,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(13.r),
                             ),
-                            textStyle: const TextStyle(fontFamily: "Poppins"),
-                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            textStyle: TextStyle(
+                              fontFamily: "Poppins",
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.sp,
+                            ),
+                            padding: EdgeInsets.symmetric(vertical: 13.h),
                           ),
-                          child: const Text(
-                            "Sudah diambil",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
+                          child: Text("Konfirmasi Bayar"),
                         ),
                       ),
                     ],
@@ -409,34 +472,37 @@ class DetailPesananSudahDiambilPage extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  // Helpers
-  static TableRow _tableRow(String left, String right, {bool boldRight = false}) {
+  static TableRow _tableRow(
+    String left,
+    String right, {
+    bool boldRight = false,
+  }) {
     return TableRow(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
+          padding: EdgeInsets.symmetric(vertical: 5.h),
           child: Text(
             left,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: "Poppins",
-              fontSize: 13.2,
+              fontSize: 13.2.sp,
               color: Colors.black87,
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
+          padding: EdgeInsets.symmetric(vertical: 5.h),
           child: Text(
             right,
             style: TextStyle(
               fontFamily: "Poppins",
-              fontSize: 13.4,
+              fontSize: 13.4.sp,
               fontWeight: boldRight ? FontWeight.bold : FontWeight.w500,
               color: boldRight ? Colors.blueGrey[900] : Colors.black87,
             ),
@@ -455,6 +521,8 @@ class DetailPesananSudahDiambilPage extends StatelessWidget {
   static String _formatRupiah(dynamic number) {
     if (number == null) return "0";
     return number.toString().replaceAllMapped(
-        RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => "${m[1]}.");
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+      (m) => "${m[1]}.",
+    );
   }
 }
