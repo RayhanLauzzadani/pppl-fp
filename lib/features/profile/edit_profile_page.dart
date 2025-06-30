@@ -6,14 +6,16 @@ class EditProfilePage extends StatefulWidget {
   final String kodeLaundry;
   final String email;
   final String password;
+  final String? role; // <--- TAMBAH PARAMETER ROLE
 
   const EditProfilePage({
-    super.key,
+    Key? key,
     required this.isOwner,
     required this.kodeLaundry,
     required this.email,
     required this.password,
-  });
+    this.role,
+  }) : super(key: key);
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
@@ -23,22 +25,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
   final TextEditingController namaController = TextEditingController(text: "");
-  final TextEditingController statusController = TextEditingController(text: "");
   final TextEditingController waController = TextEditingController(text: "");
+  late final TextEditingController statusController;
 
   bool passwordVisible = false;
-  bool isLoading = false;
+  bool isLoadingNama = false;
 
   @override
   void initState() {
     super.initState();
     emailController = TextEditingController(text: widget.email);
     passwordController = TextEditingController(text: widget.password);
-    _loadProfileFromFirestore();
+
+    // Logic status akun
+    String status = widget.isOwner
+        ? "Ownership"
+        : "Staff"; // PAKSA Staff kalau bukan owner
+    statusController = TextEditingController(text: status);
+
+    _loadProfileData();
   }
 
-  Future<void> _loadProfileFromFirestore() async {
-    setState(() => isLoading = true);
+  Future<void> _loadProfileData() async {
+    setState(() => isLoadingNama = true);
     try {
       final doc = await FirebaseFirestore.instance
           .collection('laundries')
@@ -46,16 +55,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
           .get();
       final data = doc.data();
       if (data != null) {
-        namaController.text = data['namaLaundry'] ?? "";
-        statusController.text = _getRoleDisplay(data['role']);
-        waController.text = data['wa'] ?? "";
+        if (data['namaLaundry'] != null) {
+          namaController.text = data['namaLaundry'] ?? "";
+        }
+        if (data['wa'] != null) {
+          waController.text = data['wa'] ?? "";
+        }
       }
     } catch (_) {}
-    setState(() => isLoading = false);
+    setState(() => isLoadingNama = false);
   }
 
   Future<void> _updateProfileKeFirestore() async {
-    setState(() => isLoading = true);
+    setState(() => isLoadingNama = true);
     try {
       await FirebaseFirestore.instance
           .collection('laundries')
@@ -63,8 +75,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
           .update({
         'namaLaundry': namaController.text,
         'wa': waController.text,
-        // Tidak update email & password di sini
-        // Jika perlu update role juga, tambahkan 'role': ...
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -77,18 +87,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         SnackBar(content: Text("Gagal update profil: $e")),
       );
     }
-    setState(() => isLoading = false);
-  }
-
-  String _getRoleDisplay(String? role) {
-    switch ((role ?? "").toLowerCase()) {
-      case 'owner':
-        return 'Owner';
-      case 'karyawan':
-        return 'Karyawan';
-      default:
-        return role ?? "";
-    }
+    setState(() => isLoadingNama = false);
   }
 
   @override
@@ -192,8 +191,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 textStyle: const TextStyle(fontFamily: "Poppins", fontWeight: FontWeight.bold),
                               ),
-                              onPressed: isLoading ? null : _updateProfileKeFirestore,
-                              child: isLoading
+                              onPressed: isLoadingNama ? null : _updateProfileKeFirestore,
+                              child: isLoadingNama
                                   ? const CircularProgressIndicator()
                                   : const Text("Update", style: TextStyle(fontSize: 18)),
                             ),
@@ -206,7 +205,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
             ],
           ),
-          if (isLoading)
+          if (isLoadingNama)
             Container(
               color: Colors.white.withOpacity(0.4),
               child: const Center(child: CircularProgressIndicator()),

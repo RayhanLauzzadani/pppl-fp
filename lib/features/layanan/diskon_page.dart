@@ -35,15 +35,15 @@ class DiskonModel {
 }
 
 class DiskonPage extends StatefulWidget {
-   final String laundryId;
-  const DiskonPage({Key? key, required this.laundryId}) : super(key: key);
+  final String laundryId;
+  final bool isOwner;
+  const DiskonPage({Key? key, required this.laundryId, required this.isOwner}) : super(key: key);
 
   @override
   State<DiskonPage> createState() => _DiskonPageState();
 }
 
 class _DiskonPageState extends State<DiskonPage> {
-  final String laundryId = 'laksolaundry'; // atau ambil dari login nanti
   final _collectionName = 'diskon';
 
   Future<void> _showForm({DiskonModel? diskon, required bool isEdit}) async {
@@ -75,7 +75,7 @@ class _DiskonPageState extends State<DiskonPage> {
               );
               final ref = FirebaseFirestore.instance
                   .collection('laundries')
-                  .doc(laundryId)
+                  .doc(widget.laundryId)
                   .collection(_collectionName);
 
               if (isEdit && diskon != null) {
@@ -100,7 +100,7 @@ class _DiskonPageState extends State<DiskonPage> {
         onDelete: () async {
           await FirebaseFirestore.instance
               .collection('laundries')
-              .doc(laundryId)
+              .doc(widget.laundryId)
               .collection(_collectionName)
               .doc(diskon.id)
               .delete();
@@ -163,7 +163,7 @@ class _DiskonPageState extends State<DiskonPage> {
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('laundries')
-                  .doc(laundryId)
+                  .doc(widget.laundryId)
                   .collection(_collectionName)
                   .orderBy('jenisDiskon')
                   .snapshots(),
@@ -248,34 +248,35 @@ class _DiskonPageState extends State<DiskonPage> {
                                 ],
                               ),
                             ),
-                            // Tombol Edit
-                            Container(
-                              margin: const EdgeInsets.only(left: 8, right: 7),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFBBE2EC),
-                                borderRadius: BorderRadius.circular(9),
+                            // Tombol Edit & Hapus hanya untuk Owner
+                            if (widget.isOwner) ...[
+                              Container(
+                                margin: const EdgeInsets.only(left: 8, right: 7),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFBBE2EC),
+                                  borderRadius: BorderRadius.circular(9),
+                                ),
+                                child: IconButton(
+                                  onPressed: () => _showForm(diskon: item, isEdit: true),
+                                  icon: const Icon(Icons.edit, color: Color(0xFF2B303A)),
+                                  iconSize: 23,
+                                  tooltip: "Edit",
+                                ),
                               ),
-                              child: IconButton(
-                                onPressed: () => _showForm(diskon: item, isEdit: true),
-                                icon: const Icon(Icons.edit, color: Color(0xFF2B303A)),
-                                iconSize: 23,
-                                tooltip: "Edit",
+                              Container(
+                                margin: const EdgeInsets.only(left: 0),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFBBE2EC),
+                                  borderRadius: BorderRadius.circular(9),
+                                ),
+                                child: IconButton(
+                                  onPressed: () => _showDeleteConfirm(item),
+                                  icon: const Icon(Icons.delete, color: Color(0xFF2B303A)),
+                                  iconSize: 23,
+                                  tooltip: "Hapus",
+                                ),
                               ),
-                            ),
-                            // Tombol Hapus
-                            Container(
-                              margin: const EdgeInsets.only(left: 0),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFBBE2EC),
-                                borderRadius: BorderRadius.circular(9),
-                              ),
-                              child: IconButton(
-                                onPressed: () => _showDeleteConfirm(item),
-                                icon: const Icon(Icons.delete, color: Color(0xFF2B303A)),
-                                iconSize: 23,
-                                tooltip: "Hapus",
-                              ),
-                            ),
+                            ],
                           ],
                         ),
                       ),
@@ -285,33 +286,34 @@ class _DiskonPageState extends State<DiskonPage> {
               },
             ),
           ),
-          // Tombol Tambah Diskon
-          Padding(
-            padding: const EdgeInsets.only(bottom: 28, top: 3, left: 32, right: 32),
-            child: SizedBox(
-              width: double.infinity,
-              height: 46,
-              child: ElevatedButton(
-                onPressed: () => _showForm(isEdit: false),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF40A2E3),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(13),
+          // Tombol Tambah Diskon hanya untuk Owner
+          if (widget.isOwner)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 28, top: 3, left: 32, right: 32),
+              child: SizedBox(
+                width: double.infinity,
+                height: 46,
+                child: ElevatedButton(
+                  onPressed: () => _showForm(isEdit: false),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF40A2E3),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    elevation: 0,
                   ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  "Tambah Diskon",
-                  style: TextStyle(
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16.2,
+                  child: const Text(
+                    "Tambah Diskon",
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16.2,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
