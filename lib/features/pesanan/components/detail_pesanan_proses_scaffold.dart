@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../pesanan_model.dart';
-import '../selesai pesanan/selesai_pesanan_page.dart';
+import '../selesai_pesanan/selesai_pesanan_page.dart';
 
 class DetailPesananScaffold extends StatelessWidget {
   final Pesanan pesanan;

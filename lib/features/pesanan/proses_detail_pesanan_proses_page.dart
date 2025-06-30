@@ -35,7 +35,7 @@ class _ProsesDetailPesananProsesPageState
     super.initState();
     listItem = [];
 
-    // 1. Layanan
+    // 1. Layanan dari field jumlah (bukan laundry kiloan)
     if (widget.pesanan.jumlah != null && widget.pesanan.jumlah!.isNotEmpty) {
       widget.pesanan.jumlah!.forEach((nama, qty) {
         if (nama.toLowerCase() == "laundry kiloan") return;
@@ -49,7 +49,7 @@ class _ProsesDetailPesananProsesPageState
       });
     }
 
-    // 2. Barang Satuan/Custom
+    // 2. Barang satuan/custom
     for (final barang in widget.pesanan.barangList) {
       final nama = barang['title'] ?? barang['nama'] ?? '';
       final qty = widget.pesanan.barangQty[nama] ?? 0;
@@ -80,11 +80,7 @@ class _ProsesDetailPesananProsesPageState
 
     setState(() => isLoading = true);
     try {
-      // SIMPAN ONLY YANG CENTANG!
-      final selectedItems =
-          listItem.where((item) => item['konfirmasi'] == true).toList();
-
-      // Save ke Firestore agar konsisten di page "Selesai"
+      // **Hanya update statusProses ke selesai, tidak kirim selectedItems!**
       await FirebaseFirestore.instance
           .collection('laundries')
           .doc(widget.pesanan.kodeLaundry!)
@@ -92,7 +88,6 @@ class _ProsesDetailPesananProsesPageState
           .doc(widget.pesanan.id)
           .update({
         'statusProses': 'selesai',
-        'selectedItems': selectedItems,
       });
 
       // Reload pesanan
@@ -114,7 +109,6 @@ class _ProsesDetailPesananProsesPageState
               role: widget.role,
               emailUser: widget.emailUser,
               passwordUser: widget.passwordUser,
-              selectedItems: selectedItems, // << param baru
             ),
           ),
         );
@@ -338,7 +332,7 @@ class _ProsesDetailPesananProsesPageState
                             children: [
                               _tableRow(
                                 "Status",
-                                "Dalam Antrian",
+                                "Sedang Diproses",
                                 boldRight: true,
                               ),
                               _tableRow(
