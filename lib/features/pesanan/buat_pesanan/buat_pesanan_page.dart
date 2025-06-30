@@ -9,12 +9,16 @@ import '../../home/karyawan/home_page_karyawan.dart';
 
 class BuatPesananPage extends StatefulWidget {
   final String role;
-  final String laundryId; // <--- WAJIB ada untuk balik ke home!
+  final String laundryId;
+  final String emailUser;
+  final String passwordUser;
 
   const BuatPesananPage({
     super.key,
     required this.role,
     required this.laundryId,
+    required this.emailUser,
+    required this.passwordUser,
   });
 
   @override
@@ -46,25 +50,37 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
       });
       return;
     }
-    final snapshots = await FirebaseFirestore.instance
-        .collection('laundries')
-        .get();
-    for (var doc in snapshots.docs) {
-      final userDoc = await doc.reference
-          .collection('users')
-          .doc(user.uid)
+    try {
+      final snapshots = await FirebaseFirestore.instance
+          .collection('laundries')
           .get();
-      if (userDoc.exists) {
-        setState(() {
-          kodeLaundryUser = doc.id;
-          _loadingKodeLaundry = false;
-        });
-        return;
+      for (var doc in snapshots.docs) {
+        final userDoc = await doc.reference
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (userDoc.exists) {
+          setState(() {
+            kodeLaundryUser = doc.id;
+            _loadingKodeLaundry = false;
+          });
+          return;
+        }
       }
+      setState(() {
+        _loadingKodeLaundry = false;
+      });
+    } catch (e) {
+      setState(() {
+        _loadingKodeLaundry = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal mengambil data laundry: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
     }
-    setState(() {
-      _loadingKodeLaundry = false;
-    });
   }
 
   @override
@@ -87,47 +103,31 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
     String wa = waController.text.trim();
 
     if (nama.isEmpty || wa.isEmpty) {
-      _scaffoldMessengerKey.currentState?.showSnackBar(
-        const SnackBar(
-          content: Text('Nama dan nomor Whatsapp wajib diisi!'),
-          backgroundColor: Colors.redAccent,
-          duration: Duration(seconds: 2),
-        ),
+      _showSnackBar(
+        'Nama dan nomor Whatsapp wajib diisi!',
+        color: Colors.redAccent,
       );
       return;
     }
     if (!_isValidName(nama)) {
-      _scaffoldMessengerKey.currentState?.showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Nama hanya boleh huruf dan spasi, minimal 2 karakter!',
-          ),
-          backgroundColor: Colors.orange,
-          duration: Duration(seconds: 2),
-        ),
+      _showSnackBar(
+        'Nama hanya boleh huruf dan spasi, minimal 2 karakter!',
+        color: Colors.orange,
       );
       return;
     }
     if (!_isValidPhone(wa)) {
-      _scaffoldMessengerKey.currentState?.showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Nomor Whatsapp tidak valid! Harus diawali 08 dan 10-13 digit angka.',
-          ),
-          backgroundColor: Colors.orange,
-          duration: Duration(seconds: 2),
-        ),
+      _showSnackBar(
+        'Nomor Whatsapp tidak valid! Harus diawali 08 dan 10-13 digit angka.',
+        color: Colors.orange,
       );
       return;
     }
 
     if (kodeLaundryUser == null) {
-      _scaffoldMessengerKey.currentState?.showSnackBar(
-        const SnackBar(
-          content: Text('Kode laundry belum ditemukan. Coba relogin.'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
+      _showSnackBar(
+        'Kode laundry belum ditemukan. Coba relogin.',
+        color: Colors.red,
       );
       return;
     }
@@ -144,6 +144,8 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
           desc: desc,
           kodeLaundry: kodeLaundryUser!,
           role: widget.role,
+          emailUser: widget.emailUser,
+          passwordUser: widget.passwordUser,
           barangCustom: draft?['barangCustom'],
           barangQtyCustom: draft?['barangQty'],
           beratKgSebelumnya: draft?['beratKg'],
@@ -158,14 +160,34 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
     }
   }
 
-  // ---- Navigasi ke HomePage sesuai role ----
+  void _showSnackBar(String msg, {Color color = Colors.black87}) {
+    _scaffoldMessengerKey.currentState?.showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: color,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  /// Navigasi ke HomePage sesuai role dan tetap membawa emailUser dan passwordUser
   void _navigateToHome() {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
-        builder: (_) => widget.role == 'owner'
-            ? HomePageOwner(laundryId: widget.laundryId, role: widget.role)
-            : HomePageKaryawan(laundryId: widget.laundryId, role: widget.role),
+        builder: (_) => widget.role.toLowerCase() == 'owner'
+            ? HomePageOwner(
+                laundryId: widget.laundryId,
+                role: widget.role,
+                emailUser: widget.emailUser,
+                passwordUser: widget.passwordUser,
+              )
+            : HomePageKaryawan(
+                laundryId: widget.laundryId,
+                role: widget.role,
+                emailUser: widget.emailUser,
+                passwordUser: widget.passwordUser,
+              ),
       ),
       (route) => false,
     );
@@ -187,10 +209,10 @@ class _BuatPesananPageState extends State<BuatPesananPage> {
               : SafeArea(
                   child: Column(
                     children: [
+                      // Gradient AppBar dengan tombol back arrow
                       GradientAppBar(
                         title: "Buat Pesanan",
-                        onBack:
-                            _navigateToHome, // Back arrow juga balik ke home!
+                        onBack: _navigateToHome,
                       ),
                       Expanded(
                         child: SingleChildScrollView(

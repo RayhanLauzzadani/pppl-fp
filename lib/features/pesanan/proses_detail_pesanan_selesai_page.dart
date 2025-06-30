@@ -8,11 +8,15 @@ import 'package:laundryin/features/pesanan/selesai pesanan/selesai_pesanan_page.
 class ProsesDetailPesananSelesaiPage extends StatefulWidget {
   final Pesanan pesanan;
   final String role;
+  final String emailUser;
+  final String passwordUser;
 
   const ProsesDetailPesananSelesaiPage({
     super.key,
     required this.pesanan,
     required this.role,
+    required this.emailUser,
+    required this.passwordUser,
   });
 
   @override
@@ -94,6 +98,8 @@ class _ProsesDetailPesananSelesaiPageState
             builder: (_) => SelesaiPesananPage(
               kodeLaundry: kodeLaundry,
               role: widget.role,
+              emailUser: widget.emailUser,
+              passwordUser: widget.passwordUser,
             ),
           ),
           (route) => false,
@@ -121,6 +127,8 @@ class _ProsesDetailPesananSelesaiPageState
             listItem: listItem,
             role: widget.role,
             laundryId: widget.pesanan.kodeLaundry ?? '',
+            emailUser: widget.emailUser,         // <-- PENTING!
+            passwordUser: widget.passwordUser,   // <-- PENTING!
             onLaporkanKendala: handleLaporkanKendala,
             onSelesaikanProses: isLoading ? null : handleSelesaikanProses,
           ),

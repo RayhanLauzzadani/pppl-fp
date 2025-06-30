@@ -8,12 +8,16 @@ import 'proses_detail_pesanan_selesai_page.dart';
 class ProsesDetailPesananProsesPage extends StatefulWidget {
   final Pesanan pesanan;
   final String role;
+  final String emailUser;
+  final String passwordUser;
   final VoidCallback? onHentikanProses;
 
   const ProsesDetailPesananProsesPage({
     Key? key,
     required this.pesanan,
     required this.role,
+    required this.emailUser,
+    required this.passwordUser,
     this.onHentikanProses,
   }) : super(key: key);
 
@@ -107,6 +111,8 @@ class _ProsesDetailPesananProsesPageState
             builder: (_) => ProsesDetailPesananSelesaiPage(
               pesanan: pesananSelesai,
               role: widget.role,
+              emailUser: widget.emailUser,
+              passwordUser: widget.passwordUser,
             ),
           ),
         );
@@ -142,6 +148,8 @@ class _ProsesDetailPesananProsesPageState
             listItem: listItem,
             role: widget.role,
             laundryId: widget.pesanan.kodeLaundry ?? '',
+            emailUser: widget.emailUser,        // WAJIB!
+            passwordUser: widget.passwordUser,  // WAJIB!
             onChangedKonfirmasi: (idx, val) {
               setState(() {
                 listItem[idx]["konfirmasi"] = val;

@@ -14,6 +14,8 @@ class PilihLayananPage extends StatefulWidget {
   final String desc;
   final String kodeLaundry;
   final String role;
+  final String emailUser;
+  final String passwordUser;
   final List<Map<String, dynamic>>? barangCustom;
   final Map<String, int>? barangQtyCustom;
   final double? beratKgSebelumnya;
@@ -26,6 +28,8 @@ class PilihLayananPage extends StatefulWidget {
     required this.desc,
     required this.kodeLaundry,
     required this.role,
+    required this.emailUser,
+    required this.passwordUser,
     this.barangCustom,
     this.barangQtyCustom,
     this.beratKgSebelumnya,
@@ -122,7 +126,15 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
   }
 
   int _hargaKiloan(List<Map<String, dynamic>> layananList) {
-    return 10000;
+    for (var l in layananList) {
+      if ((l['tipe'] ?? '').toLowerCase() == 'kiloan') {
+        final harga = l['harga'];
+        if (harga is int) return harga;
+        if (harga is double) return harga.toInt();
+        return int.tryParse('$harga') ?? 10000;
+      }
+    }
+    return 10000; // default jika tidak ada
   }
 
   List<Map<String, dynamic>> _filteredLayanan(
@@ -183,6 +195,14 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
       }
     }
     return null;
+  }
+
+  static String _currencyFormat(int price) {
+    final s = price.toString();
+    return s.replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]}.',
+    );
   }
 
   @override
@@ -484,6 +504,8 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                   },
                 ),
               ),
+
+              // === Summary Customer Info (MIRIP GAMBAR) ===
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('laundries')
@@ -505,18 +527,35 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                       };
                     }).toList();
                   }
-
-                  final totalKiloan = _totalKiloan(layananList);
-                  final totalSatuan = _totalSatuan(layananList);
+                  // Hitung total Kg dan Sat
+                  int kg = beratKg > 0 ? beratKg.round() : 0;
+                  int sat = 0;
+                  for (var l in layananList) {
+                    if ((l['tipe'] ?? '').toLowerCase() == 'satuan') {
+                      sat += jumlah[l['nama']] ?? 0;
+                    }
+                  }
+                  for (var v in barangQty.values) {
+                    sat += v;
+                  }
 
                   return Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 10,
+                    margin: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(13),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.07),
+                          blurRadius: 7,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [
+                        // Nama & WA
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -526,33 +565,37 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                 style: const TextStyle(
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 15.1,
-                                  color: Color(0xFF222222),
+                                  fontSize: 14.8,
+                                  color: Color(0xFF232323),
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 2),
                               Text(
                                 widget.whatsapp,
                                 style: const TextStyle(
                                   fontFamily: 'Poppins',
-                                  fontSize: 13.3,
-                                  color: Color(0xFF858585),
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 12.7,
+                                  color: Color(0xFF888888),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        if (totalKiloan > 0) InfoBadge('$totalKiloan', 'Kg'),
-                        if (totalSatuan > 0)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 7),
-                            child: InfoBadge('$totalSatuan', 'Sat'),
-                          ),
+                        Row(
+                          children: [
+                            InfoBadge('$kg', 'Kg'),
+                            const SizedBox(width: 7),
+                            InfoBadge('$sat', 'Sat'),
+                          ],
+                        ),
                       ],
                     ),
                   );
                 },
               ),
+
+              // === Total Harga & Next Button ===
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('laundries')
@@ -585,11 +628,10 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                     hargaLayanan[nama] = (l['harga'] is int)
                         ? l['harga']
                         : (l['harga'] is double)
-                        ? (l['harga'] as double).toInt()
-                        : int.tryParse('${l['harga']}') ?? 0;
+                            ? (l['harga'] as double).toInt()
+                            : int.tryParse('${l['harga']}') ?? 0;
                     tipeLayanan[nama] = (l['tipe'] ?? '').toString();
-                    if ((l['tipe'] ?? '').toString().toLowerCase() ==
-                        'kiloan') {
+                    if ((l['tipe'] ?? '').toString().toLowerCase() == 'kiloan') {
                       hargaKiloan = hargaLayanan[nama]!;
                     }
                   }
@@ -644,8 +686,8 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                   // Ambil data diskon dari pilihan user
                                   final diskonData =
                                       await _getDiskonDariPilihan(
-                                        konfirmasiData['diskon'] as String?,
-                                      );
+                                    konfirmasiData['diskon'] as String?,
+                                  );
                                   int hargaSebelumDiskon = _totalHarga(
                                     layananList,
                                   );
@@ -656,16 +698,17 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                     final tipe = diskonData['tipeDiskon'];
                                     final jumlahDiskon =
                                         int.tryParse(
-                                          diskonData['jumlahDiskon'].toString(),
-                                        ) ??
-                                        0;
+                                              diskonData['jumlahDiskon']
+                                                  .toString(),
+                                            ) ??
+                                            0;
                                     if (jumlahDiskon > 0) {
                                       if (tipe == 'Persen') {
                                         hargaSetelahDiskon =
                                             hargaSebelumDiskon -
-                                            ((hargaSebelumDiskon *
-                                                    jumlahDiskon) ~/
-                                                100);
+                                                ((hargaSebelumDiskon *
+                                                        jumlahDiskon) ~/
+                                                    100);
                                       } else {
                                         hargaSetelahDiskon =
                                             hargaSebelumDiskon - jumlahDiskon;
@@ -691,10 +734,8 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                     'hargaLayanan': hargaLayanan,
                                     'layananTipe': tipeLayanan,
                                     'hargaKiloan': hargaKiloan,
-                                    'jenisParfum':
-                                        konfirmasiData['jenisParfum'],
-                                    'antarJemput':
-                                        konfirmasiData['antarJemput'],
+                                    'jenisParfum': konfirmasiData['jenisParfum'],
+                                    'antarJemput': konfirmasiData['antarJemput'],
                                     'diskon': konfirmasiData['diskon'],
                                     'catatan': konfirmasiData['catatan'],
                                     // Tambahkan 2 status berikut:
@@ -707,14 +748,12 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                         .doc(widget.kodeLaundry)
                                         .collection('pesanan')
                                         .add({
-                                          ...pesananData,
-                                          'createdAt':
-                                              FieldValue.serverTimestamp(),
-                                          'statusProses':
-                                              'belum_mulai', // status laundry
-                                          'statusTransaksi':
-                                              'belum_bayar', // status pembayaran/ambil
-                                        });
+                                      ...pesananData,
+                                      'createdAt':
+                                          FieldValue.serverTimestamp(),
+                                      'statusProses': 'belum_mulai',
+                                      'statusTransaksi': 'belum_bayar',
+                                    });
                                     if (mounted) Navigator.pop(context);
                                     if (mounted) {
                                       Navigator.push(
@@ -724,6 +763,8 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                             data: pesananData,
                                             role: widget.role,
                                             laundryId: widget.kodeLaundry,
+                                            emailUser: widget.emailUser,
+                                            passwordUser: widget.passwordUser,
                                           ),
                                         ),
                                       );
@@ -793,14 +834,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
           ),
         ),
       ),
-    );
-  }
-
-  static String _currencyFormat(int price) {
-    final s = price.toString();
-    return s.replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]}.',
     );
   }
 }

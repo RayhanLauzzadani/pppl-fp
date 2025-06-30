@@ -4,15 +4,20 @@ import 'package:laundryin/features/home/right_drawer.dart';
 import '../../pesanan/selesai pesanan/selesai_pesanan_page.dart';
 import '../../pesanan/proses_pesanan_page.dart';
 import '../../pesanan/buat_pesanan/buat_pesanan_page.dart';
+import 'package:laundryin/features/profile/edit_profile_page.dart'; // pastikan path ini benar
 
 class HomePageKaryawan extends StatefulWidget {
   final String laundryId;
   final String role;
+  final String emailUser;
+  final String passwordUser;
 
   const HomePageKaryawan({
     super.key,
     required this.laundryId,
     required this.role,
+    required this.emailUser,
+    required this.passwordUser,
   });
 
   @override
@@ -21,7 +26,54 @@ class HomePageKaryawan extends StatefulWidget {
 
 class _HomePageKaryawanState extends State<HomePageKaryawan> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  final String namaLaundry = "Laundry Lakso";
+  String namaLaundry = "-";
+  String statusAkun = "Karyawan";
+  bool isLoadingNama = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() => isLoadingNama = true);
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('laundries')
+          .doc(widget.laundryId)
+          .get();
+      final data = doc.data();
+      setState(() {
+        namaLaundry = data?['namaLaundry'] ?? "-";
+        statusAkun = _getRoleDisplay(data?['role'] ?? widget.role);
+        isLoadingNama = false;
+      });
+    } catch (e) {
+      setState(() {
+        namaLaundry = "-";
+        statusAkun = _getRoleDisplay(widget.role);
+        isLoadingNama = false;
+      });
+    }
+  }
+
+  Future<void> _openEditProfilePage() async {
+    final updated = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditProfilePage(
+          isOwner: false,
+          kodeLaundry: widget.laundryId,
+          email: widget.emailUser,
+          password: widget.passwordUser,
+        ),
+      ),
+    );
+    if (updated == true) {
+      await _loadProfile();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +82,9 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
       endDrawer: ModernDrawerWidget(
         onLogout: () => Navigator.pop(context),
         laundryId: widget.laundryId,
-        isOwner: widget.role.toLowerCase() == 'owner',
+        isOwner: false,
+        emailUser: widget.emailUser,
+        passwordUser: widget.passwordUser,
       ),
       backgroundColor: Colors.white,
       body: Column(
@@ -122,7 +176,7 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Selamat datang ${_getRoleDisplay(widget.role)}!",
+                        "Selamat datang $statusAkun!",
                         style: const TextStyle(
                           fontFamily: "Poppins",
                           color: Colors.white,
@@ -131,22 +185,34 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        namaLaundry,
-                        style: const TextStyle(
-                          fontFamily: "Poppins",
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 22,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black12,
-                              offset: Offset(0, 1),
-                              blurRadius: 2,
+                      isLoadingNama
+                          ? const SizedBox(
+                              height: 24,
+                              width: 90,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : GestureDetector(
+                              onTap: _openEditProfilePage,
+                              child: Text(
+                                namaLaundry,
+                                style: const TextStyle(
+                                  fontFamily: "Poppins",
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 22,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black12,
+                                      offset: Offset(0, 1),
+                                      blurRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -273,6 +339,8 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
                         builder: (_) => BuatPesananPage(
                           role: widget.role,
                           laundryId: widget.laundryId,
+                          emailUser: widget.emailUser,
+                          passwordUser: widget.passwordUser,
                         ),
                       ),
                     );
@@ -288,6 +356,8 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
                         builder: (_) => ProsesPesananPage(
                           kodeLaundry: widget.laundryId,
                           role: widget.role,
+                          emailUser: widget.emailUser,
+                          passwordUser: widget.passwordUser,
                         ),
                       ),
                     );
@@ -303,6 +373,8 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
                         builder: (_) => SelesaiPesananPage(
                           kodeLaundry: widget.laundryId,
                           role: widget.role,
+                          emailUser: widget.emailUser,
+                          passwordUser: widget.passwordUser,
                         ),
                       ),
                     );

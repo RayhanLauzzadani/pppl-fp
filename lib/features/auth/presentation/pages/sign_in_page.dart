@@ -56,7 +56,7 @@ class _SignInPageState extends State<SignInPage> {
       final String kodeLaundry = data['kodeLaundry'];
       final String role = data['role'];
 
-      // Step 3: Navigasi ke OnBoardingPage, pass parameter kodeLaundry + role
+      // Step 3: Navigasi ke OnBoardingPage, pass parameter kodeLaundry + role + emailUser + passwordUser
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
@@ -64,6 +64,8 @@ class _SignInPageState extends State<SignInPage> {
           builder: (_) => OnBoardingPage(
             kodeLaundry: kodeLaundry,
             role: role,
+            emailUser: email,
+            passwordUser: password,
           ),
         ),
       );
