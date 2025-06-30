@@ -27,7 +27,7 @@ class HomePageKaryawan extends StatefulWidget {
 class _HomePageKaryawanState extends State<HomePageKaryawan> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   String namaLaundry = "-";
-  String statusAkun = "Karyawan";
+  String statusAkun = "Staff"; // default Staff
   bool isLoadingNama = false;
 
   @override
@@ -46,7 +46,8 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
       final data = doc.data();
       setState(() {
         namaLaundry = data?['namaLaundry'] ?? "-";
-        statusAkun = _getRoleDisplay(data?['role'] ?? widget.role);
+        // Ubah logika role: owner = "Owner", karyawan = "Staff"
+        statusAkun = _getRoleDisplay(widget.role);
         isLoadingNama = false;
       });
     } catch (e) {
@@ -67,6 +68,7 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
           kodeLaundry: widget.laundryId,
           email: widget.emailUser,
           password: widget.passwordUser,
+          role: widget.role, // <-- PENTING!
         ),
       ),
     );
@@ -470,9 +472,9 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
       case 'owner':
         return 'Owner';
       case 'karyawan':
-        return 'Karyawan';
+        return 'Staff'; // FIXED: pakai "Staff" biar konsisten di status akun
       default:
-        return role;
+        return "Staff";
     }
   }
 
