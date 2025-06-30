@@ -126,9 +126,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                               letterSpacing: 0.5,
                               shadows: [
                                 Shadow(
-                                  color: Colors.black.withOpacity(
-                                    0.13,
-                                  ), // Now this is valid, no `const` required
+                                  color: Color.fromRGBO(0, 0, 0, 0.13),
                                   blurRadius: 3,
                                 ),
                               ],
