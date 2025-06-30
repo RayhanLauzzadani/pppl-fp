@@ -22,14 +22,14 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
     final String layanan = data['layanan'] ?? "-";
     final String nama = data['nama'] ?? "-";
     final String noHp = data['whatsapp'] ?? "-";
-    final String status = data['status'] ?? "Dalam Antrian";
+    final String statusProses = data['statusProses'] ?? "-";
+    final String statusTransaksi = data['statusTransaksi'] ?? "-";
     final String tanggalTerima = data['tanggalTerima'] ?? _nowString();
     final String tanggalSelesai = data['tanggalSelesai'] ?? "-";
     final String jenisParfum = _safeString(
       data['parfum'] ?? data['jenisParfum'],
     );
     final String antarJemput = _safeString(data['antarJemput']);
-    // Gunakan labelDiskon jika ada, fallback ke diskon/string
     final String diskon = _safeString(data['diskon']);
     final String labelDiskon = _safeString(data['labelDiskon']);
     final String catatan = _safeString(data['catatan']);
@@ -237,26 +237,14 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
                         thickness: 0.7,
                         height: 21,
                       ),
-                      _InfoRow("Status", status, boldValue: true),
-                      _InfoRow(
-                        "Tanggal Terima",
-                        tanggalTerima,
-                        boldValue: true,
-                      ),
-                      _InfoRow(
-                        "Tanggal Selesai",
-                        tanggalSelesai,
-                        boldValue: true,
-                      ),
+                      _InfoRow("Status Laundry", _toLabelProses(statusProses), boldValue: true),
+                      _InfoRow("Status Transaksi", _toLabelTransaksi(statusTransaksi), boldValue: true),
+                      _InfoRow("Tanggal Terima", tanggalTerima, boldValue: true),
+                      _InfoRow("Tanggal Selesai", tanggalSelesai, boldValue: true),
                       _InfoRow("Jenis Parfum", jenisParfum, boldValue: true),
-                      _InfoRow(
-                        "Layanan Antar Jemput",
-                        antarJemput,
-                        boldValue: true,
-                      ),
+                      _InfoRow("Layanan Antar Jemput", antarJemput, boldValue: true),
                       _InfoRow(
                         "Diskon",
-                        // Tampilkan label diskon, jika tidak ada pakai diskon, kalau tidak ada juga "-".
                         (labelDiskon != "-" ? labelDiskon : (diskon != "-" ? diskon : "-")),
                         boldValue: true,
                       ),
@@ -471,6 +459,33 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
     final jam = now.hour.toString().padLeft(2, '0');
     final menit = now.minute.toString().padLeft(2, '0');
     return "${now.day}/${now.month}/${now.year} – $jam.$menit";
+  }
+
+  // Status label helper
+  String _toLabelProses(String status) {
+    switch (status) {
+      case "belum_mulai":
+        return "Belum Mulai";
+      case "proses":
+        return "Sedang Proses";
+      case "selesai":
+        return "Selesai";
+      default:
+        return status;
+    }
+  }
+
+  String _toLabelTransaksi(String status) {
+    switch (status) {
+      case "belum_bayar":
+        return "Belum Bayar";
+      case "belum_diambil":
+        return "Belum Diambil";
+      case "sudah_diambil":
+        return "Sudah Diambil";
+      default:
+        return status;
+    }
   }
 }
 

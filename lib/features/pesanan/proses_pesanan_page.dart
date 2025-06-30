@@ -22,6 +22,28 @@ class ProsesPesananPage extends StatefulWidget {
 class _ProsesPesananPageState extends State<ProsesPesananPage> {
   String search = "";
 
+  // Status helper menggunakan statusProses saja
+  bool isStatusBelumMulai(String? statusProses) =>
+      statusProses == 'belum_mulai';
+  bool isStatusProses(String? statusProses) =>
+      statusProses == 'proses';
+  bool isStatusSelesai(String? statusProses) =>
+      statusProses == 'selesai';
+
+  // --- Optional: Helper label status transaksi (untuk masa depan, kalau mau show di list) ---
+  String _labelTransaksi(String? statusTransaksi) {
+    switch (statusTransaksi) {
+      case "belum_bayar":
+        return "Belum Bayar";
+      case "belum_diambil":
+        return "Belum Diambil";
+      case "sudah_diambil":
+        return "Sudah Diambil";
+      default:
+        return "-";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,25 +67,30 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
               .map((doc) => Pesanan.fromFirestore(doc))
               .toList();
 
+          // --------------------------
+          // GUNAKAN statusProses !!
+          // --------------------------
           final countBelumMulai =
-              pesananList.where((e) => e.status == 'belum_mulai').length;
+              pesananList.where((e) => isStatusBelumMulai(e.statusProses)).length;
           final countProses =
-              pesananList.where((e) => e.status == 'proses').length;
+              pesananList.where((e) => isStatusProses(e.statusProses)).length;
           final countSelesai =
-              pesananList.where((e) => e.status == 'selesai').length;
+              pesananList.where((e) => isStatusSelesai(e.statusProses)).length;
 
           final filteredList = pesananList
               .where((p) =>
                   p.nama.toLowerCase().contains(search.toLowerCase()))
               .toList()
             ..sort((a, b) {
-              int getOrder(String status) {
-                if (status == 'belum_mulai') return 0;
-                if (status == 'proses') return 1;
-                return 2;
+              int getOrder(String? statusProses) {
+                if (isStatusBelumMulai(statusProses)) return 0;
+                if (isStatusProses(statusProses)) return 1;
+                if (isStatusSelesai(statusProses)) return 2;
+                return 3;
               }
 
-              int cmp = getOrder(a.status).compareTo(getOrder(b.status));
+              int cmp = getOrder(a.statusProses)
+                  .compareTo(getOrder(b.statusProses));
               if (cmp != 0) return cmp;
               return (b.createdAt ?? DateTime.now())
                   .compareTo(a.createdAt ?? DateTime.now());
@@ -221,7 +248,8 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                     return InkWell(
                       borderRadius: BorderRadius.circular(22),
                       onTap: () async {
-                        if (p.status == 'belum_mulai') {
+                        // --- LOGIKA STATUS YANG BENAR ---
+                        if (isStatusBelumMulai(p.statusProses)) {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -231,7 +259,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                               ),
                             ),
                           );
-                        } else if (p.status == 'proses') {
+                        } else if (isStatusProses(p.statusProses)) {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -241,11 +269,22 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                               ),
                             ),
                           );
-                        } else {
+                        } else if (isStatusSelesai(p.statusProses)) {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => ProsesDetailPesananSelesaiPage(
+                                pesanan: p,
+                                role: widget.role,
+                              ),
+                            ),
+                          );
+                        } else {
+                          // fallback ke proses jika ada status aneh
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProsesDetailPesananProsesPage(
                                 pesanan: p,
                                 role: widget.role,
                               ),
@@ -337,12 +376,26 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                                       ),
                                     ],
                                   ),
+                                  // (Optional: Show statusTransaksi as badge/text if you want)
+                                  // if (p.statusTransaksi != null)
+                                  //   Padding(
+                                  //     padding: const EdgeInsets.only(top: 4),
+                                  //     child: Text(
+                                  //       "Transaksi: ${_labelTransaksi(p.statusTransaksi)}",
+                                  //       style: const TextStyle(
+                                  //         fontFamily: "Poppins",
+                                  //         fontSize: 11.3,
+                                  //         color: Colors.grey,
+                                  //         fontStyle: FontStyle.italic,
+                                  //       ),
+                                  //     ),
+                                  //   ),
                                 ],
                               ),
                             ),
                             Row(
                               children: [
-                                _statusIcon(p.status),
+                                _statusIcon(p.statusProses),
                                 const SizedBox(width: 12),
                                 const Icon(
                                   Icons.arrow_forward_ios_rounded,
@@ -421,16 +474,18 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
     );
   }
 
-  Widget _statusIcon(String status) {
-    if (status == 'belum_mulai') {
+  Widget _statusIcon(String? statusProses) {
+    if (isStatusBelumMulai(statusProses)) {
       return const Icon(Icons.close_rounded,
           color: Color(0xFFFF6A6A), size: 29);
-    } else if (status == 'proses') {
+    } else if (isStatusProses(statusProses)) {
       return const Icon(Icons.radio_button_checked_rounded,
           color: Color(0xFF52E18C), size: 29);
-    } else {
+    } else if (isStatusSelesai(statusProses)) {
       return const Icon(Icons.done_all_rounded,
           color: Color(0xFF40A2E3), size: 29);
+    } else {
+      return const Icon(Icons.help_outline, color: Colors.grey, size: 29);
     }
   }
 }

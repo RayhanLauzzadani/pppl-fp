@@ -11,11 +11,11 @@ class ProsesDetailPesananProsesPage extends StatefulWidget {
   final VoidCallback? onHentikanProses;
 
   const ProsesDetailPesananProsesPage({
-    super.key,
+    Key? key,
     required this.pesanan,
     required this.role,
     this.onHentikanProses,
-  });
+  }) : super(key: key);
 
   @override
   State<ProsesDetailPesananProsesPage> createState() =>
@@ -32,6 +32,7 @@ class _ProsesDetailPesananProsesPageState
     super.initState();
     listItem = [];
 
+    // Tambah dari layanan (jumlah)
     if (widget.pesanan.jumlah != null && widget.pesanan.jumlah!.isNotEmpty) {
       widget.pesanan.jumlah!.forEach((nama, qty) {
         if (qty > 0) {
@@ -45,6 +46,7 @@ class _ProsesDetailPesananProsesPageState
       });
     }
 
+    // Tambah dari barang custom (barangQty)
     if (widget.pesanan.barangQty.isNotEmpty) {
       widget.pesanan.barangQty.forEach((nama, qty) {
         if (qty > 0) {
@@ -60,7 +62,7 @@ class _ProsesDetailPesananProsesPageState
 
     if (listItem.isEmpty) {
       listItem = [
-        {"nama": "Item", "jumlah": 1, "konfirmasi": false, "tipe": "barang"},
+        {"nama": "Item Kosong", "jumlah": 0, "konfirmasi": false, "tipe": "barang"},
       ];
     }
   }
@@ -76,15 +78,29 @@ class _ProsesDetailPesananProsesPageState
 
     setState(() => isLoading = true);
     try {
+      // Selesaikan proses laundry, statusTransaksi tetap/ikut alur
       await FirebaseFirestore.instance
           .collection('laundries')
           .doc(widget.pesanan.kodeLaundry!)
           .collection('pesanan')
           .doc(widget.pesanan.id)
-          .update({'status': 'belum_diambil'});
+          .update({
+            'statusProses': 'selesai',
+            // Jangan ubah statusTransaksi ke 'belum_diambil' jika masih 'belum_bayar'
+            // Biarkan statusTransaksi tetap sesuai di Firestore
+          });
+
+      // Baca ulang data terbaru dari Firestore agar statusTransaksi terbaru
+      final doc = await FirebaseFirestore.instance
+          .collection('laundries')
+          .doc(widget.pesanan.kodeLaundry!)
+          .collection('pesanan')
+          .doc(widget.pesanan.id)
+          .get();
+
+      final pesananSelesai = Pesanan.fromFirestore(doc);
 
       if (mounted) {
-        final pesananSelesai = widget.pesanan.copyWith(status: 'belum_diambil');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -111,7 +127,7 @@ class _ProsesDetailPesananProsesPageState
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => KendalaModal(noHp: widget.pesanan.whatsapp),
+      builder: (_) => KendalaModal(noHp: widget.pesanan.whatsapp ?? ''),
     );
   }
 

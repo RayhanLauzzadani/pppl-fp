@@ -160,8 +160,10 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
     super.dispose();
   }
 
-  // Tambahan: Fungsi untuk ambil data diskon dari firestore berdasarkan label yang dipilih user
-  Future<Map<String, dynamic>?> _getDiskonDariPilihan(String? diskonLabel) async {
+  // Fungsi untuk ambil data diskon dari firestore berdasarkan label yang dipilih user
+  Future<Map<String, dynamic>?> _getDiskonDariPilihan(
+    String? diskonLabel,
+  ) async {
     if (diskonLabel == null || diskonLabel.isEmpty) return null;
     final query = await FirebaseFirestore.instance
         .collection('laundries')
@@ -639,18 +641,21 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                               builder: (_) => BottomSheetKonfirmasi(
                                 kodeLaundry: widget.kodeLaundry,
                                 onSubmit: (konfirmasiData) async {
-                                  // --- MODIFIKASI DISINI ---
-                                  // Dapatkan data diskon sesuai pilihan user
-                                  final diskonData = await _getDiskonDariPilihan(
-                                    konfirmasiData['diskon'] as String?,
+                                  // Ambil data diskon dari pilihan user
+                                  final diskonData =
+                                      await _getDiskonDariPilihan(
+                                        konfirmasiData['diskon'] as String?,
+                                      );
+                                  int hargaSebelumDiskon = _totalHarga(
+                                    layananList,
                                   );
-                                  int hargaSebelumDiskon = _totalHarga(layananList);
                                   int hargaSetelahDiskon = hargaSebelumDiskon;
                                   String? labelDiskon;
                                   if (diskonData != null) {
                                     labelDiskon = diskonData['jenisDiskon'];
                                     final tipe = diskonData['tipeDiskon'];
-                                    final jumlahDiskon = int.tryParse(
+                                    final jumlahDiskon =
+                                        int.tryParse(
                                           diskonData['jumlahDiskon'].toString(),
                                         ) ??
                                         0;
@@ -658,7 +663,9 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                       if (tipe == 'Persen') {
                                         hargaSetelahDiskon =
                                             hargaSebelumDiskon -
-                                            ((hargaSebelumDiskon * jumlahDiskon) ~/ 100);
+                                            ((hargaSebelumDiskon *
+                                                    jumlahDiskon) ~/
+                                                100);
                                       } else {
                                         hargaSetelahDiskon =
                                             hargaSebelumDiskon - jumlahDiskon;
@@ -667,6 +674,7 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                         hargaSetelahDiskon = 0;
                                     }
                                   }
+
                                   final pesananData = {
                                     'nama': widget.nama,
                                     'whatsapp': widget.whatsapp,
@@ -689,6 +697,9 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                         konfirmasiData['antarJemput'],
                                     'diskon': konfirmasiData['diskon'],
                                     'catatan': konfirmasiData['catatan'],
+                                    // Tambahkan 2 status berikut:
+                                    'statusProses': 'belum_mulai',
+                                    'statusTransaksi': 'belum_bayar',
                                   };
                                   try {
                                     await FirebaseFirestore.instance
@@ -699,7 +710,10 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                           ...pesananData,
                                           'createdAt':
                                               FieldValue.serverTimestamp(),
-                                          'status': 'belum_bayar',
+                                          'statusProses':
+                                              'belum_mulai', // status laundry
+                                          'statusTransaksi':
+                                              'belum_bayar', // status pembayaran/ambil
                                         });
                                     if (mounted) Navigator.pop(context);
                                     if (mounted) {

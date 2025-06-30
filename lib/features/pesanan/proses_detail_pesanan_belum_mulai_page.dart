@@ -74,9 +74,9 @@ class _ProsesDetailPesananBelumMulaiPageState
           .doc(widget.pesanan.kodeLaundry)
           .collection('pesanan')
           .doc(widget.pesanan.id)
-          .update({'status': 'proses'});
+          .update({'statusProses': 'proses'}); // Update field BARU!
 
-      final Pesanan prosesPesanan = widget.pesanan.copyWith(status: 'proses');
+      final Pesanan prosesPesanan = widget.pesanan.copyWith(statusProses: 'proses');
 
       if (mounted) {
         Navigator.pushReplacement(
@@ -121,7 +121,7 @@ class _ProsesDetailPesananBelumMulaiPageState
         children: [
           DetailPesananScaffold(
             pesanan: widget.pesanan,
-            status: 'belum_mulai',
+            status: 'belum_mulai', // tetap gunakan status proses ini untuk UI
             listItem: listItem,
             role: widget.role,
             laundryId: widget.pesanan.kodeLaundry ?? '',

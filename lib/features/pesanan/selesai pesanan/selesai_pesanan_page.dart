@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'selesai_pesanan_model.dart';
-import 'detail_pesanan_selesai_scaffold.dart'; // kalau ada
+import 'detail_pesanan_selesai_scaffold.dart'; // jika ada
 
 class SelesaiPesananPage extends StatefulWidget {
   final String kodeLaundry;
@@ -25,10 +25,8 @@ class _SelesaiPesananPageState extends State<SelesaiPesananPage> {
         .collection('laundries')
         .doc(widget.kodeLaundry)
         .collection('pesanan')
-        .where(
-          'status',
-          whereIn: ['belum_diambil', 'belum_bayar', 'sudah_diambil'],
-        )
+        // Ambil semua yang sudah status proses selesai
+        .where('statusProses', isEqualTo: 'selesai')
         .snapshots()
         .map(
           (snapshot) =>
@@ -55,25 +53,21 @@ class _SelesaiPesananPageState extends State<SelesaiPesananPage> {
 
           filteredList.sort((a, b) {
             int order(String s) {
-              if (s == 'belum_diambil') return 0;
-              if (s == 'belum_bayar') return 1;
-              return 2;
+              // Urutan: belum_bayar -> belum_diambil -> sudah_diambil
+              if (s == 'belum_bayar') return 0;
+              if (s == 'belum_diambil') return 1;
+              if (s == 'sudah_diambil') return 2;
+              return 3;
             }
 
-            int cmp = order(a.status).compareTo(order(b.status));
+            int cmp = order(a.statusTransaksi).compareTo(order(b.statusTransaksi));
             if (cmp != 0) return cmp;
             return pesananList.indexOf(a).compareTo(pesananList.indexOf(b));
           });
 
-          final countBelumDiambil = pesananList
-              .where((e) => e.status == 'belum_diambil')
-              .length;
-          final countBelumBayar = pesananList
-              .where((e) => e.status == 'belum_bayar')
-              .length;
-          final countSudahDiambil = pesananList
-              .where((e) => e.status == 'sudah_diambil')
-              .length;
+          final countBelumBayar = pesananList.where((e) => e.statusTransaksi == 'belum_bayar').length;
+          final countBelumDiambil = pesananList.where((e) => e.statusTransaksi == 'belum_diambil').length;
+          final countSudahDiambil = pesananList.where((e) => e.statusTransaksi == 'sudah_diambil').length;
 
           return Column(
             children: [
@@ -153,17 +147,17 @@ class _SelesaiPesananPageState extends State<SelesaiPesananPage> {
                         child: Row(
                           children: [
                             _statusTab(
-                              icon: Icons.help_outline_rounded,
-                              iconColor: const Color(0xFF52E18C),
-                              count: countBelumDiambil,
-                              label: "Belum Diambil",
-                            ),
-                            const SizedBox(width: 13),
-                            _statusTab(
                               icon: Icons.close_rounded,
                               iconColor: const Color(0xFFFF6A6A),
                               count: countBelumBayar,
                               label: "Belum Bayar",
+                            ),
+                            const SizedBox(width: 13),
+                            _statusTab(
+                              icon: Icons.help_outline_rounded,
+                              iconColor: const Color(0xFF52E18C),
+                              count: countBelumDiambil,
+                              label: "Belum Diambil",
                             ),
                             const SizedBox(width: 13),
                             _statusTab(
@@ -240,15 +234,19 @@ class _SelesaiPesananPageState extends State<SelesaiPesananPage> {
                     // Badge icon & color
                     IconData badgeIcon;
                     Color badgeColor;
-                    if (p.status == 'belum_diambil') {
-                      badgeIcon = Icons.help_outline_rounded;
-                      badgeColor = const Color(0xFF52E18C);
-                    } else if (p.status == 'belum_bayar') {
+                    String labelStatus;
+                    if (p.statusTransaksi == 'belum_bayar') {
                       badgeIcon = Icons.close_rounded;
                       badgeColor = const Color(0xFFFF6A6A);
+                      labelStatus = "Belum Bayar";
+                    } else if (p.statusTransaksi == 'belum_diambil') {
+                      badgeIcon = Icons.help_outline_rounded;
+                      badgeColor = const Color(0xFF52E18C);
+                      labelStatus = "Belum Diambil";
                     } else {
                       badgeIcon = Icons.done_all_rounded;
                       badgeColor = const Color(0xFF40A2E3);
+                      labelStatus = "Sudah Diambil";
                     }
 
                     return Padding(
@@ -262,21 +260,22 @@ class _SelesaiPesananPageState extends State<SelesaiPesananPage> {
                             MaterialPageRoute(
                               builder: (_) => DetailPesananSelesaiScaffold(
                                 pesanan: p,
-                                status: p.status,
-                                onKonfirmasi:
-                                    (p.status == 'belum_bayar' ||
-                                        p.status == 'belum_diambil')
+                                status: labelStatus,
+                                onKonfirmasi: (p.statusTransaksi == 'belum_bayar' ||
+                                        p.statusTransaksi == 'belum_diambil')
                                     ? () async {
-                                        String newStatus =
-                                            (p.status == 'belum_bayar')
-                                            ? 'belum_diambil'
-                                            : 'sudah_diambil';
+                                        String newStatus;
+                                        if (p.statusTransaksi == 'belum_bayar') {
+                                          newStatus = 'belum_diambil';
+                                        } else {
+                                          newStatus = 'sudah_diambil';
+                                        }
                                         await FirebaseFirestore.instance
                                             .collection('laundries')
                                             .doc(widget.kodeLaundry)
                                             .collection('pesanan')
                                             .doc(p.id)
-                                            .update({'status': newStatus});
+                                            .update({'statusTransaksi': newStatus});
                                         if (mounted) setState(() {});
                                         Navigator.pop(context);
                                       }
