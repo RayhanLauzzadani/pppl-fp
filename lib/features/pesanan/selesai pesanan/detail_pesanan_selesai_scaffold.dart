@@ -16,31 +16,44 @@ class DetailPesananSelesaiScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Konfigurasi warna dan status berdasarkan status pesanan
+    // Warna, ikon, dan label status untuk badge di kanan atas
     late Color statusColor;
     late IconData statusIcon;
     late String statusText;
-    late String statusDetailText;
-    late Color totalColor;
-
-    if (status == 'belum_bayar') {
+    if (pesanan.statusTransaksi == 'belum_bayar') {
       statusColor = Colors.red[400]!;
       statusIcon = Icons.close_rounded;
       statusText = "Belum Bayar";
-      statusDetailText = "(Belum Bayar)";
-      totalColor = Colors.red[400]!;
-    } else if (status == 'belum_diambil') {
+    } else if (pesanan.statusTransaksi == 'belum_diambil') {
       statusColor = Colors.green[400]!;
       statusIcon = Icons.help_outline_rounded;
       statusText = "Belum Diambil";
-      statusDetailText = "(Sudah Bayar)";
-      totalColor = Colors.blueGrey[900]!;
     } else {
       // sudah_diambil
       statusColor = Colors.blue[700]!;
       statusIcon = Icons.done_all_rounded;
       statusText = "Sudah Diambil";
-      statusDetailText = "(Sudah Bayar)";
+    }
+
+    // Label "(Belum Bayar)" atau "(Sudah Bayar)" di bawah total
+    String getStatusDetailText(String trx) {
+      switch (trx) {
+        case 'belum_bayar':
+          return "(Belum Bayar)";
+        case 'belum_diambil':
+        case 'sudah_diambil':
+          return "(Sudah Bayar)";
+        default:
+          return "-";
+      }
+    }
+
+    Color totalColor;
+    if (pesanan.statusTransaksi == 'belum_bayar') {
+      totalColor = Colors.red[400]!;
+    } else if (pesanan.statusTransaksi == 'belum_diambil') {
+      totalColor = Colors.blueGrey[900]!;
+    } else {
       totalColor = Colors.blue[700]!;
     }
 
@@ -207,7 +220,7 @@ class DetailPesananSelesaiScaffold extends StatelessWidget {
                   1: FlexColumnWidth(),
                 },
                 children: [
-                  _tableRow("Status", _getStatusLabel(status), isBold: true),
+                  _tableRow("Status", _getStatusLabel(pesanan.statusTransaksi), isBold: true),
                   _tableRow("Tanggal Terima", _formatTanggal(pesanan.tanggalTerima)),
                   _tableRow("Tanggal Selesai", _formatTanggal(pesanan.tanggalSelesai)),
                   _tableRow("Jenis Parfum", pesanan.jenisParfum),
@@ -270,7 +283,7 @@ class DetailPesananSelesaiScaffold extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            statusDetailText,
+                            getStatusDetailText(pesanan.statusTransaksi),
                             style: TextStyle(
                               fontFamily: "Poppins",
                               color: statusColor,
@@ -331,7 +344,9 @@ class DetailPesananSelesaiScaffold extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         child: Text(
-                          status == 'belum_bayar' ? "Konfirmasi Bayar" : "Konfirmasi Diambil",
+                          pesanan.statusTransaksi == 'belum_bayar'
+                              ? "Konfirmasi Bayar"
+                              : "Konfirmasi Diambil",
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                         ),
                       ),

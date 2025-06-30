@@ -1,13 +1,83 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'pesanan_model.dart';
 
-class DetailPesananSelesaiPage extends StatelessWidget {
+class DetailPesananSelesaiPage extends StatefulWidget {
   final Pesanan pesanan;
   const DetailPesananSelesaiPage({Key? key, required this.pesanan}) : super(key: key);
 
   @override
+  State<DetailPesananSelesaiPage> createState() => _DetailPesananSelesaiPageState();
+}
+
+class _DetailPesananSelesaiPageState extends State<DetailPesananSelesaiPage> {
+  late Pesanan pesanan;
+  bool isUpdating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    pesanan = widget.pesanan;
+  }
+
+  // Menampilkan label status proses laundry
+  String get statusProsesLabel {
+    switch (pesanan.statusProses ?? "") {
+      case "belum_mulai":
+        return "Belum Diproses";
+      case "proses":
+        return "Sedang Diproses";
+      case "selesai":
+        return "Selesai";
+      default:
+        return pesanan.statusProses ?? "-";
+    }
+  }
+
+  // Menampilkan label status transaksi
+  String get statusTransaksiLabel {
+    switch (pesanan.statusTransaksi ?? "") {
+      case "belum_bayar":
+        return "Belum Bayar";
+      case "belum_diambil":
+        return "Belum Diambil";
+      case "sudah_diambil":
+        return "Sudah Diambil";
+      default:
+        return pesanan.statusTransaksi ?? "-";
+    }
+  }
+
+  // Fungsi update statusTransaksi jadi "sudah_diambil"
+  Future<void> _handleSudahDiambil() async {
+    if (pesanan.kodeLaundry == null || pesanan.kodeLaundry!.isEmpty) return;
+    setState(() => isUpdating = true);
+    try {
+      await FirebaseFirestore.instance
+          .collection('laundries')
+          .doc(pesanan.kodeLaundry)
+          .collection('pesanan')
+          .doc(pesanan.id)
+          .update({'statusTransaksi': 'sudah_diambil'});
+
+      setState(() {
+        pesanan = pesanan.copyWith(statusTransaksi: 'sudah_diambil');
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pesanan sudah diambil.')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal update status: $e')),
+      );
+    } finally {
+      setState(() => isUpdating = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Jika barangList atau barangQty kosong, tampilkan teks "Tidak ada data"
     final items = pesanan.barangList;
     final qtyMap = pesanan.barangQty;
     int totalBayar = pesanan.totalHarga;
@@ -155,17 +225,40 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                           Column(
                             children: [
                               Icon(
-                                Icons.done_all_rounded, // status selesai
+                                pesanan.statusTransaksi == "sudah_diambil"
+                                    ? Icons.verified_rounded
+                                    : Icons.done_all_rounded,
                                 color: Color(0xFF40A2E3),
-                                size: 26,
+                                size: 28,
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                "Selesai",
+                                statusProsesLabel,
                                 style: TextStyle(
                                   fontFamily: "Poppins",
                                   fontSize: 13,
                                   color: Colors.black.withOpacity(0.66),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: pesanan.statusTransaksi == "sudah_diambil"
+                                      ? Colors.green[100]
+                                      : Colors.orange[100],
+                                  borderRadius: BorderRadius.circular(11),
+                                ),
+                                child: Text(
+                                  statusTransaksiLabel,
+                                  style: TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 12,
+                                    color: pesanan.statusTransaksi == "sudah_diambil"
+                                        ? Colors.green[700]
+                                        : Colors.orange[700],
+                                  ),
                                 ),
                               ),
                             ],
@@ -174,10 +267,15 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Divider(color: Colors.grey[400], thickness: 0.8, height: 23),
-                      _infoRow("Status", pesanan.status == "selesai" ? "Selesai" : pesanan.status, boldValue: true),
-                      _infoRow("Tanggal Terima", pesanan.createdAt != null
-                          ? "${pesanan.createdAt!.day}/${pesanan.createdAt!.month}/${pesanan.createdAt!.year}"
-                          : "-", boldValue: true),
+                      _infoRow("Status Laundry", statusProsesLabel, boldValue: true),
+                      _infoRow("Status Transaksi", statusTransaksiLabel, boldValue: true),
+                      _infoRow(
+                        "Tanggal Terima",
+                        pesanan.createdAt != null
+                            ? "${pesanan.createdAt!.day}/${pesanan.createdAt!.month}/${pesanan.createdAt!.year}"
+                            : "-",
+                        boldValue: true,
+                      ),
                       // Tambah field lain sesuai kebutuhan
                       Divider(color: Colors.grey[400], thickness: 0.8, height: 24),
                       const Text(
@@ -244,11 +342,15 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                                   fontSize: 19.5,
                                 ),
                               ),
-                              const Text(
-                                "(Sudah Bayar)",
+                              Text(
+                                pesanan.statusTransaksi == "belum_bayar"
+                                    ? "(Belum Bayar)"
+                                    : "(Sudah Bayar)",
                                 style: TextStyle(
                                   fontFamily: "Poppins",
-                                  color: Color(0xFF40A2E3),
+                                  color: pesanan.statusTransaksi == "belum_bayar"
+                                      ? Colors.red
+                                      : Color(0xFF40A2E3),
                                   fontSize: 13.5,
                                 ),
                               ),
@@ -297,9 +399,13 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                 const SizedBox(width: 18),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: (pesanan.statusTransaksi == "sudah_diambil" || isUpdating)
+                        ? null
+                        : _handleSudahDiambil,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF40A2E3),
+                      backgroundColor: pesanan.statusTransaksi == "sudah_diambil"
+                          ? Colors.green[300]
+                          : Color(0xFF40A2E3),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -307,14 +413,22 @@ class DetailPesananSelesaiPage extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 13),
                     ),
-                    child: const Text(
-                      "Sudah Diambil",
-                      style: TextStyle(
-                        fontFamily: "Poppins",
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
-                    ),
+                    child: isUpdating
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : Text(
+                            pesanan.statusTransaksi == "sudah_diambil"
+                                ? "Sudah Diambil"
+                                : "Sudah Diambil",
+                            style: const TextStyle(
+                              fontFamily: "Poppins",
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                          ),
                   ),
                 ),
               ],
