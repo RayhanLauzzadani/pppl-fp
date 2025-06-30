@@ -62,6 +62,7 @@ class _ProsesDetailPesananBelumMulaiPageState
       }
     }
 
+    // 3. Jika kosong, tetap tampil placeholder
     if (listItem.isEmpty) {
       listItem = [
         {"nama": "Item Kosong", "jumlah": "0", "konfirmasi": false},
@@ -72,12 +73,18 @@ class _ProsesDetailPesananBelumMulaiPageState
   Future<void> _updateStatusProsesAndNavigate() async {
     setState(() => isLoading = true);
     try {
+      // *** INI BAGIAN KRUSIAL: SIMPAN listItem ke selectedItems di Firestore! ***
       await FirebaseFirestore.instance
           .collection('laundries')
           .doc(widget.pesanan.kodeLaundry)
           .collection('pesanan')
           .doc(widget.pesanan.id)
-          .update({'statusProses': 'proses'});
+          .update({
+            'statusProses': 'proses',
+            'selectedItems': listItem
+                .where((item) => item['jumlah'] != "0")
+                .toList(), // filter item kosong
+          });
 
       final Pesanan prosesPesanan = widget.pesanan.copyWith(
         statusProses: 'proses',
@@ -113,12 +120,6 @@ class _ProsesDetailPesananBelumMulaiPageState
       backgroundColor: Colors.transparent,
       builder: (_) => KendalaModal(noHp: widget.pesanan.whatsapp),
     );
-  }
-
-  void handleKonfirmasi(int idx, bool value) {
-    setState(() {
-      listItem[idx]['konfirmasi'] = value;
-    });
   }
 
   // Helper format tanggal
