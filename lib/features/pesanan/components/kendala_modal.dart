@@ -1,13 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class KendalaModal extends StatelessWidget {
   final String noHp;
   const KendalaModal({super.key, required this.noHp});
 
+  Future<void> _launchWA(BuildContext context) async {
+    String noWa = noHp.replaceAll(RegExp(r'[^0-9]'), '');
+    if (noWa.startsWith('0')) noWa = '62${noWa.substring(1)}';
+    final url = Uri.parse('https://wa.me/$noWa');
+    print('Nomor WA: $noWa');
+    print('URL WA: $url');
+    try {
+      bool launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal membuka WhatsApp!')),
+        );
+      }
+    } catch (e) {
+      print('ERROR WA: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal membuka WhatsApp!')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
-      widthFactor: 1, // MODAL FULL WIDTH
+      widthFactor: 1,
       child: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -36,8 +60,8 @@ class KendalaModal extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: launch WhatsApp atau telepon pelanggan
+                  onPressed: () async {
+                    await _launchWA(context);
                     Navigator.pop(context);
                   },
                   icon: const Icon(Icons.phone, color: Color(0xFF2B303A)),
