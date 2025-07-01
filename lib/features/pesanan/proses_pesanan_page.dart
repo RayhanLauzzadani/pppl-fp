@@ -134,6 +134,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                         ),
                       ),
                       SizedBox(width: 44),
+                      SizedBox(width: 44),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -431,6 +432,20 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                                             ),
                                           ],
                                         ),
+                                        // TAMPILKAN TANGGAL SELESAI JIKA SELESAI
+                                        if (p.statusProses == 'selesai' && p.tanggalSelesai != null)
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: 2.5),
+                                            child: Text(
+                                              "Selesai: ${_formatTanggal(p.tanggalSelesai!)}",
+                                              style: const TextStyle(
+                                                fontFamily: "Poppins",
+                                                fontSize: 11.8,
+                                                color: Colors.teal,
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                            ),
+                                          ),
                                       ],
                                     ),
                                   ),
@@ -515,5 +530,12 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
         ],
       ),
     );
+  }
+
+  String _formatTanggal(DateTime date) {
+    return "${date.day.toString().padLeft(2, '0')}/"
+        "${date.month.toString().padLeft(2, '0')}/"
+        "${date.year} ${date.hour.toString().padLeft(2, '0')}:"
+        "${date.minute.toString().padLeft(2, '0')}";
   }
 }

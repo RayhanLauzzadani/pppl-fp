@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/presentation/pages/edit_layanan_page.dart';
 import 'package:laundryin/features/profile/edit_profile_page.dart';
 import '../auth/presentation/pages/sign_in_page.dart';
-import 'package:laundryin/features/pesanan/riwayat_pesanan_page.dart';
+import 'package:laundryin/features/pesanan/riwayat_pesanan/riwayat_pesanan_page.dart';
 import '../general/tentang_kami_page.dart';
 
 class ModernDrawerWidget extends StatelessWidget {
@@ -49,10 +49,7 @@ class ModernDrawerWidget extends StatelessWidget {
               onPressed: () => Navigator.of(context).pop(),
               child: const Text(
                 'Batal',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', color: Colors.grey),
               ),
             ),
             ElevatedButton(
@@ -135,7 +132,11 @@ class ModernDrawerWidget extends StatelessWidget {
                   ),
                   if (onClose != null)
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 32, color: Colors.black54),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        size: 32,
+                        color: Colors.black54,
+                      ),
                       onPressed: onClose,
                     ),
                 ],
@@ -156,7 +157,7 @@ class ModernDrawerWidget extends StatelessWidget {
                 context,
                 EditProfilePage(
                   isOwner: isOwner,
-                  kodeLaundry: laundryId,
+                  kodeLaundry: laundryId, // <-- Pass kodeLaundry here
                   email: emailUser,
                   password: passwordUser,
                 ),
@@ -169,14 +170,19 @@ class ModernDrawerWidget extends StatelessWidget {
                 context,
                 EditLayananPage(
                   isOwner: isOwner,
-                  laundryId: laundryId,
+                  laundryId: laundryId, // <-- Pass kodeLaundry here
                 ),
               ),
             ),
             _drawerMenuItem(
               Icons.history,
               "Riwayat Pesanan",
-              onTap: () => pushAfterCloseDrawer(context, const RiwayatPesananPage()),
+              onTap: () => pushAfterCloseDrawer(
+                context,
+                RiwayatPesananPage(
+                  kodeLaundry: laundryId,
+                ), // Tambahkan kodeLaundry
+              ),
             ),
             _drawerMenuItem(
               Icons.info_outline,
@@ -185,7 +191,10 @@ class ModernDrawerWidget extends StatelessWidget {
             ),
             const Spacer(),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 20,
+              ),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -194,7 +203,9 @@ class ModernDrawerWidget extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.redAccent,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(13),
+                    ),
                     textStyle: const TextStyle(
                       fontFamily: "Poppins",
                       fontWeight: FontWeight.bold,
@@ -223,7 +234,11 @@ class ModernDrawerWidget extends StatelessWidget {
         leading: Icon(icon, color: const Color(0xFF40A2E3)),
         title: Text(
           label,
-          style: const TextStyle(fontFamily: "Poppins", fontWeight: FontWeight.w500, fontSize: 15.5),
+          style: const TextStyle(
+            fontFamily: "Poppins",
+            fontWeight: FontWeight.w500,
+            fontSize: 15.5,
+          ),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
         onTap: onTap,

@@ -35,7 +35,6 @@ class _ProsesDetailPesananSelesaiPageState
   }
 
   void _initItemList() {
-    // Ambil data langsung dari pesanan, tanpa selectedItems!
     final List<Map<String, dynamic>> fallback = [];
 
     // Dari field jumlah (untuk layanan/jenis)
@@ -325,7 +324,7 @@ class _ProsesDetailPesananSelesaiPageState
                               ),
                               _tableRow(
                                 "Tanggal Selesai",
-                                "-",
+                                _formatTanggal(pesanan.tanggalSelesai), // ===> PAKAI FIELD YANG BENAR
                                 boldRight: true,
                               ),
                               _tableRow(

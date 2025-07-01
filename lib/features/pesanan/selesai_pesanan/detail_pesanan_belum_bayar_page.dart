@@ -254,7 +254,7 @@ class DetailPesananBelumBayarPage extends StatelessWidget {
                               ),
                               _tableRow(
                                 "Tanggal Selesai",
-                                "-",
+                                _formatTanggal(pesanan.tanggalSelesai), // <<-- MODIFIKASI DISINI
                                 boldRight: true,
                               ),
                               _tableRow(

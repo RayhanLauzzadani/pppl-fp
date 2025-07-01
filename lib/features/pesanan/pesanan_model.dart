@@ -37,7 +37,6 @@ class LaundryItem {
   }
 }
 
-// Pesanan class
 class Pesanan {
   final String id;
   final String nama;
@@ -62,7 +61,8 @@ class Pesanan {
   final Map<String, String>? layananTipe;
   final Map<String, int>? jumlah;
   final DateTime? createdAt;
-  final DateTime? tanggalSelesai; // <--- Tambahkan field ini!
+  final DateTime? tanggalSelesai; // <--- Tambahan field ini!
+  final String? labelDiskon; // <--- TAMBAHKAN FIELD INI!
 
   Pesanan({
     required this.id,
@@ -80,13 +80,14 @@ class Pesanan {
     this.jenisParfum,
     this.antarJemput,
     this.diskon,
+    this.labelDiskon, // <--- TAMBAHKAN DI SINI!
     this.catatan,
     this.hargaKiloan,
     this.hargaLayanan,
     this.layananTipe,
     this.jumlah,
     this.createdAt,
-    this.tanggalSelesai, // <-- Pastikan ini ada
+    this.tanggalSelesai,
   });
 
   int get pcs => barangQty.values.fold(0, (a, b) => a + b);
@@ -147,6 +148,24 @@ class Pesanan {
     return items;
   }
 
+  // Getter untuk status transaksi
+  String get status => statusTransaksi;
+
+  // Getter untuk tipe layanan (Reguler, Kilat, dll)
+  String get tipe => desc;
+
+  // Getter untuk metode pembayaran
+  String get metode => "Tunai";  // Atau sesuai metode yang ada di database
+
+  // Getter untuk total harga
+  double get total => totalHarga.toDouble();
+
+  // Getter untuk tanggal selesai
+  String get formattedTanggalSelesai {
+    if (tanggalSelesai == null) return "-";
+    return "${tanggalSelesai!.day.toString().padLeft(2, '0')}/${tanggalSelesai!.month.toString().padLeft(2, '0')}/${tanggalSelesai!.year} - ${tanggalSelesai!.hour.toString().padLeft(2, '0')}:${tanggalSelesai!.minute.toString().padLeft(2, '0')}";
+  }
+
   factory Pesanan.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Pesanan(
@@ -165,13 +184,14 @@ class Pesanan {
       jenisParfum: data['jenisParfum'],
       antarJemput: data['antarJemput'],
       diskon: data['diskon'],
+      labelDiskon: data['labelDiskon'], // <--- AMBIL DARI FIRESTORE!
       catatan: data['catatan'],
       hargaKiloan: (data['hargaKiloan'] as num?)?.toInt(),
       hargaLayanan: (data['hargaLayanan'] as Map?)?.map((k, v) => MapEntry(k.toString(), (v as num).toInt())),
       layananTipe: (data['layananTipe'] as Map?)?.map((k, v) => MapEntry(k.toString(), v.toString())),
       jumlah: (data['jumlah'] as Map?)?.map((k, v) => MapEntry(k.toString(), (v as num).toInt())),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
-      tanggalSelesai: (data['tanggalSelesai'] as Timestamp?)?.toDate(), // <-- load dari firestore juga!
+      tanggalSelesai: (data['tanggalSelesai'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -191,13 +211,14 @@ class Pesanan {
     String? jenisParfum,
     String? antarJemput,
     String? diskon,
+    String? labelDiskon, // <--- TAMBAHKAN DI COPYWITH
     String? catatan,
     int? hargaKiloan,
     Map<String, int>? hargaLayanan,
     Map<String, String>? layananTipe,
     Map<String, int>? jumlah,
     DateTime? createdAt,
-    DateTime? tanggalSelesai, // tambahin juga di sini
+    DateTime? tanggalSelesai,
   }) {
     return Pesanan(
       id: id ?? this.id,
@@ -215,6 +236,7 @@ class Pesanan {
       jenisParfum: jenisParfum ?? this.jenisParfum,
       antarJemput: antarJemput ?? this.antarJemput,
       diskon: diskon ?? this.diskon,
+      labelDiskon: labelDiskon ?? this.labelDiskon, // <-- diisi juga!
       catatan: catatan ?? this.catatan,
       hargaKiloan: hargaKiloan ?? this.hargaKiloan,
       hargaLayanan: hargaLayanan ?? this.hargaLayanan,
