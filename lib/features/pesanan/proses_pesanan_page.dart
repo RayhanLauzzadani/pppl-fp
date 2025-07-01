@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:laundryin/features/pesanan/pesanan_model.dart';
-import 'package:laundryin/features/pesanan/selesai_pesanan/detail_pesanan_belum_bayar_page.dart';
-import 'package:laundryin/features/pesanan/selesai_pesanan/detail_pesanan_belum_diambil_page.dart'
-    as belumDiambil;
-import 'package:laundryin/features/pesanan/selesai_pesanan/detail_pesanan_sudah_diambil_page.dart'
-    as sudahDiambil;
+import 'package:laundryin/features/pesanan/proses_detail_pesanan_belum_mulai_page.dart';
+import 'package:laundryin/features/pesanan/proses_detail_pesanan_proses_page.dart';
+import 'package:laundryin/features/pesanan/proses_detail_pesanan_selesai_page.dart';
 import 'package:laundryin/features/home/home_page.dart';
 
 class ProsesPesananPage extends StatefulWidget {
@@ -28,11 +26,6 @@ class ProsesPesananPage extends StatefulWidget {
 
 class _ProsesPesananPageState extends State<ProsesPesananPage> {
   String search = "";
-
-  bool isStatusBelumMulai(String? statusProses) =>
-      statusProses == 'belum_mulai';
-  bool isStatusProses(String? statusProses) => statusProses == 'proses';
-  bool isStatusSelesai(String? statusProses) => statusProses == 'selesai';
 
   Stream<List<Pesanan>> _streamPesanan() {
     return FirebaseFirestore.instance
@@ -62,6 +55,10 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
     );
   }
 
+  bool isStatusBelumMulai(String? statusProses) => statusProses == 'belum_mulai';
+  bool isStatusProses(String? statusProses) => statusProses == 'proses';
+  bool isStatusSelesai(String? statusProses) => statusProses == 'selesai';
+
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -75,11 +72,12 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
         backgroundColor: const Color(0xFFF6F8FB),
         body: Column(
           children: [
-            // HEADER
+            // ===== HEADER (GRADIENT & APPBAR) =====
             Container(
               width: double.infinity,
               padding: EdgeInsets.only(
                 top: 42 + MediaQuery.of(context).padding.top,
+                bottom: 16,
               ),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -121,6 +119,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                             "Proses Pesanan",
                             style: TextStyle(
                               fontFamily: "Poppins",
+                              color: Colors.white,
                               fontWeight: FontWeight.w700,
                               fontSize: 22,
                               letterSpacing: 0.5,
@@ -134,7 +133,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 44),
+                      SizedBox(width: 44),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -243,7 +242,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
               ),
             ),
             const SizedBox(height: 15),
-            // PESANAN LIST
+            // ===== PESANAN LIST =====
             Expanded(
               child: StreamBuilder<List<Pesanan>>(
                 stream: _streamPesanan(),
@@ -252,14 +251,13 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                     return const Center(child: CircularProgressIndicator());
                   if (!snapshot.hasData || snapshot.data!.isEmpty)
                     return const Center(
-                      child: Text('Tidak ada pesanan selesai'),
+                      child: Text('Tidak ada pesanan'),
                     );
 
                   var pesananList = snapshot.data!;
                   final filteredList = pesananList
                       .where(
-                        (p) =>
-                            p.nama.toLowerCase().contains(search.toLowerCase()),
+                        (p) => p.nama.toLowerCase().contains(search.toLowerCase()),
                       )
                       .toList();
 
@@ -271,20 +269,15 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                       return 3;
                     }
 
-                    int cmp = order(
-                      a.statusProses,
-                    ).compareTo(order(b.statusProses));
+                    int cmp = order(a.statusProses).compareTo(order(b.statusProses));
                     if (cmp != 0) return cmp;
-                    return pesananList
-                        .indexOf(a)
-                        .compareTo(pesananList.indexOf(b));
+                    return pesananList.indexOf(a).compareTo(pesananList.indexOf(b));
                   });
 
                   return ListView.separated(
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
                     itemCount: filteredList.length,
-                    separatorBuilder: (context, i) =>
-                        const SizedBox(height: 13),
+                    separatorBuilder: (context, i) => const SizedBox(height: 13),
                     itemBuilder: (context, index) {
                       final p = filteredList[index];
 
@@ -303,7 +296,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                       }
 
                       return Padding(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 18,
                           vertical: 0,
                         ),
@@ -314,33 +307,41 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                           child: InkWell(
                             borderRadius: BorderRadius.circular(18),
                             onTap: () async {
-                              // Navigate to detail page based on status
+                              // Navigasi sesuai status pesanan
                               if (p.statusProses == 'belum_mulai') {
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        DetailPesananBelumBayarPage(pesanan: p),
+                                    builder: (_) => ProsesDetailPesananBelumMulaiPage(
+                                      pesanan: p,
+                                      role: widget.role,
+                                      emailUser: widget.emailUser,
+                                      passwordUser: widget.passwordUser,
+                                    ),
                                   ),
                                 );
                               } else if (p.statusProses == 'proses') {
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        belumDiambil.DetailPesananBelumDiambilPage(
-                                          pesanan: p,
-                                        ),
+                                    builder: (_) => ProsesDetailPesananProsesPage(
+                                      pesanan: p,
+                                      role: widget.role,
+                                      emailUser: widget.emailUser,
+                                      passwordUser: widget.passwordUser,
+                                    ),
                                   ),
                                 );
                               } else {
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        sudahDiambil.DetailPesananSudahDiambilPage(
-                                          pesanan: p,
-                                        ),
+                                    builder: (_) => ProsesDetailPesananSelesaiPage(
+                                      pesanan: p,
+                                      role: widget.role,
+                                      emailUser: widget.emailUser,
+                                      passwordUser: widget.passwordUser,
+                                    ),
                                   ),
                                 );
                               }
@@ -372,8 +373,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           p.nama,
@@ -385,8 +385,8 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                                           ),
                                         ),
                                         Text(
-                                          p.desc.isNotEmpty
-                                              ? p.desc
+                                          p.layanan.isNotEmpty
+                                              ? p.layanan
                                               : "Reguler",
                                           style: const TextStyle(
                                             fontFamily: "Poppins",
@@ -404,9 +404,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                                                 fontFamily: "Poppins",
                                                 fontSize: 12.6,
                                                 fontStyle: FontStyle.italic,
-                                                color: Colors.black.withOpacity(
-                                                  0.52,
-                                                ),
+                                                color: Colors.black.withOpacity(0.52),
                                                 fontWeight: FontWeight.w400,
                                               ),
                                             ),
@@ -422,14 +420,12 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                                             ),
                                             const SizedBox(width: 7),
                                             Text(
-                                              "${p.pcs} pcs",
+                                              "${p.barangQty.values.fold<int>(0, (prev, el) => prev + el)} pcs",
                                               style: TextStyle(
                                                 fontFamily: "Poppins",
                                                 fontSize: 12.6,
                                                 fontStyle: FontStyle.italic,
-                                                color: Colors.black.withOpacity(
-                                                  0.52,
-                                                ),
+                                                color: Colors.black.withOpacity(0.52),
                                                 fontWeight: FontWeight.w400,
                                               ),
                                             ),
