@@ -80,7 +80,7 @@ class _ProsesDetailPesananProsesPageState
 
     setState(() => isLoading = true);
     try {
-      // ===> UPDATE: Sekarang update juga field tanggalSelesai di Firestore
+      // *Hanya update statusProses ke selesai, tidak kirim selectedItems!*
       await FirebaseFirestore.instance
           .collection('laundries')
           .doc(widget.pesanan.kodeLaundry!)

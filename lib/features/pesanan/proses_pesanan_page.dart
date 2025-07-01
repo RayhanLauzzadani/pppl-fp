@@ -134,6 +134,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                         ),
                       ),
                       SizedBox(width: 44),
+                      SizedBox(width: 44),
                     ],
                   ),
                   const SizedBox(height: 6),

@@ -46,7 +46,6 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
       final data = doc.data();
       setState(() {
         namaLaundry = data?['namaLaundry'] ?? "-";
-        // Ubah logika role: owner = "Owner", karyawan = "Staff"
         statusAkun = _getRoleDisplay(widget.role);
         isLoadingNama = false;
       });
@@ -68,7 +67,7 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
           kodeLaundry: widget.laundryId,
           email: widget.emailUser,
           password: widget.passwordUser,
-          role: widget.role, // <-- PENTING!
+          role: widget.role,
         ),
       ),
     );
@@ -79,6 +78,20 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
 
   @override
   Widget build(BuildContext context) {
+    // --- Kunci adaptasi, gunakan lebar layar sebagai basis proporsional ---
+    final double sw = MediaQuery.of(context).size.width;
+    // --- Menu & Card Adaptive size
+    final double menuIconSize = sw * 0.21;
+    final double menuImageSize = sw * 0.13;
+    final double menuFont = sw * 0.043;
+    final double cardPadding = sw * 0.045;
+    final double cardRadius = sw * 0.045;
+    final double cardIconBox = sw * 0.12;
+    final double cardTitleFont = sw * 0.05;
+    final double cardSubFont = sw * 0.036;
+    final double cardStatNumFont = sw * 0.06;
+    final double cardStatLabelFont = sw * 0.038;
+
     return Scaffold(
       key: scaffoldKey,
       endDrawer: ModernDrawerWidget(
@@ -95,9 +108,9 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
             children: [
               Container(
                 width: double.infinity,
-                height: 196,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
+                height: sw * 0.45,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
                     begin: Alignment.bottomLeft,
                     end: Alignment.topRight,
                     stops: [0.01, 0.12, 0.83],
@@ -108,60 +121,60 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
                     ],
                   ),
                   borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(32),
-                    bottomRight: Radius.circular(32),
+                    bottomLeft: Radius.circular(sw * 0.08),
+                    bottomRight: Radius.circular(sw * 0.08),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Color(0x15000000),
-                      blurRadius: 14,
-                      offset: Offset(0, 6),
+                      color: const Color(0x15000000),
+                      blurRadius: sw * 0.032,
+                      offset: Offset(0, sw * 0.015),
                     ),
                   ],
                 ),
               ),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+                  padding: EdgeInsets.fromLTRB(sw * 0.05, sw * 0.07, sw * 0.05, 0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CircleAvatar(
                         backgroundColor: Colors.white,
-                        radius: 24,
+                        radius: sw * 0.065,
                         child: Image.asset(
                           "assets/images/logo.png",
-                          width: 38,
-                          height: 38,
+                          width: sw * 0.093,
+                          height: sw * 0.093,
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(width: sw * 0.027),
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 6.0),
+                          padding: EdgeInsets.only(top: sw * 0.015),
                           child: Text(
                             "LondryIn",
                             textAlign: TextAlign.left,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: "Poppins",
                               fontWeight: FontWeight.bold,
-                              fontSize: 26,
+                              fontSize: sw * 0.063,
                               color: Colors.white,
                             ),
                           ),
                         ),
                       ),
                       Container(
-                        margin: const EdgeInsets.only(top: 2),
+                        margin: EdgeInsets.only(top: sw * 0.006),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(100),
                           onTap: () {
                             scaffoldKey.currentState?.openEndDrawer();
                           },
-                          child: const Icon(
+                          child: Icon(
                             Icons.menu_rounded,
                             color: Colors.white,
-                            size: 32,
+                            size: sw * 0.084,
                           ),
                         ),
                       ),
@@ -170,28 +183,28 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
                 ),
               ),
               Positioned(
-                left: 24,
-                top: 110,
+                left: sw * 0.062,
+                top: sw * 0.27,
                 child: SizedBox(
-                  width: MediaQuery.of(context).size.width - 48,
+                  width: sw - (sw * 0.124),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "Selamat datang $statusAkun!",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: "Poppins",
                           color: Colors.white,
                           fontWeight: FontWeight.w400,
-                          fontSize: 16,
+                          fontSize: sw * 0.039,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: sw * 0.015),
                       isLoadingNama
-                          ? const SizedBox(
-                              height: 24,
-                              width: 90,
-                              child: CircularProgressIndicator(
+                          ? SizedBox(
+                              height: sw * 0.06,
+                              width: sw * 0.22,
+                              child: const CircularProgressIndicator(
                                 color: Colors.white,
                                 strokeWidth: 2,
                               ),
@@ -200,12 +213,12 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
                               onTap: _openEditProfilePage,
                               child: Text(
                                 namaLaundry,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: "Poppins",
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 22,
-                                  shadows: [
+                                  fontSize: sw * 0.054,
+                                  shadows: const [
                                     Shadow(
                                       color: Colors.black12,
                                       offset: Offset(0, 1),
@@ -221,17 +234,17 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
               ),
             ],
           ),
-          const SizedBox(height: 38),
+          SizedBox(height: sw * 0.095),
           // Info Card: Pesanan Hari Ini (statistik live)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22),
+            padding: EdgeInsets.symmetric(horizontal: sw * 0.045),
             child: StreamBuilder<Map<String, dynamic>>(
               stream: getStatPesananHariIni(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return Container(
                     width: double.infinity,
-                    height: 100,
+                    height: sw * 0.25,
                     alignment: Alignment.center,
                     child: const CircularProgressIndicator(),
                   );
@@ -244,16 +257,16 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
 
                 return Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                  padding: EdgeInsets.symmetric(horizontal: cardPadding, vertical: cardPadding),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFDF6ED),
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(cardRadius),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withAlpha((0.13 * 255).round()),
-                        blurRadius: 16,
-                        spreadRadius: 1,
-                        offset: const Offset(0, 8),
+                        blurRadius: cardRadius * 0.9,
+                        spreadRadius: cardRadius * 0.18,
+                        offset: Offset(0, cardRadius),
                       ),
                     ],
                   ),
@@ -261,59 +274,59 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        width: 44,
-                        height: 44,
+                        width: cardIconBox,
+                        height: cardIconBox,
                         decoration: BoxDecoration(
                           color: const Color(0xFFFDF6ED),
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(cardIconBox * 0.42),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withAlpha((0.13 * 255).round()),
-                              blurRadius: 16,
-                              spreadRadius: 1,
-                              offset: const Offset(0, 8),
+                              blurRadius: cardIconBox * 0.65,
+                              spreadRadius: cardIconBox * 0.13,
+                              offset: Offset(0, cardIconBox * 0.3),
                             ),
                           ],
                         ),
                         child: Center(
                           child: Image.asset(
                             "assets/images/checklist.png",
-                            width: 26,
-                            height: 26,
+                            width: cardIconBox * 0.65,
+                            height: cardIconBox * 0.65,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: cardPadding),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               "Pesanan Hari Ini",
                               style: TextStyle(
                                 fontFamily: "Poppins",
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
+                                fontSize: cardTitleFont,
+                                fontWeight: FontWeight.w700,
                                 color: Colors.black,
                               ),
                             ),
-                            const SizedBox(height: 2),
+                            SizedBox(height: cardPadding * 0.23),
                             Text(
                               "$pesanan Pesanan ~ Rp. ${_formatRupiah(omzet)}",
                               style: TextStyle(
                                 fontFamily: "Poppins",
-                                fontSize: 13.5,
+                                fontSize: cardSubFont,
                                 fontWeight: FontWeight.w400,
                                 color: Colors.grey[800],
                               ),
                             ),
-                            const SizedBox(height: 13),
+                            SizedBox(height: cardPadding * 0.68),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                _infoNumber(_formatKg(kg), "Kiloan"),
-                                const SizedBox(width: 24),
-                                _infoNumber("$pcs pcs", "Satuan"),
+                                _infoNumber(_formatKg(kg), "Kiloan", numFont: cardStatNumFont, labelFont: cardStatLabelFont),
+                                SizedBox(width: cardPadding * 1.25),
+                                _infoNumber("$pcs pcs", "Satuan", numFont: cardStatNumFont, labelFont: cardStatLabelFont),
                               ],
                             ),
                           ],
@@ -325,62 +338,78 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
               },
             ),
           ),
-          const SizedBox(height: 38),
+          SizedBox(height: sw * 0.095),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
+            padding: EdgeInsets.symmetric(horizontal: sw * 0.02),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _menuItem(
-                  asset: "assets/images/note.png",
-                  label: "Buat Pesanan",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BuatPesananPage(
-                          role: widget.role,
-                          laundryId: widget.laundryId,
-                          emailUser: widget.emailUser,
-                          passwordUser: widget.passwordUser,
+                Expanded(
+                  child: _menuItem(
+                    asset: "assets/images/note.png",
+                    label: "Buat Pesanan",
+                    iconSize: menuIconSize,
+                    imageSize: menuImageSize,
+                    fontSize: menuFont,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BuatPesananPage(
+                            role: widget.role,
+                            laundryId: widget.laundryId,
+                            emailUser: widget.emailUser,
+                            passwordUser: widget.passwordUser,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-                _menuItem(
-                  asset: "assets/images/mesin_cuci.png",
-                  label: "Proses",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ProsesPesananPage(
-                          kodeLaundry: widget.laundryId,
-                          role: widget.role,
-                          emailUser: widget.emailUser,
-                          passwordUser: widget.passwordUser,
+                SizedBox(width: sw * 0.04),
+                Expanded(
+                  child: _menuItem(
+                    asset: "assets/images/mesin_cuci.png",
+                    label: "Proses",
+                    iconSize: menuIconSize,
+                    imageSize: menuImageSize,
+                    fontSize: menuFont,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProsesPesananPage(
+                            kodeLaundry: widget.laundryId,
+                            role: widget.role,
+                            emailUser: widget.emailUser,
+                            passwordUser: widget.passwordUser,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-                _menuItem(
-                  asset: "assets/images/icon_done.png",
-                  label: "Selesaikan",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => SelesaiPesananPage(
-                          kodeLaundry: widget.laundryId,
-                          role: widget.role,
-                          emailUser: widget.emailUser,
-                          passwordUser: widget.passwordUser,
+                SizedBox(width: sw * 0.04),
+                Expanded(
+                  child: _menuItem(
+                    asset: "assets/images/icon_done.png",
+                    label: "Selesaikan",
+                    iconSize: menuIconSize,
+                    imageSize: menuImageSize,
+                    fontSize: menuFont,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SelesaiPesananPage(
+                            kodeLaundry: widget.laundryId,
+                            role: widget.role,
+                            emailUser: widget.emailUser,
+                            passwordUser: widget.passwordUser,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -391,24 +420,24 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
     );
   }
 
-  Widget _infoNumber(String value, String label) {
+  Widget _infoNumber(String value, String label, {required double numFont, required double labelFont}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: "Poppins",
-            fontSize: 17.5,
+            fontSize: numFont,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: "Poppins",
-            fontSize: 13,
+            fontSize: labelFont,
             color: Colors.black54,
             fontWeight: FontWeight.w500,
           ),
@@ -420,8 +449,9 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
   Widget _menuItem({
     required String asset,
     required String label,
-    double iconWidth = 90,
-    double iconHeight = 90,
+    required double iconSize,
+    required double imageSize,
+    required double fontSize,
     VoidCallback? onTap,
   }) {
     return GestureDetector(
@@ -429,37 +459,38 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
       child: Column(
         children: [
           Container(
-            width: 110,
-            height: 110,
+            width: iconSize,
+            height: iconSize,
             decoration: BoxDecoration(
               color: const Color(0xFFBBE2EC),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(iconSize * 0.18),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withAlpha((0.12 * 255).round()),
-                  blurRadius: 12,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 7),
+                  blurRadius: iconSize * 0.13,
+                  spreadRadius: iconSize * 0.03,
+                  offset: Offset(0, iconSize * 0.1),
                 ),
               ],
             ),
             child: Center(
               child: Image.asset(
                 asset,
-                width: iconWidth,
-                height: iconHeight,
+                width: imageSize,
+                height: imageSize,
                 fit: BoxFit.contain,
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: iconSize * 0.15),
           Text(
             label,
-            style: const TextStyle(
+            textAlign: TextAlign.center,
+            style: TextStyle(
               fontFamily: "Poppins",
               fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: Color(0xFF136269),
+              fontSize: fontSize,
+              color: const Color(0xFF136269),
             ),
           ),
         ],
@@ -472,7 +503,7 @@ class _HomePageKaryawanState extends State<HomePageKaryawan> {
       case 'owner':
         return 'Owner';
       case 'karyawan':
-        return 'Staff'; // FIXED: pakai "Staff" biar konsisten di status akun
+        return 'Staff';
       default:
         return "Staff";
     }

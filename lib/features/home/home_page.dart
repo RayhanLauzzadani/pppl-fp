@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'owner/home_page_owner.dart';
 import 'karyawan/home_page_karyawan.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomePage extends StatefulWidget {
   final String role;
@@ -63,16 +64,25 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    // RESPONSIF: gunakan .sp, .w, .h dari ScreenUtil
+    return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 24),
+            SizedBox(
+              width: 40.w,
+              height: 40.w,
+              child: const CircularProgressIndicator(),
+            ),
+            SizedBox(height: 26.h),
             Text(
               "Mengalihkan ke halaman utama...",
-              style: TextStyle(fontFamily: "Poppins"),
+              style: TextStyle(
+                fontFamily: "Poppins",
+                fontSize: 16.sp,
+              ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
