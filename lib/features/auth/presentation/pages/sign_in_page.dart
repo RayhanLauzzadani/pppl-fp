@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'onboarding_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -27,16 +28,18 @@ class _SignInPageState extends State<SignInPage> {
       return;
     }
 
-    setState(() { isLoading = true; });
+    setState(() {
+      isLoading = true;
+    });
 
     try {
-      // Step 1: Sign in
+      // Step 1: Sign in Firebase
       final result = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // Step 2: Fetch user doc Firestore (pastikan koleksi 'users' ada & uid dipakai)
+      // Step 2: Fetch user doc Firestore
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(result.user!.uid)
@@ -49,14 +52,24 @@ class _SignInPageState extends State<SignInPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Akun tidak valid. Hubungi admin!")),
         );
-        setState(() { isLoading = false; });
+        setState(() {
+          isLoading = false;
+        });
         return;
       }
 
       final String kodeLaundry = data['kodeLaundry'];
       final String role = data['role'];
 
-      // Step 3: Navigasi ke OnBoardingPage, pass parameter kodeLaundry + role + emailUser + passwordUser
+      // Simpan login state ke SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('role', role);
+      await prefs.setString('laundryId', kodeLaundry);
+      await prefs.setString('emailUser', email);
+      await prefs.setString('passwordUser', password);
+
+      // Step 3: Navigasi ke OnBoardingPage
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
@@ -87,7 +100,9 @@ class _SignInPageState extends State<SignInPage> {
       );
     }
     if (!mounted) return;
-    setState(() { isLoading = false; });
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override

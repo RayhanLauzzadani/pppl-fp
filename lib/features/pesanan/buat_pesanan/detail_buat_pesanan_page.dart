@@ -1,4 +1,9 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:printing/printing.dart';
+import 'widgets/pdf_nota_laundry.dart';
 import 'detail_buat_pesanan_belum_bayar_page.dart';
 import 'detail_buat_pesanan_selesai_bayar_page.dart';
 
@@ -18,7 +23,6 @@ class DetailBuatPesananPage extends StatelessWidget {
     required this.passwordUser,
   });
 
-  // Helper agar aman casting Map
   static Map<String, int> _safeMapInt(dynamic val) => (val is Map)
       ? Map<String, int>.from(
           val.map((k, v) => MapEntry(k.toString(), int.tryParse('$v') ?? 0)),
@@ -41,12 +45,12 @@ class DetailBuatPesananPage extends StatelessWidget {
     final String tanggalSelesai = "-";
     final String jenisParfum =
         (data['jenisParfum']?.toString().trim().isEmpty ?? true)
-            ? "-"
-            : data['jenisParfum'].toString();
+        ? "-"
+        : data['jenisParfum'].toString();
     final String antarJemput =
         (data['antarJemput']?.toString().trim().isEmpty ?? true)
-            ? "-"
-            : data['antarJemput'].toString();
+        ? "-"
+        : data['antarJemput'].toString();
     final String diskon = (data['diskon']?.toString().trim().isEmpty ?? true)
         ? "-"
         : data['diskon'].toString();
@@ -57,25 +61,24 @@ class DetailBuatPesananPage extends StatelessWidget {
     final double beratKg = data['beratKg'] == null
         ? 0.0
         : (data['beratKg'] is double
-            ? data['beratKg']
-            : double.tryParse(data['beratKg'].toString()) ?? 0.0);
+              ? data['beratKg']
+              : double.tryParse(data['beratKg'].toString()) ?? 0.0);
 
     final Map<String, int> jumlah = _safeMapInt(data['jumlah']);
-    final List<Map<String, dynamic>> barangList =
-        (data['barangList'] ?? []).cast<Map<String, dynamic>>();
+    final List<Map<String, dynamic>> barangList = (data['barangList'] ?? [])
+        .cast<Map<String, dynamic>>();
     final Map<String, int> barangQty = _safeMapInt(data['barangQty']);
     final Map<String, int> hargaLayanan = _safeMapInt(data['hargaLayanan']);
     final Map<String, String> tipeLayanan = _safeMapString(data['layananTipe']);
 
-    // Diskon - hargaSebelumDiskon: total sebelum diskon, hargaDiskon: setelah diskon
-    final int hargaSebelumDiskon = data['hargaSebelumDiskon'] ?? data['totalHarga'] ?? 0;
+    final int hargaSebelumDiskon =
+        data['hargaSebelumDiskon'] ?? data['totalHarga'] ?? 0;
     final int hargaDiskon = data['totalHarga'] ?? 0;
-    final String labelDiskon = data['labelDiskon'] ?? (diskon != '-' ? diskon : '');
+    final String labelDiskon =
+        data['labelDiskon'] ?? (diskon != '-' ? diskon : '');
 
-    // --- Bangun list layanan yang AKAN ditampilkan ---
     List<Map<String, dynamic>> listBarangFinal = [];
 
-    // 1. Laundry Kiloan dari berat BAR (selalu 10rb/kg)
     if (beratKg > 0) {
       listBarangFinal.add({
         'nama': "Laundry Kiloan",
@@ -86,13 +89,11 @@ class DetailBuatPesananPage extends StatelessWidget {
       });
     }
 
-    // 2. Layanan jenis (paket) dari Firestore, tidak pengaruh ke laundry kiloan bar!
     jumlah.forEach((namaLayanan, qty) {
       if (qty > 0) {
         String tipe = (tipeLayanan[namaLayanan] ?? "").toLowerCase();
         String satuan = tipe == "kiloan" ? "Kg" : "Sat";
         int harga = hargaLayanan[namaLayanan] ?? 0;
-        // Cegah double: skip "Laundry Kiloan" dari jenis_layanan (karena sudah dari bar)
         if (namaLayanan.toLowerCase() != "laundry kiloan") {
           listBarangFinal.add({
             'nama': namaLayanan,
@@ -105,7 +106,6 @@ class DetailBuatPesananPage extends StatelessWidget {
       }
     });
 
-    // 3. Custom Barang
     for (final b in barangList) {
       final nama = b['title'] ?? "";
       final qty = barangQty[nama] ?? 0;
@@ -119,11 +119,6 @@ class DetailBuatPesananPage extends StatelessWidget {
         });
       }
     }
-
-    // final int totalFromBarang = listBarangFinal.fold(
-    //   0,
-    //   (sum, b) => sum + (b['total'] as int? ?? 0),
-    // );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F8),
@@ -184,14 +179,44 @@ class DetailBuatPesananPage extends StatelessWidget {
                             ),
                           ),
                           Column(
-                            children: const [
-                              Icon(
-                                Icons.print,
-                                size: 28,
-                                color: Color(0xFF727272),
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.print,
+                                  size: 28,
+                                  color: Color(0xFF727272),
+                                ),
+                                onPressed: () async {
+                                  final Uint8List logoBytes = await rootBundle
+                                      .load('assets/images/logo.png')
+                                      .then((bd) => bd.buffer.asUint8List());
+                                  await Printing.layoutPdf(
+                                    onLayout: (format) =>
+                                        generateNotaLaundryPdf(
+                                          logoBytes: logoBytes,
+                                          nota: nota,
+                                          layanan: layanan,
+                                          nama: nama,
+                                          noHp: noHp,
+                                          status: status,
+                                          tanggalTerima: tanggalTerima,
+                                          tanggalSelesai: tanggalSelesai,
+                                          jenisParfum: jenisParfum,
+                                          antarJemput: antarJemput,
+                                          diskon: diskon,
+                                          catatan: catatan,
+                                          listBarangFinal: listBarangFinal,
+                                          hargaSebelumDiskon:
+                                              hargaSebelumDiskon,
+                                          hargaDiskon: hargaDiskon,
+                                          labelDiskon: labelDiskon,
+                                        ),
+                                    name: 'Nota_Laundry_$nota.pdf',
+                                  );
+                                },
                               ),
-                              SizedBox(height: 2),
-                              Text(
+                              const SizedBox(height: 2),
+                              const Text(
                                 "Print Nota",
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
@@ -274,7 +299,6 @@ class DetailBuatPesananPage extends StatelessWidget {
                       ),
                       ...listBarangFinal.map((b) => laundryItemTile(b)),
                       const SizedBox(height: 9),
-                      // ========== Total Bayar w/ Diskon ==========
                       Container(
                         width: double.infinity,
                         margin: const EdgeInsets.only(top: 7),
@@ -303,7 +327,7 @@ class DetailBuatPesananPage extends StatelessWidget {
                               children: [
                                 if (hargaSebelumDiskon > hargaDiskon) ...[
                                   Text(
-                                    "Rp. ${_currencyFormat(hargaSebelumDiskon)}",
+                                    "Rp. ${formatRupiah(hargaSebelumDiskon)}",
                                     style: const TextStyle(
                                       decoration: TextDecoration.lineThrough,
                                       color: Colors.redAccent,
@@ -315,11 +339,18 @@ class DetailBuatPesananPage extends StatelessWidget {
                                     children: [
                                       if (labelDiskon.isNotEmpty)
                                         Container(
-                                          margin: const EdgeInsets.only(right: 6),
-                                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                          margin: const EdgeInsets.only(
+                                            right: 6,
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 7,
+                                            vertical: 2,
+                                          ),
                                           decoration: BoxDecoration(
                                             color: const Color(0xFF40A2E3),
-                                            borderRadius: BorderRadius.circular(6),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                           ),
                                           child: Text(
                                             labelDiskon,
@@ -332,7 +363,7 @@ class DetailBuatPesananPage extends StatelessWidget {
                                           ),
                                         ),
                                       Text(
-                                        "-Rp. ${_currencyFormat(hargaSebelumDiskon - hargaDiskon)}",
+                                        "-Rp. ${formatRupiah(hargaSebelumDiskon - hargaDiskon)}",
                                         style: const TextStyle(
                                           color: Colors.green,
                                           fontWeight: FontWeight.bold,
@@ -344,7 +375,7 @@ class DetailBuatPesananPage extends StatelessWidget {
                                   ),
                                 ],
                                 Text(
-                                  "Rp. ${_currencyFormat(hargaDiskon)}",
+                                  "Rp. ${formatRupiah(hargaDiskon)}",
                                   style: const TextStyle(
                                     fontFamily: "Poppins",
                                     fontWeight: FontWeight.w800,
@@ -367,7 +398,6 @@ class DetailBuatPesananPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // ========== END ==========
                     ],
                   ),
                 ),
@@ -386,8 +416,8 @@ class DetailBuatPesananPage extends StatelessWidget {
                                   data: data,
                                   role: role,
                                   laundryId: laundryId,
-                                  emailUser: emailUser,        // WAJIB!
-                                  passwordUser: passwordUser,  // WAJIB!
+                                  emailUser: emailUser,
+                                  passwordUser: passwordUser,
                                 ),
                               ),
                             );
@@ -415,16 +445,42 @@ class DetailBuatPesananPage extends StatelessWidget {
                       const SizedBox(width: 13),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
+                            final String? pesananId = data['id'];
+                            if (pesananId == null || pesananId.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("ID pesanan tidak ditemukan!"),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+                            await FirebaseFirestore.instance
+                                .collection('laundries')
+                                .doc(laundryId)
+                                .collection('pesanan')
+                                .doc(pesananId)
+                                .update({'statusTransaksi': 'belum_diambil'});
+
+                            final updatedDoc = await FirebaseFirestore.instance
+                                .collection('laundries')
+                                .doc(laundryId)
+                                .collection('pesanan')
+                                .doc(pesananId)
+                                .get();
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => DetailBuatPesananSelesaiBayarPage(
-                                  data: data,
-                                  role: role,
-                                  emailUser: emailUser,         // WAJIB!
-                                  passwordUser: passwordUser,   // WAJIB!
-                                ),
+                                builder: (_) =>
+                                    DetailBuatPesananSelesaiBayarPage(
+                                      data: updatedDoc.data()!
+                                        ..['id'] = pesananId,
+                                      role: role,
+                                      emailUser: emailUser,
+                                      passwordUser: passwordUser,
+                                    ),
                               ),
                             );
                           },
@@ -460,14 +516,6 @@ class DetailBuatPesananPage extends StatelessWidget {
     );
   }
 
-  static String _currencyFormat(num price) {
-    final s = price.toStringAsFixed(0);
-    return s.replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]}.',
-    );
-  }
-
   static String _nowString() {
     final now = DateTime.now();
     final jam = now.hour.toString().padLeft(2, '0');
@@ -476,7 +524,6 @@ class DetailBuatPesananPage extends StatelessWidget {
   }
 }
 
-// Gradient AppBar
 class _GradientAppBar extends StatelessWidget {
   final String title;
   final VoidCallback onBack;
@@ -547,7 +594,6 @@ class _GradientAppBar extends StatelessWidget {
   }
 }
 
-// Info Row
 class _InfoRow extends StatelessWidget {
   final String keyText;
   final String value;
@@ -590,7 +636,6 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// Laundry Item Tile (pakai lowerCamelCase)
 Widget laundryItemTile(Map<String, dynamic> b) {
   final String satuan = b['satuan'] ?? '';
   final harga = b['harga'] ?? 0;
@@ -649,7 +694,7 @@ Widget laundryItemTile(Map<String, dynamic> b) {
                     ),
                   ),
                   Text(
-                    "Rp. ${DetailBuatPesananPage._currencyFormat(total)}",
+                    "Rp. ${formatRupiah(total)}",
                     style: const TextStyle(
                       fontFamily: "Poppins",
                       fontSize: 13.7,
@@ -662,7 +707,7 @@ Widget laundryItemTile(Map<String, dynamic> b) {
                 Padding(
                   padding: const EdgeInsets.only(top: 3, left: 1),
                   child: Text(
-                    "x Rp. ${DetailBuatPesananPage._currencyFormat(harga)}",
+                    "x Rp. ${formatRupiah(harga)}",
                     style: const TextStyle(
                       fontFamily: "Poppins",
                       fontSize: 11.7,

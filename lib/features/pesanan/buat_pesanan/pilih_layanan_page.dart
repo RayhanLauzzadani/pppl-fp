@@ -102,29 +102,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
     return total;
   }
 
-  int _totalKiloan(List<Map<String, dynamic>> layananList) {
-    int total = 0;
-    for (var l in layananList) {
-      if ((l['tipe'] ?? '').toLowerCase() == 'kiloan') {
-        total += jumlah[l['nama']] ?? 0;
-      }
-    }
-    return total;
-  }
-
-  int _totalSatuan(List<Map<String, dynamic>> layananList) {
-    int total = 0;
-    for (var l in layananList) {
-      if ((l['tipe'] ?? '').toLowerCase() == 'satuan') {
-        total += jumlah[l['nama']] ?? 0;
-      }
-    }
-    for (var v in barangQty.values) {
-      total += v;
-    }
-    return total;
-  }
-
   int _hargaKiloan(List<Map<String, dynamic>> layananList) {
     for (var l in layananList) {
       if ((l['tipe'] ?? '').toLowerCase() == 'kiloan') {
@@ -172,10 +149,8 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
     super.dispose();
   }
 
-  // Fungsi untuk ambil data diskon dari firestore berdasarkan label yang dipilih user
-  Future<Map<String, dynamic>?> _getDiskonDariPilihan(
-    String? diskonLabel,
-  ) async {
+  // Ambil data diskon
+  Future<Map<String, dynamic>?> _getDiskonDariPilihan(String? diskonLabel) async {
     if (diskonLabel == null || diskonLabel.isEmpty) return null;
     final query = await FirebaseFirestore.instance
         .collection('laundries')
@@ -505,7 +480,7 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                 ),
               ),
 
-              // === Summary Customer Info (MIRIP GAMBAR) ===
+              // === Summary Customer Info ===
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('laundries')
@@ -555,7 +530,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                     ),
                     child: Row(
                       children: [
-                        // Nama & WA
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -683,7 +657,6 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                               builder: (_) => BottomSheetKonfirmasi(
                                 kodeLaundry: widget.kodeLaundry,
                                 onSubmit: (konfirmasiData) async {
-                                  // Ambil data diskon dari pilihan user
                                   final diskonData =
                                       await _getDiskonDariPilihan(
                                     konfirmasiData['diskon'] as String?,
@@ -738,29 +711,35 @@ class _PilihLayananPageState extends State<PilihLayananPage> {
                                     'antarJemput': konfirmasiData['antarJemput'],
                                     'diskon': konfirmasiData['diskon'],
                                     'catatan': konfirmasiData['catatan'],
-                                    // Tambahkan 2 status berikut:
                                     'statusProses': 'belum_mulai',
                                     'statusTransaksi': 'belum_bayar',
                                   };
                                   try {
-                                    await FirebaseFirestore.instance
+                                    // ==== MODIFIKASI PENTING DI SINI ====
+                                    final docRef = await FirebaseFirestore.instance
                                         .collection('laundries')
                                         .doc(widget.kodeLaundry)
                                         .collection('pesanan')
                                         .add({
                                       ...pesananData,
-                                      'createdAt':
-                                          FieldValue.serverTimestamp(),
+                                      'createdAt': FieldValue.serverTimestamp(),
                                       'statusProses': 'belum_mulai',
                                       'statusTransaksi': 'belum_bayar',
                                     });
+
+                                    // Update doc dengan field id
+                                    await docRef.update({'id': docRef.id});
+
+                                    final pesananDataWithId = Map<String, dynamic>.from(pesananData)
+                                      ..['id'] = docRef.id;
+
                                     if (mounted) Navigator.pop(context);
                                     if (mounted) {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                           builder: (_) => DetailBuatPesananPage(
-                                            data: pesananData,
+                                            data: pesananDataWithId,
                                             role: widget.role,
                                             laundryId: widget.kodeLaundry,
                                             emailUser: widget.emailUser,

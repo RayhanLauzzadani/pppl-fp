@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'features/auth/presentation/pages/landing_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'splash_or_wrapper_page.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() async {
@@ -17,17 +17,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Atur designSize sesuai ukuran Figma/mockup kamu!
+    // Atur designSize sesuai Figma kamu
     return ScreenUtilInit(
-      designSize: const Size(390, 844), // contoh: iPhone 12/13/14 Pro
+      designSize: const Size(390, 844),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
         return MaterialApp(
-          title: 'LondryIn',
+          title: 'LaundryIn',
           debugShowCheckedModeBanner: false,
-          home: const LandingPage(),
-          // tambahkan routes jika perlu
+          home: const SplashOrWrapperPage(), // WAJIB!
+          // routes: ... (opsional)
         );
       },
     );
