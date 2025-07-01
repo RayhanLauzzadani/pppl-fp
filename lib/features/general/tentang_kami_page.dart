@@ -106,7 +106,7 @@ class AboutPage extends StatelessWidget {
                       const SizedBox(height: 17),
                       const Divider(height: 25, thickness: 1.2),
                       const Text(
-                        "DPP B DSI",
+                        "PPPL 2 DSI",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontFamily: "Poppins",

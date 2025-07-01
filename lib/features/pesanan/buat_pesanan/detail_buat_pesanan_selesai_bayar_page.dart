@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:laundryin/features/pesanan/proses_pesanan_page.dart';
+import 'package:printing/printing.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'widgets/pdf_nota_laundry.dart';
 
 class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
   final Map<String, dynamic> data;
   final String role;
-  final String emailUser;      // WAJIB TAMBAH
-  final String passwordUser;   // WAJIB TAMBAH
+  final String emailUser;
+  final String passwordUser;
 
   const DetailBuatPesananSelesaiBayarPage({
     Key? key,
     required this.data,
     required this.role,
-    required this.emailUser,      // WAJIB
-    required this.passwordUser,   // WAJIB
+    required this.emailUser,
+    required this.passwordUser,
   }) : super(key: key);
 
   // Helper agar aman casting Map
@@ -53,29 +56,26 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
         (data['catatan']?.toString().trim().isNotEmpty ?? false)
             ? data['catatan'].toString()
             : "-";
-    // ambil label diskon
     final String diskon = (data['labelDiskon']?.toString().trim().isNotEmpty ?? false)
         ? data['labelDiskon'].toString()
         : ((data['diskon']?.toString().trim().isNotEmpty ?? false)
             ? data['diskon'].toString()
             : "-");
 
-    // Data layanan laundry
     final double beratKg = data['beratKg'] == null
         ? 0.0
         : (data['beratKg'] is double
               ? data['beratKg']
               : double.tryParse(data['beratKg'].toString()) ?? 0.0);
     final Map<String, int> jumlah = _safeMapInt(data['jumlah']);
-    final List<Map<String, dynamic>> barangList = (data['barangList'] ?? [])
-        .cast<Map<String, dynamic>>();
+    final List<Map<String, dynamic>> barangList = (data['barangList'] ?? []).cast<Map<String, dynamic>>();
     final Map<String, int> barangQty = _safeMapInt(data['barangQty']);
     final Map<String, int> hargaLayanan = _safeMapInt(data['hargaLayanan']);
     final Map<String, String> tipeLayanan = _safeMapString(data['layananTipe']);
 
     List<Map<String, dynamic>> layananLaundry = [];
 
-    // Laundry kiloan (dari bar)
+    // Laundry kiloan
     if (beratKg > 0) {
       layananLaundry.add({
         'nama': "Laundry Kiloan",
@@ -85,7 +85,6 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
         'total': (10000 * beratKg).round(),
       });
     }
-
     // Layanan paket
     jumlah.forEach((namaLayanan, qty) {
       if (qty > 0) {
@@ -103,7 +102,6 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
         }
       }
     });
-
     // Custom barang
     for (final b in barangList) {
       final nama = b['title'] ?? "";
@@ -188,15 +186,44 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
                               ),
                             ),
                           ),
+                          // ---- Tombol Print Nota PDF
                           Column(
-                            children: const [
-                              Icon(
-                                Icons.print,
-                                size: 28,
-                                color: Color(0xFF727272),
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.print,
+                                  size: 28,
+                                  color: Color(0xFF727272),
+                                ),
+                                onPressed: () async {
+                                  final logoBytes = await rootBundle
+                                      .load('assets/images/logo.png')
+                                      .then((bd) => bd.buffer.asUint8List());
+                                  await Printing.layoutPdf(
+                                    onLayout: (format) => generateNotaLaundryPdf(
+                                      logoBytes: logoBytes,
+                                      nota: nota,
+                                      layanan: layanan,
+                                      nama: nama,
+                                      noHp: noHp,
+                                      status: statusProses,
+                                      tanggalTerima: tanggalTerima,
+                                      tanggalSelesai: tanggalSelesai,
+                                      jenisParfum: jenisParfum,
+                                      antarJemput: antarJemput,
+                                      diskon: diskon,
+                                      catatan: catatan,
+                                      listBarangFinal: layananLaundry,
+                                      hargaSebelumDiskon: hargaSebelumDiskon,
+                                      hargaDiskon: totalHarga,
+                                      labelDiskon: diskon,
+                                    ),
+                                    name: 'Nota_Laundry_$nota.pdf',
+                                  );
+                                },
                               ),
-                              SizedBox(height: 2),
-                              Text(
+                              const SizedBox(height: 2),
+                              const Text(
                                 "Print Nota",
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
@@ -249,11 +276,7 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
                       _InfoRow("Tanggal Terima", tanggalTerima, boldValue: true),
                       _InfoRow("Tanggal Selesai", tanggalSelesai, boldValue: true),
                       _InfoRow("Jenis Parfum", jenisParfum, boldValue: true),
-                      _InfoRow(
-                        "Layanan Antar Jemput",
-                        antarJemput,
-                        boldValue: true,
-                      ),
+                      _InfoRow("Layanan Antar Jemput", antarJemput, boldValue: true),
                       _InfoRow("Diskon", diskon, boldValue: true),
                       _InfoRow("Catatan", catatan, boldValue: false),
                       Divider(
@@ -272,9 +295,7 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      ...layananLaundry
-                          .map((b) => _LaundryItemTile(b))
-                          .toList(),
+                      ...layananLaundry.map((b) => _LaundryItemTile(b)).toList(),
                       const SizedBox(height: 9),
 
                       // Harga sebelum diskon, jika memang diskon
@@ -307,7 +328,6 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
                             ],
                           ),
                         ),
-
                       // TOTAL BAYAR
                       Container(
                         width: double.infinity,
@@ -382,8 +402,8 @@ class DetailBuatPesananSelesaiBayarPage extends StatelessWidget {
                           builder: (_) => ProsesPesananPage(
                             kodeLaundry: data['kodeLaundry'] ?? '',
                             role: role,
-                            emailUser: emailUser,        // WAJIB!
-                            passwordUser: passwordUser,  // WAJIB!
+                            emailUser: emailUser,
+                            passwordUser: passwordUser,
                           ),
                         ),
                       );

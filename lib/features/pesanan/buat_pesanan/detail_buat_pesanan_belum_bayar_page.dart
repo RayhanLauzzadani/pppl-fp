@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import '../../home/home_page.dart';
 import '../proses_pesanan_page.dart';
+import 'widgets/pdf_nota_laundry.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class DetailBuatPesananBelumBayarPage extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -186,15 +189,44 @@ class DetailBuatPesananBelumBayarPage extends StatelessWidget {
                               ),
                             ),
                           ),
+                          // ------ TOMBOL PRINT NOTA PDF ------
                           Column(
-                            children: const [
-                              Icon(
-                                Icons.print,
-                                size: 28,
-                                color: Color(0xFF727272),
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.print,
+                                  size: 28,
+                                  color: Color(0xFF727272),
+                                ),
+                                onPressed: () async {
+                                  final logoBytes = await rootBundle
+                                      .load('assets/images/logo.png')
+                                      .then((bd) => bd.buffer.asUint8List());
+                                  await Printing.layoutPdf(
+                                    onLayout: (format) => generateNotaLaundryPdf(
+                                      logoBytes: logoBytes,
+                                      nota: nota,
+                                      layanan: layanan,
+                                      nama: nama,
+                                      noHp: noHp,
+                                      status: statusProses,
+                                      tanggalTerima: tanggalTerima,
+                                      tanggalSelesai: tanggalSelesai,
+                                      jenisParfum: jenisParfum,
+                                      antarJemput: antarJemput,
+                                      diskon: diskon,
+                                      catatan: catatan,
+                                      listBarangFinal: layananLaundry,
+                                      hargaSebelumDiskon: hargaSebelumDiskon,
+                                      hargaDiskon: totalBayar,
+                                      labelDiskon: labelDiskon,
+                                    ),
+                                    name: 'Nota_Laundry_$nota.pdf',
+                                  );
+                                },
                               ),
-                              SizedBox(height: 2),
-                              Text(
+                              const SizedBox(height: 2),
+                              const Text(
                                 "Print Nota",
                                 style: TextStyle(
                                   fontFamily: 'Poppins',

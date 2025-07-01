@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth/presentation/pages/edit_layanan_page.dart';
 import 'package:laundryin/features/profile/edit_profile_page.dart';
 import '../auth/presentation/pages/sign_in_page.dart';
 import 'package:laundryin/features/pesanan/riwayat_pesanan/riwayat_pesanan_page.dart';
 import '../general/tentang_kami_page.dart';
+import 'package:laundryin/splash_or_wrapper_page.dart'; // <-- WAJIB!
 
 class ModernDrawerWidget extends StatelessWidget {
   final VoidCallback? onLogout;
@@ -55,10 +57,19 @@ class ModernDrawerWidget extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop();
+
+                // 1. Hapus status login & data user dari SharedPreferences
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.clear();
+
+                // 2. SignOut FirebaseAuth
                 await FirebaseAuth.instance.signOut();
+
                 if (onLogout != null) onLogout!();
+
+                // 3. Arahkan ke SplashOrWrapperPage, reset navigation stack!
                 Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const SignInPage()),
+                  MaterialPageRoute(builder: (context) => const SplashOrWrapperPage()),
                   (Route<dynamic> route) => false,
                 );
               },
@@ -157,7 +168,7 @@ class ModernDrawerWidget extends StatelessWidget {
                 context,
                 EditProfilePage(
                   isOwner: isOwner,
-                  kodeLaundry: laundryId, // <-- Pass kodeLaundry here
+                  kodeLaundry: laundryId,
                   email: emailUser,
                   password: passwordUser,
                 ),
@@ -168,10 +179,7 @@ class ModernDrawerWidget extends StatelessWidget {
               "Layanan",
               onTap: () => pushAfterCloseDrawer(
                 context,
-                EditLayananPage(
-                  isOwner: isOwner,
-                  laundryId: laundryId, // <-- Pass kodeLaundry here
-                ),
+                EditLayananPage(isOwner: isOwner, laundryId: laundryId),
               ),
             ),
             _drawerMenuItem(
@@ -179,9 +187,7 @@ class ModernDrawerWidget extends StatelessWidget {
               "Riwayat Pesanan",
               onTap: () => pushAfterCloseDrawer(
                 context,
-                RiwayatPesananPage(
-                  kodeLaundry: laundryId,
-                ), // Tambahkan kodeLaundry
+                RiwayatPesananPage(kodeLaundry: laundryId),
               ),
             ),
             _drawerMenuItem(
