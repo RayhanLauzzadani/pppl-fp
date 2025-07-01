@@ -80,7 +80,7 @@ class _ProsesDetailPesananProsesPageState
 
     setState(() => isLoading = true);
     try {
-      // **Hanya update statusProses ke selesai, tidak kirim selectedItems!**
+      // ===> UPDATE: Sekarang update juga field tanggalSelesai di Firestore
       await FirebaseFirestore.instance
           .collection('laundries')
           .doc(widget.pesanan.kodeLaundry!)
@@ -88,6 +88,7 @@ class _ProsesDetailPesananProsesPageState
           .doc(widget.pesanan.id)
           .update({
         'statusProses': 'selesai',
+        'tanggalSelesai': FieldValue.serverTimestamp(),
       });
 
       // Reload pesanan
@@ -342,7 +343,7 @@ class _ProsesDetailPesananProsesPageState
                               ),
                               _tableRow(
                                 "Tanggal Selesai",
-                                "-",
+                                "-", // status "proses", maka selalu "-"
                                 boldRight: true,
                               ),
                               _tableRow(

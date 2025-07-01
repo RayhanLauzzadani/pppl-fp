@@ -70,9 +70,7 @@ class DetailPesananSudahDiambilPage extends StatelessWidget {
                   end: Alignment.topRight,
                   stops: [0.02, 0.38, 0.83],
                   colors: [
-                    Color(
-                      0xFFFFF6E9,
-                    ), // <<== sama kayak selesai_pesanan_page.dart
+                    Color(0xFFFFF6E9),
                     Color(0xFFBBE2EC),
                     Color(0xFF40A2E3),
                   ],
